@@ -41,14 +41,16 @@ class BaseParser:
         
         # if no api key passed as arg, default to environment config
         openai_api_key = api_key if api_key else os.environ["OPENROUTER_API_KEY"]
-            
+        openapi_referer = os.environ.get("OPENROUTER_REFERRER", configs.OPENROUTER_REFERRER) # To identify your app. Can be set to e.g. http://localhost:3000 for testing
+        print(f"Referer: {openapi_referer}")
+
         # init model
         self.model = ChatOpenAI(
             model=model_name, 
             temperature=0.6,
             openai_api_key=openai_api_key,
             openai_api_base=configs.OPENROUTER_API_BASE,
-            headers={"HTTP-Referer": os.environ.get("OPENROUTER_REFERRER", configs.OPENROUTER_REFERRER)}, # To identify your app. Can be set to e.g. http://localhost:3000 for testing
+            headers={"HTTP-Referer": openapi_referer}, 
         )
 
         self.prompt_template = ChatPromptTemplate.from_messages([
