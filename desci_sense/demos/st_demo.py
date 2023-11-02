@@ -9,6 +9,17 @@ from desci_sense.twitter import scrape_tweet
 st.title("LLM Nanopublishing assistant demo")
 
 
+INTRO_TEXT = """The bot will categorize a tweet as one of the following types:
+
+- Announcement: post announcing a paper, dataset or other type of research output.
+- Job: for a post that describes a job listing, for example a call for graduate students or faculty. applications.
+- Review: review of another reference, such as a book, article or movie. The review can be detailed or a simple short endorsement.
+- Other: used if none of the tags above are suitable.
+
+👷In the future, more types will be added, this is just a hacky demo!"""
+
+st.markdown(INTRO_TEXT)
+
 section_title = "### 🐦 Extracted Tweet"
 result_title = "### 🤖 Nanopub Parser Prediction"
 
