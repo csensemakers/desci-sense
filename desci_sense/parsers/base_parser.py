@@ -1,5 +1,6 @@
 import os
 
+from typing import Optional, Dict
 import configs
 
 from langchain.chat_models import ChatOpenAI
@@ -10,9 +11,9 @@ from langchain.schema import (
 )
 
 
-from twitter import scrape_tweet
+from ..twitter import scrape_tweet
 
-from postprocessing.output_parsers import TypeTagParser
+from ..postprocessing.output_parsers import TypeTagParser
 
 template = """You are an expert annotator who tags social media posts related to academic research, according to a predefined set of tags. 
 The available tag types are:
@@ -36,13 +37,16 @@ human_template = "{text}"
 
 
 class BaseParser:
-    def __init__(self, model_name="mistralai/mistral-7b-instruct") -> None:
+    def __init__(self, model_name="mistralai/mistral-7b-instruct", api_key: Optional[str]=None) -> None:
         
+        # if no api key passed as arg, default to environment config
+        openai_api_key = api_key if api_key else os.environ["OPENROUTER_API_KEY"]
+            
         # init model
         self.model = ChatOpenAI(
             model=model_name, 
             temperature=0.6,
-            openai_api_key=os.environ["OPENROUTER_API_KEY"],
+            openai_api_key=openai_api_key,
             openai_api_base=configs.OPENROUTER_API_BASE,
             headers={"HTTP-Referer": os.environ["OPENROUTER_REFERRER"]}, # To identify your app. Can be set to e.g. http://localhost:3000 for testing
         )
@@ -57,9 +61,20 @@ class BaseParser:
         self.chain = self.prompt_template | self.model | self.output_parser
         
 
-    
+    def process_tweet(self, tweet: Dict):
+        # process tweet in the format of the output of scrape_tweet
 
-    def process_tweet(self, tweet_url: str):
+        answer = self.chain.invoke({"text": tweet["text"]})
+
+        result = {"tweet": tweet,
+                  "answer": answer
+                  }
+
+        return result
+
+
+
+    def process_tweet_url(self, tweet_url: str):
 
         # get tweet in json format
         tweet = scrape_tweet(tweet_url)
