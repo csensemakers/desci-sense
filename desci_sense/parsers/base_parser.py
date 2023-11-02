@@ -37,12 +37,17 @@ human_template = "{text}"
 
 
 class BaseParser:
-    def __init__(self, model_name="mistralai/mistral-7b-instruct", api_key: Optional[str]=None) -> None:
+    def __init__(self, model_name="mistralai/mistral-7b-instruct", 
+                 api_key: Optional[str]=None,
+                 openapi_referer: Optional[str]=None,
+                 ) -> None:
         
         # if no api key passed as arg, default to environment config
         openai_api_key = api_key if api_key else os.environ["OPENROUTER_API_KEY"]
-        openapi_referer = os.environ.get("OPENROUTER_REFERRER", configs.OPENROUTER_REFERRER) # To identify your app. Can be set to e.g. http://localhost:3000 for testing
-        print(f"Referer: {openapi_referer}")
+        
+        openapi_referer = openapi_referer if openapi_referer else os.environ["OPENROUTER_REFERRER"]
+        # os.environ.get("OPENROUTER_REFERRER", configs.OPENROUTER_REFERRER) # To identify your app. Can be set to e.g. http://localhost:3000 for testing
+        # print(f"Referer: {openapi_referer}")
 
         # init model
         self.model = ChatOpenAI(

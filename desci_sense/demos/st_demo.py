@@ -22,10 +22,10 @@ def print_tweet(tweet):
     st.markdown(f"{section_title} \n {author} \n\n  {tweet_text} \n\n  {tweet_url}")
 
 
-def process_tweet(tweet_url, api_key):
+def process_tweet(tweet_url, api_key, openai_referer):
     # create model
     model_name = "mistralai/mistral-7b-instruct"
-    tweet_parser = BaseParser(model_name=model_name, api_key=api_key)
+    tweet_parser = BaseParser(model_name=model_name, api_key=api_key, openapi_referer=openai_referer)
 
     # scrape tweet
     with st.spinner('Scraping tweet...'):
@@ -43,7 +43,8 @@ def process_tweet(tweet_url, api_key):
 
 with st.form("myform"):
     api_key = st.text_input("Enter OpenRouter API Key:", "")
+    openapi_referer = st.text_input("Enter OpenRouter Referer:", "http://localhost:3000")
     tweet_url = st.text_input("Enter Twitter post URL:", "")
     submitted = st.form_submit_button("Submit")
     if submitted:
-        process_tweet(tweet_url, api_key)
+        process_tweet(tweet_url, api_key, openapi_referer)
