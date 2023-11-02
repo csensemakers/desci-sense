@@ -48,7 +48,7 @@ class BaseParser:
             temperature=0.6,
             openai_api_key=openai_api_key,
             openai_api_base=configs.OPENROUTER_API_BASE,
-            headers={"HTTP-Referer": os.environ.get("OPENROUTER_REFERRER", "http://localhost:8500")}, # To identify your app. Can be set to e.g. http://localhost:3000 for testing
+            headers={"HTTP-Referer": os.environ.get("OPENROUTER_REFERRER", configs.OPENROUTER_REFERRER)}, # To identify your app. Can be set to e.g. http://localhost:3000 for testing
         )
 
         self.prompt_template = ChatPromptTemplate.from_messages([
