@@ -43,7 +43,7 @@ def process_tweet(tweet_url, api_key, openai_referer):
 
 with st.form("myform"):
     api_key = st.text_input("Enter OpenRouter API Key:", "")
-    openapi_referer = st.text_input("Enter OpenRouter Referer:", "http://localhost:3000")
+    openapi_referer = st.text_input("Enter OpenRouter Referer:", "https://ai-nanopub.streamlit.app/")
     tweet_url = st.text_input("Enter Twitter post URL:", "")
     submitted = st.form_submit_button("Submit")
     if submitted:
