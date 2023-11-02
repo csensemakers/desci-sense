@@ -1,0 +1,1 @@
+OPENROUTER_API_BASE = "https://openrouter.ai/api/v1"
