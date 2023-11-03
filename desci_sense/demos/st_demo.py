@@ -1,10 +1,19 @@
 import sys
+import os
 from pathlib import Path
+
 sys.path.append(str(Path(__file__).parents[2]))
 
 import streamlit as st
 from desci_sense.parsers.base_parser import BaseParser
 from desci_sense.twitter import scrape_tweet
+from configs import ST_OPENROUTER_REFERRER
+
+
+# if fail to get from environment config, default to streamlit referrer
+OPENROUTER_REFERRER = os.environ.get("OPENROUTER_REFERRER", ST_OPENROUTER_REFERRER)
+
+ # To identify app on OpenRouter
 
 st.title("LLM Nanopublishing assistant demo")
 
@@ -19,6 +28,12 @@ INTRO_TEXT = """The bot will categorize a tweet as one of the following types:
 👷In the future, more types will be added, this is just a hacky demo!"""
 
 st.markdown(INTRO_TEXT)
+
+
+st.markdown("Debug: `OPENROUTER_REFERRER in st.secrets=" +str("OPENROUTER_REFERRER" in st.secrets) + "`")
+st.markdown("Debug: `OPENROUTER_REFERRER in os.environ=" +str("OPENROUTER_REFERRER" in os.environ) + "`")
+st.markdown(f"Debug: OPENROUTER_REFERRER=`{OPENROUTER_REFERRER}`")
+
 
 section_title = "### 🐦 Extracted Tweet"
 result_title = "### 🤖 Nanopub Parser Prediction"
@@ -54,8 +69,7 @@ def process_tweet(tweet_url, api_key, openai_referer):
 
 with st.form("myform"):
     api_key = st.text_input("Enter OpenRouter API Key:", "")
-    openapi_referer = st.text_input("Enter OpenRouter Referer:", "https://ai-nanopub.streamlit.app/")
     tweet_url = st.text_input("Enter Twitter post URL:", "https://twitter.com/ClaypoolLab/status/1720165099992961224")
     submitted = st.form_submit_button("Submit")
     if submitted:
-        process_tweet(tweet_url, api_key, openapi_referer)
+        process_tweet(tweet_url, api_key, openai_referer=OPENROUTER_REFERRER)
