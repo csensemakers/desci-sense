@@ -66,3 +66,6 @@ with st.form("myform"):
     submitted = st.form_submit_button("Submit")
     if submitted:
         process_tweet(tweet_url, api_key, openai_referer=openrouter_referrer)
+
+
+st.markdown('''💻 Code repo: https://github.com/csensemakers/desci-sense''')
