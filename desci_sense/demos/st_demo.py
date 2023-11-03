@@ -11,9 +11,8 @@ from configs import ST_OPENROUTER_REFERRER
 
 
 # if fail to get from environment config, default to streamlit referrer
-OPENROUTER_REFERRER = os.environ.get("OPENROUTER_REFERRER", ST_OPENROUTER_REFERRER)
+openrouter_referrer = os.environ.get("OPENROUTER_REFERRER", ST_OPENROUTER_REFERRER)
 
- # To identify app on OpenRouter
 
 st.title("LLM Nanopublishing assistant demo")
 
@@ -28,12 +27,6 @@ INTRO_TEXT = """The bot will categorize a tweet as one of the following types:
 👷In the future, more types will be added, this is just a hacky demo!"""
 
 st.markdown(INTRO_TEXT)
-
-
-st.markdown("Debug: `OPENROUTER_REFERRER in st.secrets=" +str("OPENROUTER_REFERRER" in st.secrets) + "`")
-st.markdown("Debug: `OPENROUTER_REFERRER in os.environ=" +str("OPENROUTER_REFERRER" in os.environ) + "`")
-st.markdown(f"Debug: OPENROUTER_REFERRER=`{OPENROUTER_REFERRER}`")
-
 
 section_title = "### 🐦 Extracted Tweet"
 result_title = "### 🤖 Nanopub Parser Prediction"
@@ -72,4 +65,4 @@ with st.form("myform"):
     tweet_url = st.text_input("Enter Twitter post URL:", "https://twitter.com/ClaypoolLab/status/1720165099992961224")
     submitted = st.form_submit_button("Submit")
     if submitted:
-        process_tweet(tweet_url, api_key, openai_referer=OPENROUTER_REFERRER)
+        process_tweet(tweet_url, api_key, openai_referer=openrouter_referrer)
