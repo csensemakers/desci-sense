@@ -1,3 +1,4 @@
 etc/*
 .spyproject/*
+.streamlit/*
 **.pyc
