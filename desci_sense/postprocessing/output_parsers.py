@@ -10,24 +10,34 @@ def convert_string_to_list(input_string):
     return names_list
 
 
-class TypeTagParser(BaseOutputParser):
+class TagTypeParser(BaseOutputParser):
     """Parse the output of an LLM call to a dict ."""
 
 
     def parse(self, text: str):
         """Parse the output of an LLM call."""
-        # print(text)
-        # Define the regex patterns for the three sections
-        sections_re = re.compile(r"Reasoning Steps:(.*?)Candidate Tags:(.*?)Final Answer:(.*)", re.DOTALL)
+       # Define the regular expressions for the three sections
+        reasoning_steps_pattern = r"Reasoning Steps:(.*?)Candidate Tags:"
+        candidate_tags_pattern = r"Candidate Tags:(.*?)Final Answer:"
+        final_answer_pattern = r"Final Answer:(.*)"
 
-        # Extract the content using regex
-        sections_match = sections_re.search(text)
+        # Extract content using regular expressions with error handling
+        try:
+            reasoning_steps = re.search(reasoning_steps_pattern, text, re.DOTALL).group(1).strip()
+        except AttributeError:
+            reasoning_steps = "[System error: failed to extract reasoning steps since the generated output was in an invalid format]"
 
-        reasoning_steps = sections_match.group(1).strip()
-        candidate_tags = sections_match.group(2).strip()
-        final_answer = sections_match.group(3).strip()
+        try:
+            candidate_tags = re.search(candidate_tags_pattern, text, re.DOTALL).group(1).strip()
+        except AttributeError:
+            candidate_tags = "[System error: failed to extract candidate tags since the generated output was in an invalid format.]"
 
-        final_reasoning = reasoning_steps.strip() + "\n\nCandidate Tags:\n\n" + candidate_tags.strip()
+        try:
+            final_answer = re.search(final_answer_pattern, text, re.DOTALL).group(1).strip()
+        except AttributeError:
+            final_answer = "<error>"
+
+        final_reasoning = "[Reasoning Steps]\n\n" + reasoning_steps.strip() + "\n\n[Candidate Tags]\n\n" + candidate_tags.strip()
 
         # TODO force final answer to conform to closed set of tags
 

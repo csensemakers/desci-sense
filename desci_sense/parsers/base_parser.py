@@ -13,7 +13,7 @@ from langchain.schema import (
 
 from ..twitter import scrape_tweet
 
-from ..postprocessing.output_parsers import TypeTagParser
+from ..postprocessing.output_parsers import TagTypeParser
 
 template = """You are an expert annotator who tags social media posts related to academic research, according to a predefined set of tags. 
 The available tag types are:
@@ -46,8 +46,7 @@ class BaseParser:
         openai_api_key = api_key if api_key else os.environ["OPENROUTER_API_KEY"]
         
         openapi_referer = openapi_referer if openapi_referer else os.environ["OPENROUTER_REFERRER"]
-        # os.environ.get("OPENROUTER_REFERRER", configs.OPENROUTER_REFERRER) # To identify your app. Can be set to e.g. http://localhost:3000 for testing
-        # print(f"Referer: {openapi_referer}")
+
 
         # init model
         self.model = ChatOpenAI(
@@ -63,7 +62,7 @@ class BaseParser:
             ("human", human_template),
         ])
 
-        self.output_parser = TypeTagParser()
+        self.output_parser = TagTypeParser()
 
         self.chain = self.prompt_template | self.model | self.output_parser
         
