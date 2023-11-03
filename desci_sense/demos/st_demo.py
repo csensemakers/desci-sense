@@ -12,7 +12,7 @@ from configs import ST_OPENROUTER_REFERRER
 
 # if fail to get from environment config, default to streamlit referrer
 openrouter_referrer = os.environ.get("OPENROUTER_REFERRER", ST_OPENROUTER_REFERRER)
-
+api_key = os.environ.get("OPENROUTER_API_KEY")
 
 st.title("LLM Nanopublishing assistant demo")
 
@@ -61,7 +61,7 @@ def process_tweet(tweet_url, api_key, openai_referer):
 
 
 with st.form("myform"):
-    api_key = st.text_input("Enter OpenRouter API Key:", "")
+    # api_key = st.text_input("Enter OpenRouter API Key:", "")
     tweet_url = st.text_input("Enter Twitter post URL:", "https://twitter.com/ClaypoolLab/status/1720165099992961224")
     submitted = st.form_submit_button("Submit")
     if submitted:
