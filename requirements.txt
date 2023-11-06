@@ -1,6 +1,6 @@
 langchain==0.0.327
 streamlit==1.28.0
-openai
+openai==0.28.1
 pytest
 wandb
 confection
