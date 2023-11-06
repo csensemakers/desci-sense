@@ -1,4 +1,6 @@
 etc/*
 .spyproject/*
 .streamlit/*
+wandb/*
+notebooks/wandb/*
 **.pyc
