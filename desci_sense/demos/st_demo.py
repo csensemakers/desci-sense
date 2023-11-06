@@ -52,6 +52,8 @@ def log_pred_wandb(wandb_run, result):
     
 
 def init_wandb_run(model_config):
+
+    wandb.login(key=os.environ["WANDB_API_KEY"])
     wandb_run = wandb.init(job_type="demo",project=model_config["wandb"]["project"], config=model_config, 
                                        entity=model_config["wandb"]["wand_entity"])
     
