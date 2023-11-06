@@ -124,8 +124,7 @@ def process_tweet(tweet_url, model, api_key, openai_referer):
 with st.spinner("Creating model..."):
     model = init_model()
 
-with st.spinner("Setting up logging..."):
-    wandb_run = init_wandb_run(model.config)
+
 
 with st.form("myform"):
     # api_key = st.text_input("Enter OpenRouter API Key:", "")
@@ -142,7 +141,10 @@ with st.form("myform"):
 
         if log_check:
             # log results to wandb DB
-            log_pred_wandb(wandb_run, result)
+            with st.spinner("Logging result..."):
+                wandb_run = init_wandb_run(model.config)
+                log_pred_wandb(wandb_run, result)
+                wandb_run.finish()
 
 
     
