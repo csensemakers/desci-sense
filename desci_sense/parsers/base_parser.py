@@ -1,7 +1,10 @@
 import os
 
+from pathlib import Path
 from typing import Optional, Dict
-import configs
+import desci_sense.configs as configs
+
+from confection import Config
 
 from langchain.chat_models import ChatOpenAI
 from langchain.prompts.chat import ChatPromptTemplate
@@ -15,32 +18,38 @@ from ..twitter import scrape_tweet
 
 from ..postprocessing.output_parsers import TagTypeParser
 
-template = """You are an expert annotator who tags social media posts related to academic research, according to a predefined set of tags. 
-The available tag types are:
-<announce>: this post contains an announcement of new research. The announcement is likely made by the authors but may be a third party. The research should be a paper, dataset or other type of research output that is being announced publicly.
-<review>: this post contains a review of another reference, such as a book, article or movie. The review could be positive or negative. A review can be detailed or a simple short endorsement.
-<job>: this post describes a job listing, for example a call for graduate students or faculty applications.
-<other>: This is a special tag. Use this tag if none of the tags above are suitable. If you tag a post with <other>, no other tag should be assigned to the post.
 
-A user will pass in a post, and you should think step by step, before a single tag that best matches the post.
 
-Your final answer should be structured as follows:
-Reasoning Steps: (your reasoning steps)
-Candidate Tags: (For potential each tag you choose, explain why you chose it.)
-Final Answer: (a final single tag, based on the Candidate Tags. The final tag must be included in the Candidate Tags list!)
+# template = """You are an expert annotator who tags social media posts related to academic research, according to a predefined set of tags. 
+# The available tag types are:
+# <announce>: this post contains an announcement of new research. The announcement is likely made by the authors but may be a third party. The research should be a paper, dataset or other type of research output that is being announced publicly.
+# <review>: this post contains a review of another reference, such as a book, article or movie. The review could be positive or negative. A review can be detailed or a simple short endorsement.
+# <job>: this post describes a job listing, for example a call for graduate students or faculty applications.
+# <event>: this post describes an event, either real-world or an online event. Any kind of event is relevant, some examples of events could be seminars, meetups, or hackathons.
+# <other>: This is a special tag. Use this tag if none of the tags above are suitable. If you tag a post with <other>, no other tag should be assigned to the post.
 
-Remember:
-Do not make up any new tags that are not in the list above!
-Only choose one final tag!
-"""
+# A user will pass in a post, and you should think step by step, before a single tag that best matches the post.
+
+# Your final answer should be structured as follows:
+# Reasoning Steps: (your reasoning steps)
+# Candidate Tags: (For potential each tag you choose, explain why you chose it.)
+# Final Answer: (a final single tag, based on the Candidate Tags. The final tag must be included in the Candidate Tags list!)
+
+# Remember:
+# Do not make up any new tags that are not in the list above!
+# Only choose one final tag!
+# """
 human_template = "{text}"
 
 
 class BaseParser:
-    def __init__(self, model_name="mistralai/mistral-7b-instruct", 
+    def __init__(self, 
+                 config: Config,
                  api_key: Optional[str]=None,
-                 openapi_referer: Optional[str]=None,
+                 openapi_referer: Optional[str]=None
                  ) -> None:
+        
+        self.config = config
         
         # if no api key passed as arg, default to environment config
         openai_api_key = api_key if api_key else os.environ["OPENROUTER_API_KEY"]
@@ -49,13 +58,19 @@ class BaseParser:
 
 
         # init model
+        model_name = "mistralai/mistral-7b-instruct" if not "name" in config["model"] else config["model"]["name"]
+        
         self.model = ChatOpenAI(
             model=model_name, 
-            temperature=0.6,
+            temperature=self.config["model"]["temperature"],
             openai_api_key=openai_api_key,
             openai_api_base=configs.OPENROUTER_API_BASE,
             headers={"HTTP-Referer": openapi_referer}, 
         )
+
+        # load prompt
+        template_path = Path(__file__).parents[2] / self.config["prompt"]["template_path"]
+        template = template_path.read_text()
 
         self.prompt_template = ChatPromptTemplate.from_messages([
             ("system", template),
