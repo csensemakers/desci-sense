@@ -64,8 +64,8 @@ def init_wandb_run(model_config):
 def init_model():
 
     # get config file
-    config = init_config(template_path="desci_sense/prompting/templates/p1.txt",
-                         wandb_project="st_demo-v0.1")
+    config = init_config(template_path="desci_sense/prompting/templates/p2.txt",
+                         wandb_project="st_demo-v0.2")
 
     # create model
     tweet_parser = BaseParser(config=config, api_key=api_key, openapi_referer=openrouter_referrer)
