@@ -3,4 +3,7 @@ etc/*
 .streamlit/*
 wandb/*
 notebooks/wandb/*
+scripts/artifacts/*
+notebooks/artifacts/*
+artifacts/*
 **.pyc
