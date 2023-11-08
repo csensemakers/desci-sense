@@ -15,30 +15,13 @@ from langchain.schema import (
 
 
 from ..twitter import scrape_tweet
+from ..utils import extract_and_expand_urls
 
 from ..postprocessing.output_parsers import TagTypeParser
 
 
 
-# template = """You are an expert annotator who tags social media posts related to academic research, according to a predefined set of tags. 
-# The available tag types are:
-# <announce>: this post contains an announcement of new research. The announcement is likely made by the authors but may be a third party. The research should be a paper, dataset or other type of research output that is being announced publicly.
-# <review>: this post contains a review of another reference, such as a book, article or movie. The review could be positive or negative. A review can be detailed or a simple short endorsement.
-# <job>: this post describes a job listing, for example a call for graduate students or faculty applications.
-# <event>: this post describes an event, either real-world or an online event. Any kind of event is relevant, some examples of events could be seminars, meetups, or hackathons.
-# <other>: This is a special tag. Use this tag if none of the tags above are suitable. If you tag a post with <other>, no other tag should be assigned to the post.
 
-# A user will pass in a post, and you should think step by step, before a single tag that best matches the post.
-
-# Your final answer should be structured as follows:
-# Reasoning Steps: (your reasoning steps)
-# Candidate Tags: (For potential each tag you choose, explain why you chose it.)
-# Final Answer: (a final single tag, based on the Candidate Tags. The final tag must be included in the Candidate Tags list!)
-
-# Remember:
-# Do not make up any new tags that are not in the list above!
-# Only choose one final tag!
-# """
 human_template = "{text}"
 
 
@@ -87,6 +70,16 @@ class BaseParser:
 
         answer = self.chain.invoke({"text": tweet["text"]})
 
+        # check if there is an external link in this post - if not, tag as <no-ref>
+        expanded_urls = extract_and_expand_urls(tweet["text"])
+
+        if not expanded_urls:
+            answer = {"reasoning": "[System msg: no urls detected - categorizing as <no-ref>]", 
+                             "final_answer": "<no-ref>"}
+        else:
+            # url detected, process to find relation of text to referenced url
+            answer = self.chain.invoke({"text": tweet["text"]})
+
         result = {"tweet": tweet,
                   "answer": answer
                   }
@@ -100,8 +93,19 @@ class BaseParser:
         # get tweet in json format
         tweet = scrape_tweet(tweet_url)
 
-        answer = self.chain.invoke({"text": tweet["text"]})
+        # check if there is an external link in this post - if not, tag as <no-ref>
+        expanded_urls = extract_and_expand_urls(tweet["text"])
 
+        
+
+        if not expanded_urls:
+            answer = {"reasoning": "[System msg: no urls detected - categorizing as <no-ref>]", 
+                             "final_answer": "<no-ref>"}
+        else:
+            # url detected, process to find relation of text to referenced url
+            answer = self.chain.invoke({"text": tweet["text"]})
+
+        
         result = {"tweet": tweet,
                   "answer": answer
                   }
