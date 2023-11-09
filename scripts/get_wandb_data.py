@@ -83,6 +83,7 @@ if __name__ == "__main__":
         artifacts = get_artifacts_from_proj(api, project)
         all_artifacts += artifacts
     
+    print(f"Processing {len(all_artifacts)} predictions...")
     df = load_data_from_artifacts(all_artifacts)
     
     print("Saving output...")
