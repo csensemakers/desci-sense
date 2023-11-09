@@ -138,7 +138,7 @@ if __name__ == "__main__":
         - Review: review of another reference, such as a book, article or movie. The review can be detailed or a simple short endorsement.
         - Event: Either real-world or an online event. Any kind of event is relevant, some examples of events could be seminars, meetups, or hackathons.
         - Reading: Post describes the reading status of the author in relation to a reference, such as a book or article. The author may either have read the reference in the past, is reading the reference in the present, or is looking forward to reading the reference in the future.
-        Recommendation: The author is recommending any kind of content: an article, a movie, podcast, book, another post, etc. This tag can also be used for cases of implicit recommendation, where the author is expressing enjoyment of some content but not explicitly recommending it.
+        - Recommendation: The author is recommending any kind of content: an article, a movie, podcast, book, another post, etc. This tag can also be used for cases of implicit recommendation, where the author is expressing enjoyment of some content but not explicitly recommending it.
         - Other: used if none of the tags above are suitable.''')
     
         st.markdown("""👷In the future, more types will be added, this is just a hacky demo!""")
