@@ -14,8 +14,8 @@ from langchain.schema import (
 )
 
 
-from ..twitter import scrape_tweet
-from ..utils import extract_and_expand_urls
+from ..twitter import scrape_tweet, extract_external_ref_urls
+# from ..utils import extract_and_expand_urls
 
 from ..postprocessing.output_parsers import TagTypeParser
 
@@ -71,7 +71,7 @@ class BaseParser:
         answer = self.chain.invoke({"text": tweet["text"]})
 
         # check if there is an external link in this post - if not, tag as <no-ref>
-        expanded_urls = extract_and_expand_urls(tweet["text"])
+        expanded_urls = extract_external_ref_urls(tweet)
 
         if not expanded_urls:
             answer = {"reasoning": "[System msg: no urls detected - categorizing as <no-ref>]", 
@@ -94,7 +94,7 @@ class BaseParser:
         tweet = scrape_tweet(tweet_url)
 
         # check if there is an external link in this post - if not, tag as <no-ref>
-        expanded_urls = extract_and_expand_urls(tweet["text"])
+        expanded_urls = extract_external_ref_urls(tweet)
 
         
 

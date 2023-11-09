@@ -33,4 +33,10 @@ def extract_and_expand_urls(text):
         
 
 
-    
+def extract_twitter_status_id(url):
+    pattern = r'twitter\.com\/\w+\/status\/(\d+)'
+    match = re.search(pattern, url)
+    if match:
+        return match.group(1)
+    else:
+        return None
