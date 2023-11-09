@@ -145,7 +145,7 @@ if __name__ == "__main__":
 
     st.markdown("Sample Twitter URL for ✂️📋:")
     st.code('''
-                https://twitter.com/ClaypoolLab/status/1720165099992961224
+                https://twitter.com/TaniaLombrozo/status/1722709702667026865
                  ''',language='markdown')    
     
     tweet_url = st.text_input("Enter Twitter post URL:", "")
@@ -174,7 +174,7 @@ if __name__ == "__main__":
         log_check = st.checkbox('Log run results for research purposes?')
         st.markdown('''👆 Check this box before submitting if you agree to share the data with our team for research purposes. 
                 By data we mean the URL field as well as any labels you optionally provided, along with the bot response. Thanks! ''')
-        manual_label = st.text_input("Add the correct label here, so we can see if Nanobot agrees with you :) Or if you think Nanobot made a mistake, add a correct label here and then re-click the 'Run Nanobot' button! If you planned on using the <other> label, feel free to suggest a new, more specific label instead.", "")
+        manual_label = st.text_input("Add the correct label here, so we can see if Nanobot agrees with you :) Or also if you think Nanobot made a mistake, add a correct label here and then re-click the 'Run Nanobot' button! If you planned on using the <other> label, feel free to suggest a new, more specific label instead.", "")
         labeler_name = st.text_input("Optionally add your name or other identifier.", "")
         submitted = st.form_submit_button("🤖 Run Nanobot!")
 
