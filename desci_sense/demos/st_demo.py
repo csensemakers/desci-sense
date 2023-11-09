@@ -64,7 +64,7 @@ def init_wandb_run(model_config):
 def init_model():
 
     # get config file
-    config = init_config(template_path="desci_sense/prompting/templates/p2.txt",
+    config = init_config(template_path="desci_sense/prompting/templates/p3.txt",
                          wandb_project="st_demo-v0.2")
 
     # create model
