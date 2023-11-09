@@ -21,7 +21,6 @@ api_key = os.environ.get("OPENROUTER_API_KEY")
 
 result = None
 
-# def get_wandb
 
 def log_pred_wandb(wandb_run, result, human_label: str = "", labeler_name: str = ""):
 
@@ -32,17 +31,34 @@ def log_pred_wandb(wandb_run, result, human_label: str = "", labeler_name: str =
 
     columns = ["User", "URL", "Text", "Reasoning Steps", "Predicted Label", "True Label", "Name of Label Provider" , "Tweet ID"]
 
-    # extract relevant columns from prediction
-    pred_row = [
-        result['tweet']['user_name'],
-        result['tweet']['tweetURL'],
-        result['tweet']['text'],
-        result['answer']['reasoning'],
-        result['answer']['final_answer'],
-        human_label, # if user supplied a label
-        labeler_name, # name of person who provided label
-        result['tweet']['tweetID']
-    ]
+    # check if prediction was tweet or simple text
+    if "tweet" in result:
+        # extract relevant columns from prediction
+        pred_row = [
+            result['tweet']['user_name'],
+            result['tweet']['tweetURL'],
+            result['tweet']['text'],
+            result['answer']['reasoning'],
+            result['answer']['final_answer'],
+            human_label, # if user supplied a label
+            labeler_name, # name of person who provided label
+            result['tweet']['tweetID']
+        ]
+    elif "text" in result:
+        user_name = labeler_name if labeler_name != "" else "unknown app user"
+        pred_row = [
+            user_name,
+            "",
+            result["text"],
+            result['answer']['reasoning'],
+            result['answer']['final_answer'],
+            human_label, # if user supplied a label
+            labeler_name, # name of person who provided label
+            ""
+        ]
+    else:
+        raise ValueError("Result should have either text or tweet key!")
+
     data = [pred_row]
 
     # add data to table
@@ -74,30 +90,8 @@ def init_model():
 
 
 
-
-st.title("LLM Nanopublishing assistant demo")
-
-
-INTRO_TEXT = """The bot will categorize a tweet as one of the following types:
-
-- Announcement: post announcing a paper, dataset or other type of research output.
-- Job: for a post that describes a job listing, for example a call for graduate students or faculty. applications.
-- Review: review of another reference, such as a book, article or movie. The review can be detailed or a simple short endorsement.
-- Other: used if none of the tags above are suitable.
-
-👷In the future, more types will be added, this is just a hacky demo!"""
-
-st.markdown(INTRO_TEXT)
-
-section_title = "### 🐦 Extracted Tweet"
-result_title = "### 🤖 Nanopub Parser Prediction"
-
-
-
-
-
 def print_tweet(tweet):
-
+    section_title = "### 🐦 Extracted Tweet"
     author = "👤 **Author:** :gray[{}]".format(tweet["user_name"])
     tweet_text = "📝 **Tweet text:** :gray[{}]".format(tweet["text"])
     tweet_url = "🔗 **Tweet URL:** `{}`".format(tweet["tweetURL"])
@@ -108,64 +102,99 @@ def scrape(tweet_url):
     # scrape tweet
     with st.spinner('Scraping tweet...'):
         tweet = scrape_tweet(tweet_url)
-    st.success('Done!')  
+    st.success('Scraped tweet successfully!')  
 
-    print_tweet(tweet)
     return tweet
 
-def process_tweet(tweet, model, api_key, openai_referer):
-    # create model
-    # model_name = "mistralai/mistral-7b-instruct"
-    # tweet_parser = BaseParser(model_name=model_name, api_key=api_key, openapi_referer=openai_referer)
 
-    # scrape tweet
-    with st.spinner('Scraping tweet...'):
-        tweet = scrape_tweet(tweet_url)
-    st.success('Done!')  
-
-    print_tweet(tweet)
-
-    # parse tweet
-    with st.spinner('Parsing tweet...'):
-        result = model.process_tweet(tweet)
-        st.markdown(f"{result_title}")
+def process_text(text, model, api_key, openai_referer):
+    # parse text
+    with st.spinner('Parsing text...'):
+        result = model.process_text(text)
         st.write(result["answer"])
         return result
 
-with st.spinner("Creating model..."):
-    model = init_model()
+
+def process_tweet(tweet, model, api_key, openai_referer):
+    # parse tweet
+    with st.spinner('Parsing tweet...'):
+        result = model.process_tweet(tweet)
+        st.write(result["answer"])
+        return result
 
 
-with st.form("myform"):
-    # api_key = st.text_input("Enter OpenRouter API Key:", "")
-    tweet_url = st.text_input("Enter Twitter post URL:", "https://twitter.com/ClaypoolLab/status/1720165099992961224")
+
+
+
+if __name__ == "__main__":
+
+    st.title("LLM Nanopublishing assistant demo")
+
+    st.markdown('''The bot will categorize a tweet as one of the following types:''')
+    with st.expander("Label types"):
+        st.markdown('''
+        - Announcement: post announcing a paper, dataset or other type of research output.
+        - Job: for a post that describes a job listing, for example a call for graduate students or faculty. applications.
+        - Review: review of another reference, such as a book, article or movie. The review can be detailed or a simple short endorsement.
+        - Other: used if none of the tags above are suitable.''')
     
+        st.markdown("""👷In the future, more types will be added, this is just a hacky demo!""")
 
+    with st.spinner("Creating model..."):
+        model = init_model()
 
-
-    submitted = st.form_submit_button("Submit")
-    log_check = st.checkbox('Log results for research purposes?')
-    st.markdown('''👆 Check this box before submitting if you agree to share the data with our team for research purposes. 
-            By data we mean the URL field as well as any labels you optionally provided, along with the bot response. Thanks! ''')
-    manual_label = st.text_input("If you think Nanobot made a mistake, add a correct manual label here and then re-click the 'Submit' button above! If you planned on using the <other> label, feel free to suggest a new, more specific label instead.", "")
-    labeler_name = st.text_input("Optionally add your name or other identifier.", "")
-
-    if submitted:
-        result = process_tweet(tweet_url, model, api_key, openai_referer=openrouter_referrer)
-
-        if log_check:
-            # log results to wandb DB
-            with st.spinner("Logging result..."):
-                wandb_run = init_wandb_run(model.config)
-                log_pred_wandb(wandb_run, result, manual_label, labeler_name)
-                wandb_run.finish()
-
-
+    st.markdown("Sample Twitter URL for ✂️📋:")
+    st.code('''
+                https://twitter.com/ClaypoolLab/status/1720165099992961224
+                 ''',language='markdown')    
     
+    tweet_url = st.text_input("Enter Twitter post URL:", "")
+    user_text = st.text_area("Or write text here directly instead")
+    if not (tweet_url or user_text):
+        st.warning('Please input a Twitter URL or your own free-form text.')
+        st.stop()
+    if tweet_url:
+        st.success('Twitter URL provided.')
+    if user_text:
+        st.success('Free-form text provided')
+        target_text = user_text
 
+    if tweet_url:
+        tweet = scrape(tweet_url)
+        print_tweet(tweet)
+        target_text = tweet["text"]
+        
+    st.markdown("### Target text to parse:")
+    st.text(target_text)
+    
+    st.markdown("### 🎛️ Nanobot Settings")
+    
+    with st.form("myform"):
+        # st.write(tweet)
+        log_check = st.checkbox('Log run results for research purposes?')
+        st.markdown('''👆 Check this box before submitting if you agree to share the data with our team for research purposes. 
+                By data we mean the URL field as well as any labels you optionally provided, along with the bot response. Thanks! ''')
+        manual_label = st.text_input("Add the correct label here, so we can see if Nanobot agrees with you :) Or if you think Nanobot made a mistake, add a correct label here and then re-click the 'Run Nanobot' button! If you planned on using the <other> label, feel free to suggest a new, more specific label instead.", "")
+        labeler_name = st.text_input("Optionally add your name or other identifier.", "")
+        submitted = st.form_submit_button("🤖 Run Nanobot!")
 
+        if manual_label and not log_check:
+            st.warning('Please check the `log run` box since otherwise this label will not be recorded.', icon="⚠️")
+        if submitted:
+            st.markdown("### 🤖 Nanopub Parser Prediction")
 
+            if tweet_url:
+                result = process_tweet(tweet, model, api_key, openai_referer=openrouter_referrer)
+            else:
+                # free text option
+                result = process_text(target_text, model, api_key, openai_referer=openrouter_referrer)
 
+            if log_check:
+                # log results to wandb DB
+                with st.spinner("Logging result..."):
+                    wandb_run = init_wandb_run(model.config)
+                    log_pred_wandb(wandb_run, result, manual_label, labeler_name)
+                    wandb_run.finish()
 
-st.divider()
-st.markdown('''💻 Code repo: https://github.com/csensemakers/desci-sense''')
+    st.divider()
+    st.markdown('''💻 Code repo: https://github.com/csensemakers/desci-sense''')
