@@ -38,14 +38,21 @@ def extract_status_id(url):
     else:
         return None
 
-def extract_external_ref_urls(tweet):
+def extract_external_ref_urls(tweet, add_qrt_url: bool = True):
     """
     Extract list of non-internal URLs referenced by this tweet (in the tweet text body).
     In this context, internal URLs are URLs of media items associated with the tweet, such as images or videos.
     Internal URLs share the same ID as the referencing tweet.
     Shortened URLs are expanded to long form.
+    Quote Retweets (QRTs) are treated by default as an external URL. (disable by setting `add_qrt_url`=False)
     """
     urls = extract_and_expand_urls(tweet["text"])
+
+    # add qrt url if this was a qrt
+    if add_qrt_url:
+        if tweet["qrtURL"]:
+            urls += [tweet["qrtURL"]]
+
 
     external = []
     for url in urls:
