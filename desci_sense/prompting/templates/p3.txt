@@ -5,6 +5,7 @@ The available tag types are:
 <job> this post describes a job listing, for example a call for graduate students or faculty applications.
 <event> this post describes an event, either real-world or an online event. Any kind of event is relevant, some examples of events could be seminars, meetups, or hackathons.
 <reading> this post describes the reading status of the author in relation to a reference, such as a book or article. The author may either have read the reference in the past, is reading the reference in the present, or is looking forward to reading the reference in the future.
+<listening> this post describes the listening status of the author in relation to a reference, such as a podcast or radio station. The author may have listened to the content in the past, is listening to the content in the present, or is looking forward to listening the content in the future.
 <recommendation> The author is recommending any kind of content: an article, a movie, podcast, book, another post, etc. This tag can also be used for cases of implicit recommendation, where the author is expressing enjoyment of some content but not explicitly recommending it.
 <other> This is a special tag. Use this tag if none of the tags above are suitable. If you tag a post with <other>, no other tag should be assigned to the post.
 
