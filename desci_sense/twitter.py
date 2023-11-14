@@ -20,6 +20,8 @@ def scrape_tweet(tweet_id: Union[str, int]) -> Optional[dict]:
         return
     try:
         data = do_work(response.json())
+        data["sm_type"] = "twitter"
+        data["post_text"] = data["text"] # replace this with Post object
         return data
     except requests.JSONDecodeError:
         print("Couldn't decode response.")

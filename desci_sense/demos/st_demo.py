@@ -10,7 +10,9 @@ import shortuuid
 
 from desci_sense.parsers.base_parser import BaseParser
 from desci_sense.twitter import scrape_tweet
+from desci_sense.mastodon import scrape_mastodon_post
 from desci_sense.configs import ST_OPENROUTER_REFERRER, init_config
+from desci_sense.utils import identify_social_media
 
 
 
@@ -33,16 +35,29 @@ def log_pred_wandb(wandb_run, result, human_label: str = "", labeler_name: str =
 
     # check if prediction was tweet or simple text
     if "tweet" in result:
+        post = result["tweet"]
+        if post["sm_type"] == "mastodon":
+            author = post["account"]["display_name"]
+            text = post["plain_content"]
+            url = post["url"]
+            post_id = post["id"]
+        else:
+            # assuming Twitter for now
+            author = post["user_name"]
+            text = post["text"]
+            url = post["tweetURL"]
+            post_id = post['tweetID']
+
         # extract relevant columns from prediction
         pred_row = [
-            result['tweet']['user_name'],
-            result['tweet']['tweetURL'],
-            result['tweet']['text'],
+            author,
+            url,
+            text,
             result['answer']['reasoning'],
             result['answer']['final_answer'],
             human_label, # if user supplied a label
             labeler_name, # name of person who provided label
-            result['tweet']['tweetID']
+            post_id
         ]
     elif "text" in result:
         user_name = labeler_name if labeler_name != "" else "unknown app user"
@@ -91,20 +106,74 @@ def init_model():
 
 
 def print_tweet(tweet):
+    st.divider()
     section_title = "### 🐦 Extracted Tweet"
     author = "👤 **Author:** :gray[{}]".format(tweet["user_name"])
     tweet_text = "📝 **Tweet text:** :gray[{}]".format(tweet["text"])
     tweet_url = "🔗 **Tweet URL:** `{}`".format(tweet["tweetURL"])
     st.markdown(f"{section_title} \n {author} \n\n  {tweet_text} \n\n  {tweet_url}")
+    st.divider()
+
+def print_post(post):
+    st.divider()
+    section_title = "### 🗨️ Extracted Post"
+    if post["sm_type"] == "mastodon":
+        author = post["account"]["display_name"]
+        text = post["plain_content"]
+        url = post["url"]
+        sm_type_string = "🦣 Mastodon"
+    else:
+        # assuming Twitter for now
+        author = post["user_name"]
+        text = post["text"]
+        url = post["tweetURL"]
+        sm_type_string = "🐦 Twitter"
+        
+    
+    author_str = "👤 **Author:** :gray[{}]".format(author)
+    post_text = "📝 **Post text:** :gray[{}]".format(text)
+    post_url = "🔗 **Post URL:** `{}`".format(url)
+    source_sm = f"🔉 **Source Social Media:** {sm_type_string}"
+    st.markdown(f"{section_title} \n {author_str} \n\n  {post_text} \n\n  {post_url} \n\n {source_sm}")
+    st.divider()
+
+        
 
 
-def scrape(tweet_url):
+def scrape_tweet_post(tweet_url):
     # scrape tweet
     with st.spinner('Scraping tweet...'):
         tweet = scrape_tweet(tweet_url)
     st.success('Scraped tweet successfully!')  
 
     return tweet
+
+def scrape_toot_post(toot_url):
+    # scrape tweet
+    with st.spinner('Scraping toot...'):
+        post = scrape_mastodon_post(toot_url)
+    st.success('Scraped toot successfully!')  
+
+    return post
+
+def scrape_post(post_url):
+    """
+    Scrape Twitter or Mastodon post
+    """
+    # check social media type
+    social_type = identify_social_media(post_url)
+
+    if social_type == "twitter":
+        result = scrape_tweet(post_url)
+        
+    elif social_type == "mastodon":
+        result = scrape_toot_post(post_url)
+
+    else:
+        st.error('Could not detect post social media type. Please try another URL.', icon="🚨")
+        st.stop()
+
+    return result
 
 
 def process_text(text, model, api_key, openai_referer):
@@ -123,6 +192,21 @@ def process_tweet(tweet, model, api_key, openai_referer):
         return result
 
 
+def process_post(post, model):
+    # check whether masto or twitter and parse accordingly
+    sm_type = post["sm_type"]
+    assert sm_type in ["twitter", "mastodon"]
+    
+    with st.spinner(f"Parsing {sm_type} post..."):
+        if sm_type == "twitter":
+            result = model.process_tweet(post)
+            st.write(result["answer"])
+            return result
+        else:
+            # mastodon
+            result = model.process_toot(post)
+            st.write(result["answer"])
+            return result
 
 
 
@@ -151,24 +235,25 @@ if __name__ == "__main__":
                 https://twitter.com/TaniaLombrozo/status/1722709702667026865
                  ''',language='markdown')    
     
-    tweet_url = st.text_input("Enter Twitter post URL:", "")
+    post_url = st.text_input("Enter Twitter/Mastodon post URL:", "")
     user_text = st.text_area("Or write text here directly instead")
-    if not (tweet_url or user_text):
-        st.warning('Please input a Twitter URL or your own free-form text.')
+    if not (post_url or user_text):
+        st.warning('Please input a Twitter/Mastodon URL or your own free-form text.')
         st.stop()
-    if tweet_url:
-        st.success('Twitter URL provided.')
+    if post_url:
+        st.success('Post URL provided.')
     if user_text:
         st.success('Free-form text provided')
         target_text = user_text
 
-    if tweet_url:
-        tweet = scrape(tweet_url)
-        print_tweet(tweet)
-        target_text = tweet["text"]
+    if post_url:
+        post = scrape_post(post_url)
+        print_post(post)
+        target_text = post["post_text"]
         
     st.markdown("### Target text to parse:")
     st.text(target_text)
+    st.divider()
     
     st.markdown("### 🎛️ Nanobot Settings")
     
@@ -186,8 +271,8 @@ if __name__ == "__main__":
         if submitted:
             st.markdown("### 🤖 Nanopub Parser Prediction")
 
-            if tweet_url:
-                result = process_tweet(tweet, model, api_key, openai_referer=openrouter_referrer)
+            if post_url:
+                result = process_post(post, model)
             else:
                 # free text option
                 result = process_text(target_text, model, api_key, openai_referer=openrouter_referrer)

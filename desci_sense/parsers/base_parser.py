@@ -15,7 +15,8 @@ from langchain.schema import (
 
 
 from ..twitter import scrape_tweet, extract_external_ref_urls
-from ..utils import extract_and_expand_urls
+from ..mastodon import scrape_mastodon_post, extract_external_masto_ref_urls
+from ..utils import extract_and_expand_urls, identify_social_media
 
 from ..postprocessing.output_parsers import TagTypeParser
 
@@ -129,10 +130,89 @@ class BaseParser:
 
         
         result = {"tweet": tweet,
-                  "answer": answer
+                  "answer": answer,
+                  "source": "twitter"
                   }
 
         return result
+    
+
+    def process_toot_url(self, toot_url: str):
+        """Scrape target toot and run parser on it.
+
+        Args:
+            toot_url (str): url of Mastodon post
+        """
+
+        # get toot in json format
+        post = scrape_mastodon_post(toot_url)
+
+
+        # check if there is an external link in this post - if not, tag as <no-ref>
+        expanded_urls = extract_external_masto_ref_urls(post)
+
+        if not expanded_urls:
+            answer = {"reasoning": "[System msg: no urls detected - categorizing as <no-ref>]", 
+                             "final_answer": "<no-ref>"}
+        else:
+            # url detected, process to find relation of text to referenced url
+            answer = self.chain.invoke({"text": post["plain_content"]})
+
+        result = {"tweet": post,
+                  "answer": answer,
+                  "source": "mastodon"
+                  }
+
+        return result
+    
+    def process_toot(self, post: dict):
+        """Scrape target toot and run parser on it.
+
+        Args:
+            post - json representation of mastodon post
+        """
+
+        # check if there is an external link in this post - if not, tag as <no-ref>
+        expanded_urls = extract_external_masto_ref_urls(post)
+
+        if not expanded_urls:
+            answer = {"reasoning": "[System msg: no urls detected - categorizing as <no-ref>]", 
+                             "final_answer": "<no-ref>"}
+        else:
+            # url detected, process to find relation of text to referenced url
+            answer = self.chain.invoke({"text": post["plain_content"]})
+
+        result = {"tweet": post,
+                  "answer": answer,
+                  "source": "mastodon"
+                  }
+
+        return result
+
+    def process_url(self, post_url: str):
+        """
+        Scrape social media post and parse using model. 
+        Supported types: Mastodon & Twitter
+        """
+        
+        # check social media type
+        social_type = identify_social_media(post_url)
+
+        if social_type == "twitter":
+            result = self.process_tweet_url(post_url)
+        
+        elif social_type == "mastodon":
+            result = self.process_toot_url(post_url)
+
+        else:
+            raise IOError(f"Could not detect social media type of input URL: {post_url}")
+
+        return result
+
+
+
+
+
 
 
 
