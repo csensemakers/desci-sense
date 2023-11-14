@@ -5,7 +5,7 @@ from pathlib import Path
 ROOT = Path(__file__).parents[1]
 sys.path.append(str(ROOT))
 
-from desci_sense.twitter import extract_external_ref_urls, scrape_tweet
+from desci_sense.dataloaders.twitter.twitter_utils import extract_external_ref_urls, scrape_tweet
 
 def test_ext_urls():
     test_urls = [
@@ -18,10 +18,10 @@ def test_ext_urls():
     ("https://twitter.com/soldni/status/1724094517970882959", False)
     ]
 
+
     for case, label in test_urls:
         tweet = scrape_tweet(case)
-        r = extract_external_ref_urls(tweet)
-        assert((len(r) > 0) == label), f"{case} extracted to {r} - mismatch with {label}"
+        assert(tweet.has_refs() == label), f"{case} has_refs? = {tweet.has_refs()} - mismatch with {label}"
 
 
 def test_problem_tweet_i31():
@@ -34,5 +34,4 @@ def test_problem_tweet_i31():
 
     for case, label in test_urls:
         tweet = scrape_tweet(case)
-        r = extract_external_ref_urls(tweet)
-        assert((len(r) > 0) == label), f"{case} extracted to {r} - mismatch with {label}"
+        assert(tweet.has_refs() == label), f"{case} has_refs? = {tweet.has_refs()} - mismatch with {label}"

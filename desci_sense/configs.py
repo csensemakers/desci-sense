@@ -18,7 +18,7 @@ ST_OPENROUTER_REFERRER = "https://ai-nanopub.streamlit.app/"
 
 def init_config(model_name: str = "mistralai/mistral-7b-instruct",
                 temperature: float = 0.6,
-                template_path: str = "desci_sense/prompting/templates/p2.txt",
+                template_path: str = "desci_sense/prompting/templates/p4.txt",
                 wandb_entity: str = "common-sense-makers",
                 wandb_project: str = "st-demo",
                 wandb_db_name: str = "test-DB"):
