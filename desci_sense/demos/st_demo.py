@@ -8,9 +8,10 @@ import streamlit as st
 import wandb
 import shortuuid
 
+from desci_sense.schema.post import RefPost
 from desci_sense.parsers.base_parser import BaseParser
-from desci_sense.twitter import scrape_tweet
-from desci_sense.mastodon import scrape_mastodon_post
+from desci_sense.dataloaders.twitter.twitter_utils import scrape_tweet
+from desci_sense.dataloaders.mastodon.mastodon_utils import scrape_mastodon_post
 from desci_sense.configs import ST_OPENROUTER_REFERRER, init_config
 from desci_sense.utils import identify_social_media
 
@@ -31,33 +32,20 @@ def log_pred_wandb(wandb_run, result, human_label: str = "", labeler_name: str =
 
     artifact = wandb.Artifact(f"pred_{wandb_run.id}_{pred_uid}", type="prediction")
 
-    columns = ["User", "URL", "Text", "Reasoning Steps", "Predicted Label", "True Label", "Name of Label Provider" , "Tweet ID"]
+    columns = ["User", "URL", "Text", "Reasoning Steps", "Predicted Label", "True Label", "Name of Label Provider" , "Post Source"]
 
-    # check if prediction was tweet or simple text
-    if "tweet" in result:
-        post = result["tweet"]
-        if post["sm_type"] == "mastodon":
-            author = post["account"]["display_name"]
-            text = post["plain_content"]
-            url = post["url"]
-            post_id = post["id"]
-        else:
-            # assuming Twitter for now
-            author = post["user_name"]
-            text = post["text"]
-            url = post["tweetURL"]
-            post_id = post['tweetID']
-
-        # extract relevant columns from prediction
+    # check if prediction was post or simple text
+    if "post" in result:
+        post: RefPost = result["post"]
         pred_row = [
-            author,
-            url,
-            text,
+            post.author,
+            post.url,
+            post.content,
             result['answer']['reasoning'],
             result['answer']['final_answer'],
             human_label, # if user supplied a label
             labeler_name, # name of person who provided label
-            post_id
+            post.source_network
         ]
     elif "text" in result:
         user_name = labeler_name if labeler_name != "" else "unknown app user"
@@ -69,10 +57,10 @@ def log_pred_wandb(wandb_run, result, human_label: str = "", labeler_name: str =
             result['answer']['final_answer'],
             human_label, # if user supplied a label
             labeler_name, # name of person who provided label
-            ""
+            "user input"
         ]
     else:
-        raise ValueError("Result should have either text or tweet key!")
+        raise ValueError("Result should have either text or post key!")
 
     data = [pred_row]
 
@@ -105,34 +93,32 @@ def init_model():
 
 
 
-def print_tweet(tweet):
-    st.divider()
-    section_title = "### 🐦 Extracted Tweet"
-    author = "👤 **Author:** :gray[{}]".format(tweet["user_name"])
-    tweet_text = "📝 **Tweet text:** :gray[{}]".format(tweet["text"])
-    tweet_url = "🔗 **Tweet URL:** `{}`".format(tweet["tweetURL"])
-    st.markdown(f"{section_title} \n {author} \n\n  {tweet_text} \n\n  {tweet_url}")
+# def print_tweet(tweet):
+#     st.divider()
+#     section_title = "### 🐦 Extracted Tweet"
+#     author = "👤 **Author:** :gray[{}]".format(tweet["user_name"])
+#     tweet_text = "📝 **Tweet text:** :gray[{}]".format(tweet["text"])
+#     tweet_url = "🔗 **Tweet URL:** `{}`".format(tweet["tweetURL"])
+#     st.markdown(f"{section_title} \n {author} \n\n  {tweet_text} \n\n  {tweet_url}")
+#     st.divider()
+
+def print_post(post: RefPost):
+
+    sm_type = post.source_network
+    assert sm_type in ["twitter", "mastodon"]
     st.divider()
 
-def print_post(post):
-    st.divider()
     section_title = "### 🗨️ Extracted Post"
-    if post["sm_type"] == "mastodon":
-        author = post["account"]["display_name"]
-        text = post["plain_content"]
-        url = post["url"]
+
+    if sm_type == "mastodon":
         sm_type_string = "🦣 Mastodon"
     else:
-        # assuming Twitter for now
-        author = post["user_name"]
-        text = post["text"]
-        url = post["tweetURL"]
+        # assuming Twitter
         sm_type_string = "🐦 Twitter"
         
-    
-    author_str = "👤 **Author:** :gray[{}]".format(author)
-    post_text = "📝 **Post text:** :gray[{}]".format(text)
-    post_url = "🔗 **Post URL:** `{}`".format(url)
+    author_str = "👤 **Author:** :gray[{}]".format(post.author)
+    post_text = "📝 **Post text:** :gray[{}]".format(post.content)
+    post_url = "🔗 **Post URL:** `{}`".format(post.url)
     source_sm = f"🔉 **Source Social Media:** {sm_type_string}"
     st.markdown(f"{section_title} \n {author_str} \n\n  {post_text} \n\n  {post_url} \n\n {source_sm}")
     st.divider()
@@ -184,29 +170,17 @@ def process_text(text, model, api_key, openai_referer):
         return result
 
 
-def process_tweet(tweet, model, api_key, openai_referer):
-    # parse tweet
-    with st.spinner('Parsing tweet...'):
-        result = model.process_tweet(tweet)
-        st.write(result["answer"])
-        return result
 
 
-def process_post(post, model):
+def process_post(post: RefPost, model):
     # check whether masto or twitter and parse accordingly
-    sm_type = post["sm_type"]
+    sm_type = post.source_network
     assert sm_type in ["twitter", "mastodon"]
     
     with st.spinner(f"Parsing {sm_type} post..."):
-        if sm_type == "twitter":
-            result = model.process_tweet(post)
-            st.write(result["answer"])
-            return result
-        else:
-            # mastodon
-            result = model.process_toot(post)
-            st.write(result["answer"])
-            return result
+        result = model.process_ref_post(post)
+        st.write(result["answer"])
+        return result
 
 
 
@@ -235,6 +209,11 @@ if __name__ == "__main__":
                 https://twitter.com/TaniaLombrozo/status/1722709702667026865
                  ''',language='markdown')    
     
+    st.markdown("Sample Mastodon URL for ✂️📋:")
+    st.code('''
+                https://mastodon.social/@lawrence@kopiti.am/111135373474343453
+                 ''',language='markdown')  
+    
     post_url = st.text_input("Enter Twitter/Mastodon post URL:", "")
     user_text = st.text_area("Or write text here directly instead")
     if not (post_url or user_text):
@@ -249,7 +228,7 @@ if __name__ == "__main__":
     if post_url:
         post = scrape_post(post_url)
         print_post(post)
-        target_text = post["post_text"]
+        target_text = post.content
         
     st.markdown("### Target text to parse:")
     st.text(target_text)

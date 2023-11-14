@@ -4,18 +4,18 @@ import re
 
 from urllib.parse import urlparse
 
-from .utils import convert_html_to_plain_text, extract_and_expand_urls
+from ...schema.post import RefPost
+from ...utils import convert_html_to_plain_text, extract_and_expand_urls
 
 
-def extract_external_masto_ref_urls(post, add_qrt_url: bool = True):
+def extract_external_masto_ref_urls(post: RefPost, add_qrt_url: bool = True):
     """
     Extract list of URLs referenced by this post (in the post text body).
     Shortened URLs are expanded to long form.
     """
     urls = extract_and_expand_urls(post["plain_content"])
 
-    # TODO add support for cards 
-    # https://github.com/csensemakers/desci-sense/issues/32
+    # extract URL from mastodon post card
     if post["card"]:
         if post["card"]["url"]:
             urls += [post["card"]["url"]]
@@ -41,7 +41,7 @@ def extract_instance_and_status(url):
         return None, None
 
 # based on chat gpt
-def get_mastodon_post_by_instance(instance_url, status_id, access_token=None):
+def get_mastodon_post_by_instance(instance_url, status_id, access_token=None) -> RefPost:
     """
     Get a single Mastodon post given its status ID.
 
@@ -51,7 +51,7 @@ def get_mastodon_post_by_instance(instance_url, status_id, access_token=None):
         access_token (str, optional): An optional access token if the post is on a private account.
 
     Returns:
-        dict: The Mastodon post in JSON format.
+        RefPost: The Mastodon post in RefPost format.
     """
     endpoint = f"{instance_url}/api/v1/statuses/{status_id}"
     headers = {"Authorization": f"Bearer {access_token}"} if access_token else {}
@@ -59,25 +59,40 @@ def get_mastodon_post_by_instance(instance_url, status_id, access_token=None):
     response = requests.get(endpoint, headers=headers)
 
     if response.status_code == 200:
-        post = response.json()
+        raw_post = response.json()
 
         # convert post html to plaintext
-        post["plain_content"] = convert_html_to_plain_text(post["content"])
-        post["post_text"] = post["plain_content"]
+        raw_post["plain_content"] = convert_html_to_plain_text(raw_post["content"])
+        raw_post["post_text"] = raw_post["plain_content"]
+
+        author = raw_post["account"]["display_name"]
+        text = raw_post["plain_content"]
+        url = raw_post["url"]
+        
+
+        # extract external reference urls from post
+        ext_ref_urls = extract_external_masto_ref_urls(raw_post)
+
+        post = RefPost(author=author,
+                    content=text,
+                    url=url,
+                    source_network="mastodon",
+                    metadata=raw_post,
+                    ref_urls=ext_ref_urls)
+
+
 
         return post
     else:
         print(f"Failed to get Mastodon post. Status code: {response.status_code}")
         return None
 
-def scrape_mastodon_post(post_url: str):
+def scrape_mastodon_post(post_url: str) -> RefPost:
 
     # get instance url and status ID
     instance_url, status_id = extract_instance_and_status(post_url)
 
     post = get_mastodon_post_by_instance(instance_url, status_id)
-
-    post["sm_type"] = "mastodon"
 
     return post
 

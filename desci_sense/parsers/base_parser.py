@@ -14,10 +14,10 @@ from langchain.schema import (
 )
 
 
-from ..twitter import scrape_tweet, extract_external_ref_urls
-from ..mastodon import scrape_mastodon_post, extract_external_masto_ref_urls
+from ..dataloaders.twitter.twitter_utils import scrape_tweet, extract_external_ref_urls
+from ..dataloaders.mastodon.mastodon_utils import scrape_mastodon_post, extract_external_masto_ref_urls
 from ..utils import extract_and_expand_urls, identify_social_media
-
+from ..schema.post import RefPost
 from ..postprocessing.output_parsers import TagTypeParser
 
 
@@ -87,52 +87,14 @@ class BaseParser:
                   }
 
         return result
-    
-    def process_tweet(self, tweet: Dict):
-        # process tweet in the format of the output of scrape_tweet
-
-        # answer = self.chain.invoke({"text": tweet["text"]})
-
-        # check if there is an external link in this post - if not, tag as <no-ref>
-        expanded_urls = extract_external_ref_urls(tweet)
-
-        if not expanded_urls:
-            answer = {"reasoning": "[System msg: no urls detected - categorizing as <no-ref>]", 
-                             "final_answer": "<no-ref>"}
-        else:
-            # url detected, process to find relation of text to referenced url
-            answer = self.chain.invoke({"text": tweet["text"]})
-
-        result = {"tweet": tweet,
-                  "answer": answer
-                  }
-
-        return result
-
 
 
     def process_tweet_url(self, tweet_url: str):
 
-        # get tweet in json format
-        tweet = scrape_tweet(tweet_url)
+        # get tweet in RefPost format
+        post: RefPost = scrape_tweet(tweet_url)
 
-        # check if there is an external link in this post - if not, tag as <no-ref>
-        expanded_urls = extract_external_ref_urls(tweet)
-
-        
-
-        if not expanded_urls:
-            answer = {"reasoning": "[System msg: no urls detected - categorizing as <no-ref>]", 
-                             "final_answer": "<no-ref>"}
-        else:
-            # url detected, process to find relation of text to referenced url
-            answer = self.chain.invoke({"text": tweet["text"]})
-
-        
-        result = {"tweet": tweet,
-                  "answer": answer,
-                  "source": "twitter"
-                  }
+        result = self.process_ref_post(post)
 
         return result
     
@@ -145,46 +107,29 @@ class BaseParser:
         """
 
         # get toot in json format
-        post = scrape_mastodon_post(toot_url)
+        post: RefPost = scrape_mastodon_post(toot_url)
 
-
-        # check if there is an external link in this post - if not, tag as <no-ref>
-        expanded_urls = extract_external_masto_ref_urls(post)
-
-        if not expanded_urls:
-            answer = {"reasoning": "[System msg: no urls detected - categorizing as <no-ref>]", 
-                             "final_answer": "<no-ref>"}
-        else:
-            # url detected, process to find relation of text to referenced url
-            answer = self.chain.invoke({"text": post["plain_content"]})
-
-        result = {"tweet": post,
-                  "answer": answer,
-                  "source": "mastodon"
-                  }
+        result = self.process_ref_post(post)
 
         return result
     
-    def process_toot(self, post: dict):
-        """Scrape target toot and run parser on it.
+    def process_ref_post(self, post: RefPost):
+        """Run parser on target RefPost.
 
         Args:
-            post - json representation of mastodon post
+            post - RefPost representation of mastodon post
         """
 
         # check if there is an external link in this post - if not, tag as <no-ref>
-        expanded_urls = extract_external_masto_ref_urls(post)
-
-        if not expanded_urls:
+        if not post.has_refs():
             answer = {"reasoning": "[System msg: no urls detected - categorizing as <no-ref>]", 
                              "final_answer": "<no-ref>"}
         else:
             # url detected, process to find relation of text to referenced url
-            answer = self.chain.invoke({"text": post["plain_content"]})
+            answer = self.chain.invoke({"text": post.content})
 
-        result = {"tweet": post,
-                  "answer": answer,
-                  "source": "mastodon"
+        result = {"post": post,
+                  "answer": answer
                   }
 
         return result

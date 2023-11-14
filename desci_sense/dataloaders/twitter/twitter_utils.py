@@ -5,27 +5,39 @@ from typing import Optional, Union
 import re
 import requests
 
-
-from .utils import extract_and_expand_urls, extract_twitter_status_id
+from ...schema.post import RefPost
+from ...utils import extract_and_expand_urls, extract_twitter_status_id
 
 def do_work(data: dict) -> None:
     # do actual work with data
     return data
 
 
-def scrape_tweet(tweet_id: Union[str, int]) -> Optional[dict]:
+def scrape_tweet(tweet_id: Union[str, int]) -> RefPost:
     response = requests.get(url=f"https://api.vxtwitter.com/Twitter/status/{tweet_id}")
     if not response.ok:
         print("Couldn't get tweet.")
         return
     try:
         data = do_work(response.json())
-        data["sm_type"] = "twitter"
-        data["post_text"] = data["text"] # replace this with Post object
-        return data
+        author = data["user_name"]
+        text = data["text"]
+        url = data["tweetURL"]
+
+        # extract external reference urls from post
+        ext_ref_urls = extract_external_ref_urls(data)
+
+        post = RefPost(author=author,
+                    content=text,
+                    url=url,
+                    source_network="twitter",
+                    metadata=data,
+                    ref_urls=ext_ref_urls)
+        return post
     except requests.JSONDecodeError:
         print("Couldn't decode response.")
         return
+
 
 def extract_status_id(url):
     """
@@ -40,7 +52,7 @@ def extract_status_id(url):
     else:
         return None
 
-def extract_external_ref_urls(tweet, add_qrt_url: bool = True):
+def extract_external_ref_urls(tweet: dict, add_qrt_url: bool = True):
     """
     Extract list of non-internal URLs referenced by this tweet (in the tweet text body).
     In this context, internal URLs are URLs of media items associated with the tweet, such as images or videos.
@@ -56,25 +68,26 @@ def extract_external_ref_urls(tweet, add_qrt_url: bool = True):
             urls += [tweet["qrtURL"]]
 
 
-    external = []
+    external = set()
     for url in urls:
         twitter_id = extract_twitter_status_id(url)
         if twitter_id: # check if a twitter url
             if twitter_id != tweet["tweetID"]: # check if url shares same status id with parsed tweet
-                external.append(url)
+                external.add(url)
         else:
             # not twitter url, add
-            external.append(url)
+            external.add(url)
     
-    return external
 
-def extract_tweet_external_ref_urls(tweet_url):
-    """
-    Extract list of non-internal URLs referenced by the tweet associated with the tweet_url (in the tweet text body).
-    In this context, internal URLs are URLs of media items associated with the tweet, such as images or videos.
-    Internal URLs share the same ID as the referencing tweet.
-    Shortened URLs are expanded to long form.
-    """
-    tweet = scrape_tweet(tweet_url)
-    return extract_external_ref_urls(tweet)
+    return list(external)
+
+# def extract_tweet_external_ref_urls(tweet_url):
+#     """
+#     Extract list of non-internal URLs referenced by the tweet associated with the tweet_url (in the tweet text body).
+#     In this context, internal URLs are URLs of media items associated with the tweet, such as images or videos.
+#     Internal URLs share the same ID as the referencing tweet.
+#     Shortened URLs are expanded to long form.
+#     """
+#     tweet = scrape_tweet(tweet_url)
+#     return extract_external_ref_urls(tweet)
 
