@@ -5,7 +5,7 @@ import re
 from urllib.parse import urlparse
 
 from ...schema.post import RefPost
-from ...utils import convert_html_to_plain_text, extract_and_expand_urls
+from ...utils import convert_html_to_plain_text, extract_and_expand_urls, normalize_url
 
 
 def extract_external_masto_ref_urls(post: RefPost, add_qrt_url: bool = True):
@@ -19,6 +19,9 @@ def extract_external_masto_ref_urls(post: RefPost, add_qrt_url: bool = True):
     if post["card"]:
         if post["card"]["url"]:
             urls += [post["card"]["url"]]
+
+    # normalize urls
+    urls = [normalize_url(u) for u in urls]
 
     # remove dups
     urls = list(set(urls))
@@ -40,6 +43,39 @@ def extract_instance_and_status(url):
     else:
         return None, None
 
+
+def convert_post_json_to_ref_post(post_json: dict) -> RefPost:
+    """_summary_
+
+    Args:
+        post_json (dict): _description_
+
+    Returns:
+        RefPost: _description_
+    """
+    author = post_json["account"]["display_name"]
+
+    # convert post content html to plaintext
+    text = convert_html_to_plain_text(post_json["content"])
+    post_json["plain_content"] = text
+    url = post_json["url"]
+    
+    # extract external reference urls from post
+    ext_ref_urls = extract_external_masto_ref_urls(post_json)
+
+    
+
+    post = RefPost(author=author,
+                content=text,
+                url=url,
+                source_network="mastodon",
+                metadata=post_json,
+                ref_urls=ext_ref_urls)
+
+
+
+    return post
+
 # based on chat gpt
 def get_mastodon_post_by_instance(instance_url, status_id, access_token=None) -> RefPost:
     """
@@ -60,28 +96,7 @@ def get_mastodon_post_by_instance(instance_url, status_id, access_token=None) ->
 
     if response.status_code == 200:
         raw_post = response.json()
-
-        # convert post html to plaintext
-        raw_post["plain_content"] = convert_html_to_plain_text(raw_post["content"])
-        raw_post["post_text"] = raw_post["plain_content"]
-
-        author = raw_post["account"]["display_name"]
-        text = raw_post["plain_content"]
-        url = raw_post["url"]
-        
-
-        # extract external reference urls from post
-        ext_ref_urls = extract_external_masto_ref_urls(raw_post)
-
-        post = RefPost(author=author,
-                    content=text,
-                    url=url,
-                    source_network="mastodon",
-                    metadata=raw_post,
-                    ref_urls=ext_ref_urls)
-
-
-
+        post = convert_post_json_to_ref_post(raw_post)
         return post
     else:
         print(f"Failed to get Mastodon post. Status code: {response.status_code}")

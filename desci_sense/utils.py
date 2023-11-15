@@ -2,6 +2,7 @@ import re
 import requests
 import html2text
 from urllib.parse import urlparse
+from url_normalize import url_normalize
 
 # based on ChatGPT and https://stackoverflow.com/a/6041965
 def extract_urls(text):
@@ -13,6 +14,20 @@ def extract_urls(text):
     final_res = [r[0] for r in res]
     return final_res
 
+def normalize_url(url):
+    """
+    Process url to convert it to canonical format.
+
+    Includes:
+    - URL unshortening
+    -Normalization (using https://pypi.org/project/url-normalize/)
+
+
+    """
+    res = unshorten_url(url)
+    res = url_normalize(res)
+
+    return res
 
 def unshorten_url(url):
     try:
@@ -30,7 +45,7 @@ def extract_and_expand_urls(text):
         text (_type_): _description_
     """
 
-    expanded_urls = [unshorten_url(url) for url in extract_urls(text)]
+    expanded_urls = [normalize_url(url) for url in extract_urls(text)]
     return expanded_urls
         
 

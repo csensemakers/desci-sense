@@ -6,3 +6,5 @@ wandb
 confection
 shortuuid
 html2text
+Mastodon.py
+url_normalize

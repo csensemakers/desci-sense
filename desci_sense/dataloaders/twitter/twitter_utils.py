@@ -6,7 +6,7 @@ import re
 import requests
 
 from ...schema.post import RefPost
-from ...utils import extract_and_expand_urls, extract_twitter_status_id
+from ...utils import extract_and_expand_urls, extract_twitter_status_id, normalize_url
 
 def do_work(data: dict) -> None:
     # do actual work with data
@@ -67,6 +67,8 @@ def extract_external_ref_urls(tweet: dict, add_qrt_url: bool = True):
         if tweet["qrtURL"]:
             urls += [tweet["qrtURL"]]
 
+    # normalize urls
+    urls = [normalize_url(u) for u in urls]
 
     external = set()
     for url in urls:
