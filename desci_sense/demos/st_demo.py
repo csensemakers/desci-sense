@@ -93,15 +93,6 @@ def init_model():
 
 
 
-# def print_tweet(tweet):
-#     st.divider()
-#     section_title = "### 🐦 Extracted Tweet"
-#     author = "👤 **Author:** :gray[{}]".format(tweet["user_name"])
-#     tweet_text = "📝 **Tweet text:** :gray[{}]".format(tweet["text"])
-#     tweet_url = "🔗 **Tweet URL:** `{}`".format(tweet["tweetURL"])
-#     st.markdown(f"{section_title} \n {author} \n\n  {tweet_text} \n\n  {tweet_url}")
-#     st.divider()
-
 def print_post(post: RefPost):
 
     sm_type = post.source_network
@@ -211,7 +202,7 @@ if __name__ == "__main__":
     
     st.markdown("Sample Mastodon URL for ✂️📋:")
     st.code('''
-                https://mastodon.social/@lawrence@kopiti.am/111135373474343453
+                https://mastodon.social/@wchr/111370111389014969
                  ''',language='markdown')  
     
     post_url = st.text_input("Enter Twitter/Mastodon post URL:", "")
