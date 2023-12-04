@@ -26,6 +26,8 @@ Code is being developed on Ubuntu 22.04 with Python 3.11
     
     ```
     
+    (you may need to close and re-open your terminal for changes to take effect)
+    
 
 ## Streamlit Demo
 
