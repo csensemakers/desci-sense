@@ -43,24 +43,23 @@ def get_artifacts_from_proj(wandb_api, project_name: str):
 def load_data_from_artifacts(artifacts):
     # load predictions data from artifacts and return joined data as DataFrame
     rows = []
-    cols = None
+
     for artifact in tqdm(artifacts, total=len(artifacts)):
         a_path = artifact.download()
         table_path = Path(f"{a_path}/predictions.table.json")
         raw_data = json.load(table_path.open())
-        if not cols:
-            cols = raw_data["columns"]
-        else:
-            assert cols == raw_data["columns"]
 
-        # add wandb name to identify each artifact    
-        row = raw_data["data"][0] + [artifact.name]
-        rows += [row]
+        # create dict of key (col) value (row) pairs
+        # note that these might differ across runs if we changed the logging code! 
+        # https://github.com/csensemakers/desci-sense/issues/41
+        row_d = dict(zip(raw_data["columns"], raw_data["data"][0]))
+        
+        # add wandb name to identify each artifact   
+        row_d["wandb name"] = artifact.name
 
-    # add column for wandb name
-    cols += ["wandb name"]
+        rows.append(row_d)
 
-    df = pd.DataFrame(data=rows, columns=cols)
+    df = pd.DataFrame(rows)
 
     return df
 
