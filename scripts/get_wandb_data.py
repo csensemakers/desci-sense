@@ -1,7 +1,7 @@
 """Script to download and process the data stored on wandb by the streamlit Nanopubbot app.
 
 Usage:
-  get_wandb_data.py [--projects=<projects> --outpath=<outpath>]
+  get_wandb_data.py [--projects=<projects> --outpath=<outpath>] [--log_wandb]
   get_wandb_data.py (-h | --help)
 
 
@@ -9,10 +9,12 @@ Options:
   -h --help     Show this screen.
   --projects=<projects>  wandb projects to save data from, seperated by commas [default: st_demo-v0.2].
   --outpath=<outpath>  path to file to save data to [default: etc/data/st_data.csv].
+  --log_wandb  Log collected data to wandb.
 
 """
 
 from pathlib import Path
+from typing import List
 import json
 from docopt import docopt
 import pandas as pd
@@ -63,9 +65,27 @@ def load_data_from_artifacts(artifacts):
 
     return df
 
+def log_aggregate_table(df: pd.DataFrame, projects: List[str]):
+    """ log table to wandb """
+    wandb_run = wandb.init(job_type="dataset",project="data_aggregation", 
+                                       entity="common-sense-makers")
+    artifact_name = "agg_data-" + "_".join(projects)
+
+    cols = list(df.columns)
+    data = [list(row) for i, row in df.iterrows()]
+    table = wandb.Table(columns=cols, data=data)
+    wandb_run.log({artifact_name: table})
+    wandb_run.finish()
+
+
+
+    
+
 if __name__ == "__main__":
 
     arguments = docopt(__doc__, version='Wandb Collector 0.1')
+    
+    log_wandb = arguments.get('--log_wandb')
 
     projects_string = arguments.get('--projects')
     projects_list = parse_projects(projects_string)
@@ -87,6 +107,10 @@ if __name__ == "__main__":
     
     print("Saving output...")
     df.to_csv(str(out_path))
+    
+    if log_wandb:
+        print("Logging table to wandb...")
+        log_aggregate_table(df, projects_list)
     
     print("Done!")
 
