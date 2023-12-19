@@ -253,10 +253,10 @@ if __name__ == "__main__":
 
             if log_check:
                 # log results to wandb DB
-                """with st.spinner("Logging result..."):
+                with st.spinner("Logging result..."):
                     wandb_run = init_wandb_run(model.config)
                     log_pred_wandb(wandb_run, result, manual_label, labeler_name)
-                    wandb_run.finish()"""
+                    wandb_run.finish()
                 #print(post.dict()), .update({"_id":post.metadata.sourcenetwoork+post.metadata.id}))
                 if post.source_network == "mastodon":
                     
