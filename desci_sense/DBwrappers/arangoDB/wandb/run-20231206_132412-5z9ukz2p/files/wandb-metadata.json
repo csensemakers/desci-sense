@@ -1,0 +1,37 @@
+{
+    "os": "macOS-12.6.3-arm64-arm-64bit",
+    "python": "3.11.2",
+    "heartbeatAt": "2023-12-06T18:24:13.614799",
+    "startedAt": "2023-12-06T18:24:12.982727",
+    "docker": null,
+    "cuda": null,
+    "args": [],
+    "state": "running",
+    "program": "/Users/shaharorielkagan/Documents/Python/desci-sense/desci_sense/demos/st_demo.py",
+    "codePathLocal": null,
+    "codePath": "desci_sense/demos/st_demo.py",
+    "git": {
+        "remote": "https://github.com/csensemakers/desci-sense",
+        "commit": "183a0eb213b7f0d524f8071dd69a7b990b20a072"
+    },
+    "email": "shahar.r.oriel@gmail.com",
+    "root": "/Users/shaharorielkagan/Documents/Python/desci-sense",
+    "host": "shahars-MacBook-Air-2.local",
+    "username": "shaharorielkagan",
+    "executable": "/Library/Frameworks/Python.framework/Versions/3.11/bin/python3.11",
+    "cpu_count": 8,
+    "cpu_count_logical": 8,
+    "disk": {
+        "/": {
+            "total": 228.27386474609375,
+            "used": 21.768470764160156
+        }
+    },
+    "gpuapple": {
+        "type": "arm",
+        "vendor": "Apple"
+    },
+    "memory": {
+        "total": 8.0
+    }
+}

@@ -7,15 +7,19 @@ sys.path.append(str(Path(__file__).parents[2]))
 import streamlit as st
 import wandb
 import shortuuid
-
+print(sys.path)
 from desci_sense.schema.post import RefPost
 from desci_sense.parsers.base_parser import BaseParser
 from desci_sense.dataloaders.twitter.twitter_utils import scrape_tweet
 from desci_sense.dataloaders.mastodon.mastodon_utils import scrape_mastodon_post
 from desci_sense.configs import ST_OPENROUTER_REFERRER, init_config
 from desci_sense.utils import identify_social_media
+from desci_sense.DBwrappers.arangoDB.arango import ArangoDB
+from dotenv import load_dotenv
 
 
+# Load environment variables from .env file
+load_dotenv()
 
 
 # if fail to get from environment config, default to streamlit referrer
@@ -254,6 +258,17 @@ if __name__ == "__main__":
                     wandb_run = init_wandb_run(model.config)
                     log_pred_wandb(wandb_run, result, manual_label, labeler_name)
                     wandb_run.finish()
+                #print(post.dict()), .update({"_id":post.metadata.sourcenetwoork+post.metadata.id}))
+                if post.source_network == "mastodon":
+                    
+                    doc = post.dict()
+
+                    doc["_key"] = str("mastodon"+post.metadata["id"])
+
+                    try:
+                        ArangoDB().insert(doc)
+                    except: 
+                        print("post id conflict")
 
     st.divider()
     st.markdown('''💻 Code repo: https://github.com/csensemakers/desci-sense''')
