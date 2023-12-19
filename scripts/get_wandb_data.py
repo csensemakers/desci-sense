@@ -1,7 +1,7 @@
 """Script to download and process the data stored on wandb by the streamlit Nanopubbot app.
 
 Usage:
-  get_wandb_data.py [--projects=<projects> --outpath=<outpath>]
+  get_wandb_data.py [--projects=<projects> --outpath=<outpath>] [--log_wandb]
   get_wandb_data.py (-h | --help)
 
 
@@ -9,10 +9,12 @@ Options:
   -h --help     Show this screen.
   --projects=<projects>  wandb projects to save data from, seperated by commas [default: st_demo-v0.2].
   --outpath=<outpath>  path to file to save data to [default: etc/data/st_data.csv].
+  --log_wandb  Log collected data to wandb.
 
 """
 
 from pathlib import Path
+from typing import List
 import json
 from docopt import docopt
 import pandas as pd
@@ -43,30 +45,47 @@ def get_artifacts_from_proj(wandb_api, project_name: str):
 def load_data_from_artifacts(artifacts):
     # load predictions data from artifacts and return joined data as DataFrame
     rows = []
-    cols = None
+
     for artifact in tqdm(artifacts, total=len(artifacts)):
         a_path = artifact.download()
         table_path = Path(f"{a_path}/predictions.table.json")
         raw_data = json.load(table_path.open())
-        if not cols:
-            cols = raw_data["columns"]
-        else:
-            assert cols == raw_data["columns"]
 
-        # add wandb name to identify each artifact    
-        row = raw_data["data"][0] + [artifact.name]
-        rows += [row]
+        # create dict of key (col) value (row) pairs
+        # note that these might differ across runs if we changed the logging code! 
+        # https://github.com/csensemakers/desci-sense/issues/41
+        row_d = dict(zip(raw_data["columns"], raw_data["data"][0]))
+        
+        # add wandb name to identify each artifact   
+        row_d["wandb name"] = artifact.name
 
-    # add column for wandb name
-    cols += ["wandb name"]
+        rows.append(row_d)
 
-    df = pd.DataFrame(data=rows, columns=cols)
+    df = pd.DataFrame(rows)
 
     return df
+
+def log_aggregate_table(df: pd.DataFrame, projects: List[str]):
+    """ log table to wandb """
+    wandb_run = wandb.init(job_type="dataset",project="data_aggregation", 
+                                       entity="common-sense-makers")
+    artifact_name = "agg_data-" + "_".join(projects)
+
+    cols = list(df.columns)
+    data = [list(row) for i, row in df.iterrows()]
+    table = wandb.Table(columns=cols, data=data)
+    wandb_run.log({artifact_name: table})
+    wandb_run.finish()
+
+
+
+    
 
 if __name__ == "__main__":
 
     arguments = docopt(__doc__, version='Wandb Collector 0.1')
+    
+    log_wandb = arguments.get('--log_wandb')
 
     projects_string = arguments.get('--projects')
     projects_list = parse_projects(projects_string)
@@ -88,6 +107,10 @@ if __name__ == "__main__":
     
     print("Saving output...")
     df.to_csv(str(out_path))
+    
+    if log_wandb:
+        print("Logging table to wandb...")
+        log_aggregate_table(df, projects_list)
     
     print("Done!")
 

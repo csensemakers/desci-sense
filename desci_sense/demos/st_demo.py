@@ -88,7 +88,8 @@ def init_model():
 
     # get config file
     config = init_config(template_path="desci_sense/prompting/templates/p4.txt",
-                         wandb_project="st_demo-v0.2")
+                         wandb_project="st_demo-v0.2",
+                         model_name="fireworks/mixtral-8x7b-fw-chat")
 
     # create model
     tweet_parser = BaseParser(config=config, api_key=api_key, openapi_referer=openrouter_referrer)
@@ -206,7 +207,7 @@ if __name__ == "__main__":
     
     st.markdown("Sample Mastodon URL for ✂️📋:")
     st.code('''
-                https://mastodon.social/@wchr/111370111389014969
+                https://mastodon.social/@yoginho@spore.social/111335863558977253
                  ''',language='markdown')  
     
     post_url = st.text_input("Enter Twitter/Mastodon post URL:", "")
