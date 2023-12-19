@@ -1,0 +1,44 @@
+wandb_version: 1
+
+model:
+  desc: null
+  value:
+    model_name: mistralai/mistral-7b-instruct
+    temperature: 0.6
+prompt:
+  desc: null
+  value:
+    template_path: desci_sense/prompting/templates/p4.txt
+wandb:
+  desc: null
+  value:
+    wand_entity: common-sense-makers
+    project: st_demo-v0.2
+    wandb_db_name: test-DB
+_wandb:
+  desc: null
+  value:
+    python_version: 3.11.2
+    cli_version: 0.16.0
+    is_jupyter_run: false
+    is_kaggle_kernel: false
+    start_time: 1701887351.738131
+    t:
+      1:
+      - 55
+      - 86
+      - 95
+      2:
+      - 55
+      - 86
+      - 95
+      3:
+      - 2
+      - 16
+      - 23
+      4: 3.11.2
+      5: 0.16.0
+      8:
+      - 4
+      - 5
+      13: darwin-arm64

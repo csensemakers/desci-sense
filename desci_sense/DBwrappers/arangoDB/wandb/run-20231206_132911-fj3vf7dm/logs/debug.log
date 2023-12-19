@@ -1,0 +1,35 @@
+2023-12-06 13:29:11,730 INFO    ScriptRunner.scriptThread:56379 [wandb_setup.py:_flush():76] Current SDK version is 0.16.0
+2023-12-06 13:29:11,731 INFO    ScriptRunner.scriptThread:56379 [wandb_setup.py:_flush():76] Configure stats pid to 56379
+2023-12-06 13:29:11,731 INFO    ScriptRunner.scriptThread:56379 [wandb_setup.py:_flush():76] Loading settings from /Users/shaharorielkagan/.config/wandb/settings
+2023-12-06 13:29:11,731 INFO    ScriptRunner.scriptThread:56379 [wandb_setup.py:_flush():76] Loading settings from /Users/shaharorielkagan/Documents/Python/desci-sense/desci_sense/dataloaders/arangoDB/wandb/settings
+2023-12-06 13:29:11,731 INFO    ScriptRunner.scriptThread:56379 [wandb_setup.py:_flush():76] Loading settings from environment variables: {'api_key': '***REDACTED***'}
+2023-12-06 13:29:11,731 INFO    ScriptRunner.scriptThread:56379 [wandb_setup.py:_flush():76] Inferring run settings from compute environment: {'program_relpath': 'desci_sense/demos/st_demo.py', 'program_abspath': '/Users/shaharorielkagan/Documents/Python/desci-sense/desci_sense/demos/st_demo.py', 'program': '/Users/shaharorielkagan/Documents/Python/desci-sense/desci_sense/demos/st_demo.py'}
+2023-12-06 13:29:11,731 INFO    ScriptRunner.scriptThread:56379 [wandb_setup.py:_flush():76] Applying login settings: {'api_key': '***REDACTED***'}
+2023-12-06 13:29:11,731 INFO    ScriptRunner.scriptThread:56379 [wandb_setup.py:_flush():76] Applying login settings: {'api_key': '***REDACTED***'}
+2023-12-06 13:29:11,731 INFO    ScriptRunner.scriptThread:56379 [wandb_init.py:_log_setup():524] Logging user logs to /Users/shaharorielkagan/Documents/Python/desci-sense/desci_sense/dataloaders/arangoDB/wandb/run-20231206_132911-fj3vf7dm/logs/debug.log
+2023-12-06 13:29:11,731 INFO    ScriptRunner.scriptThread:56379 [wandb_init.py:_log_setup():525] Logging internal logs to /Users/shaharorielkagan/Documents/Python/desci-sense/desci_sense/dataloaders/arangoDB/wandb/run-20231206_132911-fj3vf7dm/logs/debug-internal.log
+2023-12-06 13:29:11,731 INFO    ScriptRunner.scriptThread:56379 [wandb_init.py:init():564] calling init triggers
+2023-12-06 13:29:11,731 INFO    ScriptRunner.scriptThread:56379 [wandb_init.py:init():571] wandb.init called with sweep_config: {}
+config: {'model': {'model_name': 'mistralai/mistral-7b-instruct', 'temperature': 0.6}, 'prompt': {'template_path': 'desci_sense/prompting/templates/p4.txt'}, 'wandb': {'wand_entity': 'common-sense-makers', 'project': 'st_demo-v0.2', 'wandb_db_name': 'test-DB'}}
+2023-12-06 13:29:11,731 INFO    ScriptRunner.scriptThread:56379 [wandb_init.py:init():614] starting backend
+2023-12-06 13:29:11,731 INFO    ScriptRunner.scriptThread:56379 [wandb_init.py:init():618] setting up manager
+2023-12-06 13:29:11,736 INFO    ScriptRunner.scriptThread:56379 [backend.py:_multiprocessing_setup():105] multiprocessing start_methods=spawn,fork,forkserver, using: spawn
+2023-12-06 13:29:11,737 INFO    ScriptRunner.scriptThread:56379 [wandb_init.py:init():624] backend started and connected
+2023-12-06 13:29:11,751 INFO    ScriptRunner.scriptThread:56379 [wandb_init.py:init():716] updated telemetry
+2023-12-06 13:29:11,782 INFO    ScriptRunner.scriptThread:56379 [wandb_init.py:init():749] communicating run to backend with 90.0 second timeout
+2023-12-06 13:29:12,176 INFO    ScriptRunner.scriptThread:56379 [wandb_run.py:_on_init():2254] communicating current version
+2023-12-06 13:29:12,300 INFO    ScriptRunner.scriptThread:56379 [wandb_run.py:_on_init():2263] got version response upgrade_message: "wandb version 0.16.1 is available!  To upgrade, please run:\n $ pip install wandb --upgrade"
+
+2023-12-06 13:29:12,300 INFO    ScriptRunner.scriptThread:56379 [wandb_init.py:init():800] starting run threads in backend
+2023-12-06 13:29:12,346 INFO    ScriptRunner.scriptThread:56379 [wandb_run.py:_console_start():2233] atexit reg
+2023-12-06 13:29:12,347 INFO    ScriptRunner.scriptThread:56379 [wandb_run.py:_redirect():2088] redirect: wrap_raw
+2023-12-06 13:29:12,347 INFO    ScriptRunner.scriptThread:56379 [wandb_run.py:_redirect():2153] Wrapping output streams.
+2023-12-06 13:29:12,347 INFO    ScriptRunner.scriptThread:56379 [wandb_run.py:_redirect():2178] Redirects installed.
+2023-12-06 13:29:12,348 INFO    ScriptRunner.scriptThread:56379 [wandb_init.py:init():841] run started, returning control to user process
+2023-12-06 13:29:12,496 INFO    ScriptRunner.scriptThread:56379 [wandb_run.py:_finish():1962] finishing run common-sense-makers/st_demo-v0.2/fj3vf7dm
+2023-12-06 13:29:12,496 INFO    ScriptRunner.scriptThread:56379 [wandb_run.py:_atexit_cleanup():2202] got exitcode: 0
+2023-12-06 13:29:12,496 INFO    ScriptRunner.scriptThread:56379 [wandb_run.py:_restore():2185] restore
+2023-12-06 13:29:12,496 INFO    ScriptRunner.scriptThread:56379 [wandb_run.py:_restore():2191] restore done
+2023-12-06 13:29:16,938 INFO    ScriptRunner.scriptThread:56379 [wandb_run.py:_footer_history_summary_info():3760] rendering history
+2023-12-06 13:29:16,938 INFO    ScriptRunner.scriptThread:56379 [wandb_run.py:_footer_history_summary_info():3792] rendering summary
+2023-12-06 13:29:16,944 INFO    ScriptRunner.scriptThread:56379 [wandb_run.py:_footer_sync_info():3719] logging synced files

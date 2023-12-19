@@ -1,0 +1,182 @@
+2023-12-06 13:24:12,994 INFO    StreamThr :56425 [internal.py:wandb_internal():86] W&B internal server running at pid: 56425, started at: 2023-12-06 13:24:12.993774
+2023-12-06 13:24:12,995 DEBUG   HandlerThread:56425 [handler.py:handle_request():146] handle_request: status
+2023-12-06 13:24:13,001 INFO    WriterThread:56425 [datastore.py:open_for_write():85] open: /Users/shaharorielkagan/Documents/Python/desci-sense/desci_sense/dataloaders/arangoDB/wandb/run-20231206_132412-5z9ukz2p/run-5z9ukz2p.wandb
+2023-12-06 13:24:13,002 DEBUG   SenderThread:56425 [sender.py:send():380] send: header
+2023-12-06 13:24:13,020 DEBUG   SenderThread:56425 [sender.py:send():380] send: run
+2023-12-06 13:24:13,422 INFO    SenderThread:56425 [dir_watcher.py:__init__():211] watching files in: /Users/shaharorielkagan/Documents/Python/desci-sense/desci_sense/dataloaders/arangoDB/wandb/run-20231206_132412-5z9ukz2p/files
+2023-12-06 13:24:13,422 INFO    SenderThread:56425 [sender.py:_start_run_threads():1124] run started: 5z9ukz2p with start time 1701887052.995177
+2023-12-06 13:24:13,434 DEBUG   HandlerThread:56425 [handler.py:handle_request():146] handle_request: check_version
+2023-12-06 13:24:13,434 DEBUG   SenderThread:56425 [sender.py:send_request():407] send_request: check_version
+2023-12-06 13:24:13,598 DEBUG   HandlerThread:56425 [handler.py:handle_request():146] handle_request: run_start
+2023-12-06 13:24:13,611 DEBUG   HandlerThread:56425 [system_info.py:__init__():32] System info init
+2023-12-06 13:24:13,611 DEBUG   HandlerThread:56425 [system_info.py:__init__():47] System info init done
+2023-12-06 13:24:13,611 INFO    HandlerThread:56425 [system_monitor.py:start():194] Starting system monitor
+2023-12-06 13:24:13,611 INFO    SystemMonitor:56425 [system_monitor.py:_start():158] Starting system asset monitoring threads
+2023-12-06 13:24:13,611 INFO    HandlerThread:56425 [system_monitor.py:probe():214] Collecting system info
+2023-12-06 13:24:13,612 INFO    SystemMonitor:56425 [interfaces.py:start():190] Started cpu monitoring
+2023-12-06 13:24:13,612 INFO    SystemMonitor:56425 [interfaces.py:start():190] Started disk monitoring
+2023-12-06 13:24:13,613 DEBUG   HandlerThread:56425 [system_info.py:probe():196] Probing system
+2023-12-06 13:24:13,614 INFO    SystemMonitor:56425 [interfaces.py:start():190] Started gpuapple monitoring
+2023-12-06 13:24:13,616 INFO    SystemMonitor:56425 [interfaces.py:start():190] Started memory monitoring
+2023-12-06 13:24:13,618 INFO    SystemMonitor:56425 [interfaces.py:start():190] Started network monitoring
+2023-12-06 13:24:13,632 DEBUG   HandlerThread:56425 [system_info.py:_probe_git():181] Probing git
+2023-12-06 13:24:13,660 DEBUG   HandlerThread:56425 [system_info.py:_probe_git():189] Probing git done
+2023-12-06 13:24:13,660 DEBUG   HandlerThread:56425 [system_info.py:probe():244] Probing system done
+2023-12-06 13:24:13,660 DEBUG   HandlerThread:56425 [system_monitor.py:probe():223] {'os': 'macOS-12.6.3-arm64-arm-64bit', 'python': '3.11.2', 'heartbeatAt': '2023-12-06T18:24:13.614799', 'startedAt': '2023-12-06T18:24:12.982727', 'docker': None, 'cuda': None, 'args': (), 'state': 'running', 'program': '/Users/shaharorielkagan/Documents/Python/desci-sense/desci_sense/demos/st_demo.py', 'codePathLocal': None, 'codePath': 'desci_sense/demos/st_demo.py', 'git': {'remote': 'https://github.com/csensemakers/desci-sense', 'commit': '183a0eb213b7f0d524f8071dd69a7b990b20a072'}, 'email': 'shahar.r.oriel@gmail.com', 'root': '/Users/shaharorielkagan/Documents/Python/desci-sense', 'host': 'shahars-MacBook-Air-2.local', 'username': 'shaharorielkagan', 'executable': '/Library/Frameworks/Python.framework/Versions/3.11/bin/python3.11', 'cpu_count': 8, 'cpu_count_logical': 8, 'disk': {'/': {'total': 228.27386474609375, 'used': 21.768470764160156}}, 'gpuapple': {'type': 'arm', 'vendor': 'Apple'}, 'memory': {'total': 8.0}}
+2023-12-06 13:24:13,660 INFO    HandlerThread:56425 [system_monitor.py:probe():224] Finished collecting system info
+2023-12-06 13:24:13,660 INFO    HandlerThread:56425 [system_monitor.py:probe():227] Publishing system info
+2023-12-06 13:24:13,660 DEBUG   HandlerThread:56425 [system_info.py:_save_pip():52] Saving list of pip packages installed into the current environment
+2023-12-06 13:24:13,660 DEBUG   HandlerThread:56425 [system_info.py:_save_pip():68] Saving pip packages done
+2023-12-06 13:24:13,661 INFO    HandlerThread:56425 [system_monitor.py:probe():229] Finished publishing system info
+2023-12-06 13:24:13,663 DEBUG   SenderThread:56425 [sender.py:send():380] send: files
+2023-12-06 13:24:13,663 INFO    SenderThread:56425 [sender.py:_save_file():1380] saving file wandb-metadata.json with policy now
+2023-12-06 13:24:13,667 DEBUG   HandlerThread:56425 [handler.py:handle_request():146] handle_request: stop_status
+2023-12-06 13:24:13,667 DEBUG   HandlerThread:56425 [handler.py:handle_request():146] handle_request: internal_messages
+2023-12-06 13:24:13,668 DEBUG   SenderThread:56425 [sender.py:send_request():407] send_request: stop_status
+2023-12-06 13:24:13,824 DEBUG   HandlerThread:56425 [handler.py:handle_request():146] handle_request: log_artifact
+2023-12-06 13:24:13,841 DEBUG   SenderThread:56425 [sender.py:send():380] send: telemetry
+2023-12-06 13:24:13,841 DEBUG   SenderThread:56425 [sender.py:send_request():407] send_request: log_artifact
+2023-12-06 13:24:14,099 INFO    wandb-upload_0:56425 [upload_job.py:push():131] Uploaded file /var/folders/j3/1_zy_b4s2517g8j_rjjdhd4h0000gn/T/tmp0n06c_sdwandb/q8uiv05t-wandb-metadata.json
+2023-12-06 13:24:14,424 INFO    Thread-12 :56425 [dir_watcher.py:_on_file_created():271] file/dir created: /Users/shaharorielkagan/Documents/Python/desci-sense/desci_sense/dataloaders/arangoDB/wandb/run-20231206_132412-5z9ukz2p/files/wandb-metadata.json
+2023-12-06 13:24:14,424 INFO    Thread-12 :56425 [dir_watcher.py:_on_file_created():271] file/dir created: /Users/shaharorielkagan/Documents/Python/desci-sense/desci_sense/dataloaders/arangoDB/wandb/run-20231206_132412-5z9ukz2p/files/requirements.txt
+2023-12-06 13:24:14,593 INFO    wandb-upload_0:56425 [upload_job.py:push():89] Uploaded file /Users/shaharorielkagan/Library/Application Support/wandb/artifacts/staging/tmpm0p163_x
+2023-12-06 13:24:14,833 DEBUG   HandlerThread:56425 [handler.py:handle_request():146] handle_request: poll_exit
+2023-12-06 13:24:15,111 INFO    SenderThread:56425 [sender.py:send_request_log_artifact():1446] logged artifact pred_5z9ukz2p_gSs2vEfT - {'id': 'QXJ0aWZhY3Q6NjU5Mzc3ODIw', 'state': 'PENDING', 'artifactSequence': {'id': 'QXJ0aWZhY3RDb2xsZWN0aW9uOjEyMTQxNzYzMQ==', 'latestArtifact': None}}
+2023-12-06 13:24:15,111 DEBUG   SenderThread:56425 [sender.py:send():380] send: telemetry
+2023-12-06 13:24:15,112 DEBUG   SenderThread:56425 [sender.py:send():380] send: exit
+2023-12-06 13:24:15,112 INFO    SenderThread:56425 [sender.py:send_exit():585] handling exit code: 0
+2023-12-06 13:24:15,112 INFO    SenderThread:56425 [sender.py:send_exit():587] handling runtime: 0
+2023-12-06 13:24:15,113 INFO    SenderThread:56425 [sender.py:_save_file():1380] saving file wandb-summary.json with policy end
+2023-12-06 13:24:15,113 INFO    SenderThread:56425 [sender.py:send_exit():593] send defer
+2023-12-06 13:24:15,113 DEBUG   SenderThread:56425 [sender.py:send_request():407] send_request: poll_exit
+2023-12-06 13:24:15,113 DEBUG   HandlerThread:56425 [handler.py:handle_request():146] handle_request: defer
+2023-12-06 13:24:15,114 INFO    HandlerThread:56425 [handler.py:handle_request_defer():172] handle defer: 0
+2023-12-06 13:24:15,114 DEBUG   SenderThread:56425 [sender.py:send_request():407] send_request: defer
+2023-12-06 13:24:15,114 INFO    SenderThread:56425 [sender.py:send_request_defer():609] handle sender defer: 0
+2023-12-06 13:24:15,114 INFO    SenderThread:56425 [sender.py:transition_state():613] send defer: 1
+2023-12-06 13:24:15,114 DEBUG   HandlerThread:56425 [handler.py:handle_request():146] handle_request: defer
+2023-12-06 13:24:15,114 INFO    HandlerThread:56425 [handler.py:handle_request_defer():172] handle defer: 1
+2023-12-06 13:24:15,114 DEBUG   SenderThread:56425 [sender.py:send_request():407] send_request: defer
+2023-12-06 13:24:15,115 INFO    SenderThread:56425 [sender.py:send_request_defer():609] handle sender defer: 1
+2023-12-06 13:24:15,115 INFO    SenderThread:56425 [sender.py:transition_state():613] send defer: 2
+2023-12-06 13:24:15,115 DEBUG   HandlerThread:56425 [handler.py:handle_request():146] handle_request: defer
+2023-12-06 13:24:15,115 INFO    HandlerThread:56425 [handler.py:handle_request_defer():172] handle defer: 2
+2023-12-06 13:24:15,115 INFO    HandlerThread:56425 [system_monitor.py:finish():203] Stopping system monitor
+2023-12-06 13:24:15,116 DEBUG   SystemMonitor:56425 [system_monitor.py:_start():172] Starting system metrics aggregation loop
+2023-12-06 13:24:15,116 INFO    HandlerThread:56425 [interfaces.py:finish():202] Joined cpu monitor
+2023-12-06 13:24:15,116 DEBUG   SystemMonitor:56425 [system_monitor.py:_start():179] Finished system metrics aggregation loop
+2023-12-06 13:24:15,116 INFO    HandlerThread:56425 [interfaces.py:finish():202] Joined disk monitor
+2023-12-06 13:24:15,116 DEBUG   SystemMonitor:56425 [system_monitor.py:_start():183] Publishing last batch of metrics
+2023-12-06 13:24:15,116 INFO    HandlerThread:56425 [interfaces.py:finish():202] Joined gpuapple monitor
+2023-12-06 13:24:15,117 INFO    HandlerThread:56425 [interfaces.py:finish():202] Joined memory monitor
+2023-12-06 13:24:15,117 INFO    HandlerThread:56425 [interfaces.py:finish():202] Joined network monitor
+2023-12-06 13:24:15,117 DEBUG   SenderThread:56425 [sender.py:send_request():407] send_request: defer
+2023-12-06 13:24:15,118 INFO    SenderThread:56425 [sender.py:send_request_defer():609] handle sender defer: 2
+2023-12-06 13:24:15,118 INFO    SenderThread:56425 [sender.py:transition_state():613] send defer: 3
+2023-12-06 13:24:15,118 DEBUG   SenderThread:56425 [sender.py:send():380] send: telemetry
+2023-12-06 13:24:15,118 DEBUG   HandlerThread:56425 [handler.py:handle_request():146] handle_request: defer
+2023-12-06 13:24:15,118 DEBUG   SenderThread:56425 [sender.py:send():380] send: stats
+2023-12-06 13:24:15,118 INFO    HandlerThread:56425 [handler.py:handle_request_defer():172] handle defer: 3
+2023-12-06 13:24:15,118 DEBUG   SenderThread:56425 [sender.py:send_request():407] send_request: defer
+2023-12-06 13:24:15,118 INFO    SenderThread:56425 [sender.py:send_request_defer():609] handle sender defer: 3
+2023-12-06 13:24:15,118 INFO    SenderThread:56425 [sender.py:transition_state():613] send defer: 4
+2023-12-06 13:24:15,118 DEBUG   HandlerThread:56425 [handler.py:handle_request():146] handle_request: defer
+2023-12-06 13:24:15,118 INFO    HandlerThread:56425 [handler.py:handle_request_defer():172] handle defer: 4
+2023-12-06 13:24:15,119 DEBUG   SenderThread:56425 [sender.py:send_request():407] send_request: defer
+2023-12-06 13:24:15,119 INFO    SenderThread:56425 [sender.py:send_request_defer():609] handle sender defer: 4
+2023-12-06 13:24:15,119 INFO    SenderThread:56425 [sender.py:transition_state():613] send defer: 5
+2023-12-06 13:24:15,119 DEBUG   HandlerThread:56425 [handler.py:handle_request():146] handle_request: defer
+2023-12-06 13:24:15,119 INFO    HandlerThread:56425 [handler.py:handle_request_defer():172] handle defer: 5
+2023-12-06 13:24:15,119 DEBUG   SenderThread:56425 [sender.py:send():380] send: summary
+2023-12-06 13:24:15,119 INFO    SenderThread:56425 [sender.py:_save_file():1380] saving file wandb-summary.json with policy end
+2023-12-06 13:24:15,119 DEBUG   SenderThread:56425 [sender.py:send_request():407] send_request: defer
+2023-12-06 13:24:15,119 INFO    SenderThread:56425 [sender.py:send_request_defer():609] handle sender defer: 5
+2023-12-06 13:24:15,120 INFO    SenderThread:56425 [sender.py:transition_state():613] send defer: 6
+2023-12-06 13:24:15,120 DEBUG   HandlerThread:56425 [handler.py:handle_request():146] handle_request: defer
+2023-12-06 13:24:15,120 INFO    HandlerThread:56425 [handler.py:handle_request_defer():172] handle defer: 6
+2023-12-06 13:24:15,120 DEBUG   SenderThread:56425 [sender.py:send_request():407] send_request: defer
+2023-12-06 13:24:15,120 INFO    SenderThread:56425 [sender.py:send_request_defer():609] handle sender defer: 6
+2023-12-06 13:24:15,123 DEBUG   HandlerThread:56425 [handler.py:handle_request():146] handle_request: status_report
+2023-12-06 13:24:15,248 INFO    SenderThread:56425 [sender.py:transition_state():613] send defer: 7
+2023-12-06 13:24:15,248 DEBUG   HandlerThread:56425 [handler.py:handle_request():146] handle_request: defer
+2023-12-06 13:24:15,248 INFO    HandlerThread:56425 [handler.py:handle_request_defer():172] handle defer: 7
+2023-12-06 13:24:15,248 DEBUG   SenderThread:56425 [sender.py:send_request():407] send_request: defer
+2023-12-06 13:24:15,249 INFO    SenderThread:56425 [sender.py:send_request_defer():609] handle sender defer: 7
+2023-12-06 13:24:15,249 INFO    SenderThread:56425 [sender.py:transition_state():613] send defer: 8
+2023-12-06 13:24:15,249 DEBUG   HandlerThread:56425 [handler.py:handle_request():146] handle_request: defer
+2023-12-06 13:24:15,249 INFO    HandlerThread:56425 [handler.py:handle_request_defer():172] handle defer: 8
+2023-12-06 13:24:15,249 DEBUG   SenderThread:56425 [sender.py:send_request():407] send_request: defer
+2023-12-06 13:24:15,249 INFO    SenderThread:56425 [sender.py:send_request_defer():609] handle sender defer: 8
+2023-12-06 13:24:15,249 INFO    SenderThread:56425 [job_builder.py:build():298] Attempting to build job artifact
+2023-12-06 13:24:15,249 INFO    SenderThread:56425 [job_builder.py:_get_source_type():428] is repo sourced job
+2023-12-06 13:24:15,251 INFO    SenderThread:56425 [job_builder.py:build():404] adding wandb-job metadata file
+2023-12-06 13:24:15,254 INFO    SenderThread:56425 [sender.py:transition_state():613] send defer: 9
+2023-12-06 13:24:15,254 DEBUG   HandlerThread:56425 [handler.py:handle_request():146] handle_request: defer
+2023-12-06 13:24:15,254 DEBUG   SenderThread:56425 [sender.py:send():380] send: artifact
+2023-12-06 13:24:15,254 INFO    HandlerThread:56425 [handler.py:handle_request_defer():172] handle defer: 9
+2023-12-06 13:24:15,429 INFO    Thread-12 :56425 [dir_watcher.py:_on_file_modified():288] file/dir modified: /Users/shaharorielkagan/Documents/Python/desci-sense/desci_sense/dataloaders/arangoDB/wandb/run-20231206_132412-5z9ukz2p/files/config.yaml
+2023-12-06 13:24:15,430 INFO    Thread-12 :56425 [dir_watcher.py:_on_file_created():271] file/dir created: /Users/shaharorielkagan/Documents/Python/desci-sense/desci_sense/dataloaders/arangoDB/wandb/run-20231206_132412-5z9ukz2p/files/wandb-summary.json
+2023-12-06 13:24:15,747 INFO    wandb-upload_1:56425 [upload_job.py:push():86] Skipped uploading /Users/shaharorielkagan/Library/Application Support/wandb/artifacts/staging/tmp30jxyo22
+2023-12-06 13:24:15,838 DEBUG   HandlerThread:56425 [handler.py:handle_request():146] handle_request: poll_exit
+2023-12-06 13:24:15,973 INFO    wandb-upload_0:56425 [upload_job.py:push():89] Uploaded file /Users/shaharorielkagan/Library/Application Support/wandb/artifacts/staging/tmpbxp7mnju
+2023-12-06 13:24:16,727 INFO    SenderThread:56425 [sender.py:send_artifact():1458] sent artifact job-https___github.com_csensemakers_desci-sense_desci_sense_demos_st_demo.py - {'id': 'QXJ0aWZhY3Q6NjU5Mzc3ODQ3', 'state': 'PENDING', 'artifactSequence': {'id': 'QXJ0aWZhY3RDb2xsZWN0aW9uOjEyMTIwOTkwNw==', 'latestArtifact': {'id': 'QXJ0aWZhY3Q6NjU4NTU2ODM0', 'versionIndex': 0}}}
+2023-12-06 13:24:16,727 DEBUG   SenderThread:56425 [sender.py:send_request():407] send_request: defer
+2023-12-06 13:24:16,727 INFO    SenderThread:56425 [sender.py:send_request_defer():609] handle sender defer: 9
+2023-12-06 13:24:16,728 INFO    SenderThread:56425 [dir_watcher.py:finish():358] shutting down directory watcher
+2023-12-06 13:24:17,438 INFO    SenderThread:56425 [dir_watcher.py:finish():388] scan: /Users/shaharorielkagan/Documents/Python/desci-sense/desci_sense/dataloaders/arangoDB/wandb/run-20231206_132412-5z9ukz2p/files
+2023-12-06 13:24:17,438 INFO    SenderThread:56425 [dir_watcher.py:finish():402] scan save: /Users/shaharorielkagan/Documents/Python/desci-sense/desci_sense/dataloaders/arangoDB/wandb/run-20231206_132412-5z9ukz2p/files/requirements.txt requirements.txt
+2023-12-06 13:24:17,439 INFO    SenderThread:56425 [dir_watcher.py:finish():402] scan save: /Users/shaharorielkagan/Documents/Python/desci-sense/desci_sense/dataloaders/arangoDB/wandb/run-20231206_132412-5z9ukz2p/files/config.yaml config.yaml
+2023-12-06 13:24:17,442 INFO    SenderThread:56425 [dir_watcher.py:finish():402] scan save: /Users/shaharorielkagan/Documents/Python/desci-sense/desci_sense/dataloaders/arangoDB/wandb/run-20231206_132412-5z9ukz2p/files/wandb-summary.json wandb-summary.json
+2023-12-06 13:24:17,444 INFO    SenderThread:56425 [dir_watcher.py:finish():402] scan save: /Users/shaharorielkagan/Documents/Python/desci-sense/desci_sense/dataloaders/arangoDB/wandb/run-20231206_132412-5z9ukz2p/files/wandb-metadata.json wandb-metadata.json
+2023-12-06 13:24:17,444 INFO    SenderThread:56425 [sender.py:transition_state():613] send defer: 10
+2023-12-06 13:24:17,445 DEBUG   SenderThread:56425 [sender.py:send_request():407] send_request: poll_exit
+2023-12-06 13:24:17,446 DEBUG   HandlerThread:56425 [handler.py:handle_request():146] handle_request: defer
+2023-12-06 13:24:17,447 INFO    HandlerThread:56425 [handler.py:handle_request_defer():172] handle defer: 10
+2023-12-06 13:24:17,448 DEBUG   SenderThread:56425 [sender.py:send_request():407] send_request: defer
+2023-12-06 13:24:17,448 INFO    SenderThread:56425 [sender.py:send_request_defer():609] handle sender defer: 10
+2023-12-06 13:24:17,449 INFO    SenderThread:56425 [file_pusher.py:finish():175] shutting down file pusher
+2023-12-06 13:24:17,680 INFO    wandb-upload_1:56425 [upload_job.py:push():131] Uploaded file /Users/shaharorielkagan/Documents/Python/desci-sense/desci_sense/dataloaders/arangoDB/wandb/run-20231206_132412-5z9ukz2p/files/requirements.txt
+2023-12-06 13:24:17,747 INFO    wandb-upload_0:56425 [upload_job.py:push():131] Uploaded file /Users/shaharorielkagan/Documents/Python/desci-sense/desci_sense/dataloaders/arangoDB/wandb/run-20231206_132412-5z9ukz2p/files/config.yaml
+2023-12-06 13:24:17,803 INFO    wandb-upload_2:56425 [upload_job.py:push():131] Uploaded file /Users/shaharorielkagan/Documents/Python/desci-sense/desci_sense/dataloaders/arangoDB/wandb/run-20231206_132412-5z9ukz2p/files/wandb-summary.json
+2023-12-06 13:24:17,849 DEBUG   HandlerThread:56425 [handler.py:handle_request():146] handle_request: poll_exit
+2023-12-06 13:24:17,850 DEBUG   SenderThread:56425 [sender.py:send_request():407] send_request: poll_exit
+2023-12-06 13:24:18,008 INFO    Thread-11 (_thread_body):56425 [sender.py:transition_state():613] send defer: 11
+2023-12-06 13:24:18,009 DEBUG   HandlerThread:56425 [handler.py:handle_request():146] handle_request: defer
+2023-12-06 13:24:18,009 INFO    HandlerThread:56425 [handler.py:handle_request_defer():172] handle defer: 11
+2023-12-06 13:24:18,010 DEBUG   SenderThread:56425 [sender.py:send_request():407] send_request: defer
+2023-12-06 13:24:18,010 INFO    SenderThread:56425 [sender.py:send_request_defer():609] handle sender defer: 11
+2023-12-06 13:24:18,010 INFO    SenderThread:56425 [file_pusher.py:join():181] waiting for file pusher
+2023-12-06 13:24:18,010 INFO    SenderThread:56425 [sender.py:transition_state():613] send defer: 12
+2023-12-06 13:24:18,010 DEBUG   HandlerThread:56425 [handler.py:handle_request():146] handle_request: defer
+2023-12-06 13:24:18,010 INFO    HandlerThread:56425 [handler.py:handle_request_defer():172] handle defer: 12
+2023-12-06 13:24:18,011 DEBUG   SenderThread:56425 [sender.py:send_request():407] send_request: defer
+2023-12-06 13:24:18,011 INFO    SenderThread:56425 [sender.py:send_request_defer():609] handle sender defer: 12
+2023-12-06 13:24:18,011 INFO    SenderThread:56425 [file_stream.py:finish():595] file stream finish called
+2023-12-06 13:24:18,131 INFO    SenderThread:56425 [file_stream.py:finish():599] file stream finish is done
+2023-12-06 13:24:18,131 INFO    SenderThread:56425 [sender.py:transition_state():613] send defer: 13
+2023-12-06 13:24:18,131 DEBUG   HandlerThread:56425 [handler.py:handle_request():146] handle_request: defer
+2023-12-06 13:24:18,131 INFO    HandlerThread:56425 [handler.py:handle_request_defer():172] handle defer: 13
+2023-12-06 13:24:18,132 DEBUG   SenderThread:56425 [sender.py:send_request():407] send_request: defer
+2023-12-06 13:24:18,132 INFO    SenderThread:56425 [sender.py:send_request_defer():609] handle sender defer: 13
+2023-12-06 13:24:18,132 INFO    SenderThread:56425 [sender.py:transition_state():613] send defer: 14
+2023-12-06 13:24:18,133 DEBUG   HandlerThread:56425 [handler.py:handle_request():146] handle_request: defer
+2023-12-06 13:24:18,133 DEBUG   SenderThread:56425 [sender.py:send():380] send: final
+2023-12-06 13:24:18,133 INFO    HandlerThread:56425 [handler.py:handle_request_defer():172] handle defer: 14
+2023-12-06 13:24:18,133 DEBUG   SenderThread:56425 [sender.py:send():380] send: footer
+2023-12-06 13:24:18,133 DEBUG   SenderThread:56425 [sender.py:send_request():407] send_request: defer
+2023-12-06 13:24:18,133 INFO    SenderThread:56425 [sender.py:send_request_defer():609] handle sender defer: 14
+2023-12-06 13:24:18,134 DEBUG   HandlerThread:56425 [handler.py:handle_request():146] handle_request: poll_exit
+2023-12-06 13:24:18,135 DEBUG   SenderThread:56425 [sender.py:send_request():407] send_request: poll_exit
+2023-12-06 13:24:18,135 DEBUG   HandlerThread:56425 [handler.py:handle_request():146] handle_request: internal_messages
+2023-12-06 13:24:18,136 DEBUG   HandlerThread:56425 [handler.py:handle_request():146] handle_request: server_info
+2023-12-06 13:24:18,136 DEBUG   HandlerThread:56425 [handler.py:handle_request():146] handle_request: get_summary
+2023-12-06 13:24:18,136 DEBUG   SenderThread:56425 [sender.py:send_request():407] send_request: server_info
+2023-12-06 13:24:18,136 DEBUG   HandlerThread:56425 [handler.py:handle_request():146] handle_request: sampled_history
+2023-12-06 13:24:18,139 DEBUG   HandlerThread:56425 [handler.py:handle_request():146] handle_request: job_info
+2023-12-06 13:24:18,204 DEBUG   SenderThread:56425 [sender.py:send_request():407] send_request: job_info
+2023-12-06 13:24:18,205 DEBUG   HandlerThread:56425 [handler.py:handle_request():146] handle_request: shutdown
+2023-12-06 13:24:18,205 INFO    HandlerThread:56425 [handler.py:finish():866] shutting down handler
+2023-12-06 13:24:19,144 INFO    WriterThread:56425 [datastore.py:close():294] close: /Users/shaharorielkagan/Documents/Python/desci-sense/desci_sense/dataloaders/arangoDB/wandb/run-20231206_132412-5z9ukz2p/run-5z9ukz2p.wandb
+2023-12-06 13:24:19,209 INFO    SenderThread:56425 [sender.py:finish():1536] shutting down sender
+2023-12-06 13:24:19,210 INFO    SenderThread:56425 [file_pusher.py:finish():175] shutting down file pusher
+2023-12-06 13:24:19,210 INFO    SenderThread:56425 [file_pusher.py:join():181] waiting for file pusher
