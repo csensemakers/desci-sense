@@ -32,7 +32,7 @@ class TagTypeParser(BaseOutputParser):
 
     @classmethod
     def tags(cls):
-        return ["announce", "read", "event", "review", "recommendation", "listening", "job", "quote", "discussion"]
+        return ["announce", "reading", "event", "review", "recommendation", "listening", "job", "quote", "discussion"]
 
     def parse(self, text: str):
         """Parse the output of an LLM call."""

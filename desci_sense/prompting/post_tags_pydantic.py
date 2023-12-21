@@ -34,14 +34,14 @@ class PostTagsDataModel(BaseModel):
 
     @classmethod
     def tags(cls):
-        return ["announce", "read", "event", "review", "recommendation", "listening", "job", "quote", "discussion"]
+        return ["announce", "reading", "event", "review", "recommendation", "listening", "job", "quote", "discussion"]
     
     def get_selected_tags(self):
         result = set()
         if self.is_announce_tag:
             result.add("announce")
         if self.is_read_tag:
-            result.add("read")
+            result.add("reading")
         if self.is_review_tag:
             result.add("review")
         if self.is_event_tag:

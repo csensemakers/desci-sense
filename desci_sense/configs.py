@@ -6,14 +6,12 @@ OPENROUTER_API_BASE = "https://openrouter.ai/api/v1"
 
 # Streamlit App URL
 ST_OPENROUTER_REFERRER = "https://ai-nanopub.streamlit.app/"
-# WANDB_ENTITY = "common-sense-makers"
-# WANDB_DB_NAME = "test-DB"
 
+# project to save data from deployed web app
+WEB_APP_WANDB_PROJ = "st-app-multi-v1"
 
-# @dataclass
-# class ConfigSchema(pyd.BaseModel):
-#     model_name: str = "mistralai/mistral-7b-instruct"
-#     temperature: float = 0.6
+# sandbox project
+WANDB_SANDBOX_PROJ = "st-demo-sandbox"
     
 
 def init_config(model_name: str = "mistralai/mistral-7b-instruct",
@@ -21,22 +19,29 @@ def init_config(model_name: str = "mistralai/mistral-7b-instruct",
                 temperature: float = 0.6,
                 template_path: str = "desci_sense/prompting/templates/p4.txt",
                 wandb_entity: str = "common-sense-makers",
-                wandb_project: str = "st-demo",
-                wandb_db_name: str = "test-DB"):
+                wandb_project: str = WANDB_SANDBOX_PROJ
+                ):
     config = Config(
-                    {"model": {
-                                "model_name": model_name, 
-                                "temperature": temperature
-                            },
+                    {
+                    "general": {
+                        "parser_type": parser_type
+
+                    },
+
+                    "model": {
+                            "model_name": model_name, 
+                            "temperature": temperature
+                        },
                     "prompt": {
                         "template_path": template_path
                     },
                     "wandb": {
-                        "wand_entity": wandb_entity,
-                        "project": wandb_project,
-                        "wandb_db_name": wandb_db_name
+                        "entity": wandb_entity,
+                        "project": wandb_project
+                        
                     },
-                    "parser_type": parser_type
+                    
+                    
 
                     }
                     

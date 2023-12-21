@@ -1,5 +1,19 @@
+"""Script to run the streamlit Nanobot app.
+
+Usage:
+  st_demo.py [--config=<config>]
+  st_demo.py (-h | --help)
+
+
+Options:
+  -h --help     Show this screen. To run through streamlit with arguments, use `streamlit run path/to/script -- --config path/to/config`
+  --config=<config>  Optional path to configuration file.
+
+"""
+
 import sys
 import os
+from docopt import docopt
 from pathlib import Path
 
 sys.path.append(str(Path(__file__).parents[2]))
@@ -7,11 +21,13 @@ sys.path.append(str(Path(__file__).parents[2]))
 import streamlit as st
 import wandb
 import shortuuid
+from confection import Config
 
 from desci_sense.schema.post import RefPost
 from desci_sense.parsers.base_parser import BaseParser
 from desci_sense.parsers.multi_tag_parser import MultiTagParser
 from desci_sense.prompting.post_tags_pydantic import PostTagsDataModel
+
 
 from desci_sense.dataloaders.twitter.twitter_utils import scrape_tweet
 from desci_sense.dataloaders.mastodon.mastodon_utils import scrape_mastodon_post
@@ -84,15 +100,37 @@ def log_pred_wandb(wandb_run, result, human_label: str = "", labeler_name: str =
     wandb.log_artifact(artifact)
     
 
+def load_config(config_path: str = None) -> Config:
+    """
+    Create configuration for this run. If config file path is provided, use that.
+    Otherwise use a default config.
+    If WAND_PROJECT environment key is set, update config with it (used for deployed app).
+    """
+    if config_path:
+        config = Config().from_disk(config_path)
+    else:
+        config = init_config(parser_type="base",
+                         model_name="fireworks/mixtral-8x7b-fw-chat",
+                         template_path="desci_sense/prompting/templates/p5_multi.txt")
+        if "WANDB_PROJECT" in os.environ:
+            wandb_proj = os.environ.get("WANDB_PROJECT")
+            config["wandb"]["project"] = wandb_proj
+
+    return config
+
+
+
+   
+
 def init_wandb_run(model_config):
 
     wandb.login(key=os.environ["WANDB_API_KEY"])
     wandb_run = wandb.init(job_type="demo",project=model_config["wandb"]["project"], config=model_config, 
-                                       entity=model_config["wandb"]["wand_entity"])
+                                       entity=model_config["wandb"]["entity"])
     
     return wandb_run
 
-def init_model():
+def init_model(config: Config):
 
     # TODO fix hardwired code
     # get config file
@@ -100,15 +138,15 @@ def init_model():
     #                      wandb_project="st_demo-multi_v1_testing",
     #                      model_name="fireworks/mixtral-8x7b-fw-chat")
     
-    config = init_config(parser_type="base",
-                         wandb_project="st_demo-v0.2",
-                         model_name="fireworks/mixtral-8x7b-fw-chat",
-                         template_path="desci_sense/prompting/templates/p5_multi.txt")
+    # config = init_config(parser_type="base",
+    #                      wandb_project="st_demo-v0.2",
+    #                      model_name="fireworks/mixtral-8x7b-fw-chat",
+    #                      template_path="desci_sense/prompting/templates/p5_multi.txt")
 
     # create parser
-    if config["parser_type"] == "base":
+    if config["general"]["parser_type"] == "base":
         tweet_parser = BaseParser(config=config, api_key=api_key, openapi_referer=openrouter_referrer)
-    elif config["parser_type"] == "multi":
+    elif config["general"]["parser_type"] == "multi":
         tweet_parser = MultiTagParser(config=config, api_key=api_key, openapi_referer=openrouter_referrer)
     else:
         raise ValueError(f"Unknown parser type: {config['parser_type']}")
@@ -198,8 +236,18 @@ def process_post(post: RefPost, model):
 
 if __name__ == "__main__":
 
+    arguments = docopt(__doc__, version='Nanopub Streamlit App 0.1')
+    print(arguments)
+
+    # initialize config
+    config_path = arguments.get('--config')
+    config = load_config(config_path)
+    
+
     st.title("LLM Nanopublishing assistant demo")
     
+
+    # container structure for layout
     pre_amble_section = st.container()
     input_section = st.container()
     nanobot_section = st.container()
@@ -232,7 +280,7 @@ if __name__ == "__main__":
                         ''',language='markdown')
 
         with st.spinner("Creating model..."):
-            model = init_model()
+            model = init_model(config)
 
     with bottom_section:
         st.divider()
