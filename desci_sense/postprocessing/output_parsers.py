@@ -1,5 +1,6 @@
 
 import re
+from typing import List
 from langchain.schema import BaseOutputParser
 
 def convert_string_to_list(input_string):
@@ -9,10 +10,29 @@ def convert_string_to_list(input_string):
     names_list = [name.strip() for name in input_string.split(',') if name.strip()]
     return names_list
 
+def extract_tags(input_text: str, tags: List[str]) -> List[str]:
+    """
+    Given an input text and a list of tags, return a list of all tags appearing in the text
+    in the order of their occurrence, accounting for tags that may be substrings of other words.
+    * note this may lead to some unintended hallucination edge cases *
+    Args:
+    input_text (str): The text in which to search for tags.
+    tags (List[str]): The list of tags to search for in the text.
+
+    Returns:
+    List[str]: A list of tags found in the input text, in the order of their occurrence.
+    """
+    pattern = '|'.join(map(re.escape, tags))
+    found_tags = re.findall(pattern, input_text)
+    return found_tags
+
 
 class TagTypeParser(BaseOutputParser):
     """Parse the output of an LLM call to a dict ."""
 
+    @classmethod
+    def tags(cls):
+        return ["announce", "read", "event", "review", "recommendation", "listening", "job", "quote", "discussion"]
 
     def parse(self, text: str):
         """Parse the output of an LLM call."""
@@ -39,10 +59,18 @@ class TagTypeParser(BaseOutputParser):
 
         final_reasoning = "[Reasoning Steps]\n\n" + reasoning_steps.strip() + "\n\n[Candidate Tags]\n\n" + candidate_tags.strip()
 
-        # TODO force final answer to conform to closed set of tags
+        # force final answer to conform to closed set of tags
+        multi_tags = extract_tags(final_answer, TagTypeParser.tags())
+
+        # if we only want to choose single tag - take first
+        single_tag = multi_tags[:1]
+        
+
 
         # Combine into a tuple
         extracted_content = {"reasoning": final_reasoning, 
-                             "final_answer": final_answer}
+                             "final_answer": final_answer,
+                             "single_tag": single_tag,
+                             "multi_tag": multi_tags}
         # print("Extracted Content Tuple:", extracted_content)
         return extracted_content

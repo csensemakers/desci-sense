@@ -7,26 +7,31 @@ import desci_sense.configs as configs
 from confection import Config
 
 from langchain.chat_models import ChatOpenAI
-from langchain.prompts.chat import ChatPromptTemplate
+from langchain.prompts import ChatPromptTemplate, HumanMessagePromptTemplate
 from langchain.schema import BaseOutputParser
 from langchain.schema import (
     HumanMessage,
 )
 
+from langchain.output_parsers import PydanticOutputParser
+from pydantic import BaseModel, Field
 
 from ..dataloaders.twitter.twitter_utils import scrape_tweet, extract_external_ref_urls
 from ..dataloaders.mastodon.mastodon_utils import scrape_mastodon_post, extract_external_masto_ref_urls
 from ..utils import extract_and_expand_urls, identify_social_media
 from ..schema.post import RefPost
-from ..postprocessing.output_parsers import TagTypeParser
+from ..prompting.post_tags_pydantic import PostTagsDataModel
+from ..postprocessing.parser_utils import fix_json_string_with_backslashes
 
 
+def format_answer(post_tags: PostTagsDataModel) -> dict:
+    tags = list(post_tags.get_selected_tags())
+    return {"final_answer": post_tags.get_selected_tags_str(),
+                             "reasoning": "",
+                             "single_tag": tags[:1],
+                             "multi_tag": tags}
 
-
-human_template = "{text}"
-
-
-class BaseParser:
+class MultiTagParser:
     def __init__(self, 
                  config: Config,
                  api_key: Optional[str]=None,
@@ -52,42 +57,79 @@ class BaseParser:
             headers={"HTTP-Referer": openapi_referer}, 
         )
 
-        # load prompt
-        template_path = Path(__file__).parents[2] / self.config["prompt"]["template_path"]
-        template = template_path.read_text()
 
-        self.prompt_template = ChatPromptTemplate.from_messages([
-            ("system", template),
-            ("human", human_template),
-        ])
 
-        self.output_parser = TagTypeParser()
+        # Instantiate the pydantic parser with the selected model.
+        self.pydantic_parser = PydanticOutputParser(pydantic_object=PostTagsDataModel)
 
-        self.chain = self.prompt_template | self.model | self.output_parser
-        
-    def process_text(self, text: str):
-        # print("Text received: ", text)
-        # process tweet in the format of the output of scrape_tweet
+        self.prompt_template = ChatPromptTemplate(
+        messages=[
+            HumanMessagePromptTemplate.from_template(
+                "Tag the post as accurately as possible.\n{format_instructions}\n{question}"
+            )
+        ],
+        input_variables=["question"],
+        partial_variables={
+            "format_instructions": self.pydantic_parser.get_format_instructions(),
+        },
+        )
 
-        answer = self.chain.invoke({"text": text})
+    def run(self, text: str) -> PostTagsDataModel:
+        """Process post text into PostTagsDataModel which represents the tags selected based on the target text.
 
-        # check if there is an external link in this post - if not, tag as <no-ref>
-        # expanded_urls = extract_and_expand_urls(text)
+        Args:
+            text (str): input text representing post
 
-        # if not expanded_urls:
-        #     answer = {"reasoning": "[System msg: no urls detected - categorizing as <no-ref>]", 
-        #                      "final_answer": "<no-ref>"}
-        # else:
-        #     # url detected, process to find relation of text to referenced url
-        #     answer = self.chain.invoke({"text": text})
+        Returns:
+            PostTagsDataModel: Parsing result
+        """
 
-        # TODO fix results
+        # Generate the input using the updated prompt.
+        user_query = (
+            f"Target post: {text}"
+        )
+        _input = self.prompt_template.format_prompt(question=user_query)
+
+        output = self.model(_input.to_messages())
+        fixed_content = fix_json_string_with_backslashes(output.content)
+        parsed: PostTagsDataModel = self.pydantic_parser.parse(fixed_content)
+
+        return parsed
+    
+    def run_raw(self, text: str) -> dict:
+        """Process post text without Pydantic post-processing
+
+        Args:
+            text (str): input text representing post
+
+        Returns:
+            Dict of raw parsing result
+        """
+
+        # Generate the input using the updated prompt.
+        user_query = (
+            f"Target post: {text}"
+        )
+        _input = self.prompt_template.format_prompt(question=user_query)
+
+        output = self.model(_input.to_messages())
+        fixed_content = fix_json_string_with_backslashes(output.content)
+
+        return fixed_content
+
+    def process_text(self, text: str) -> PostTagsDataModel:
+        """
+
+        """
+        post_tags = self.run(text)
+
+
         result = {"text": text,
-                  "answer": answer
+                  "answer": format_answer(post_tags)
                   }
-
+        
         return result
-
+    
 
     def process_tweet_url(self, tweet_url: str):
 
@@ -123,16 +165,17 @@ class BaseParser:
         # check if there is an external link in this post - if not, tag as <no-ref>
         if not post.has_refs():
             answer = {"reasoning": "[System msg: no urls detected - categorizing as <no-ref>]", 
-                             "final_answer": "<no-ref>",
-                             "single_tag": None,
-                             "multi_tag": []}
+                             "final_answer": "<no-ref>"}
+            result = {"post": post,
+                    "answer": answer
+                    }
         else:
             # url detected, process to find relation of text to referenced url
-            answer = self.chain.invoke({"text": post.content})
+            post_tags = self.run(post.content)
 
-        result = {"post": post,
-                  "answer": answer
-                  }
+            result = {"post": post,
+                    "answer": format_answer(post_tags)
+                    }
 
         return result
 
@@ -156,15 +199,4 @@ class BaseParser:
 
         return result
 
-
-
-
-
-
-
-
-
-
-
-
-
+        
