@@ -23,7 +23,7 @@ def extract_tags(input_text: str, tags: List[str]) -> List[str]:
     List[str]: A list of tags found in the input text, in the order of their occurrence.
     """
     pattern = '|'.join(map(re.escape, tags))
-    found_tags = re.findall(pattern, input_text)
+    found_tags = re.findall(pattern, input_text.lower())
     return found_tags
 
 
