@@ -237,7 +237,6 @@ def process_post(post: RefPost, model):
 if __name__ == "__main__":
 
     arguments = docopt(__doc__, version='Nanopub Streamlit App 0.1')
-    print(arguments)
 
     # initialize config
     config_path = arguments.get('--config')
