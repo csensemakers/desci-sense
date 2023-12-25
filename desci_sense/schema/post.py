@@ -10,6 +10,8 @@ from typing import Any, Literal, Sequence, List
 from langchain.load.serializable import Serializable
 from langchain.pydantic_v1 import Field
 
+from ..prompting.post_tags_pydantic import PostTagsDataModel
+
 
 class Post(Serializable):
     """Class for storing a piece of text and associated metadata."""
@@ -44,8 +46,27 @@ class RefPost(Post):
     """
     List of URLs referenced by the post
     """
-    type: Literal["MentionPost"] = "MentionPost"
+    type: Literal["ReferencePost"] = "ReferencePost"
 
 
     def has_refs(self):
         return len(self.ref_urls) > 0
+    
+
+
+class MultiTagRefPost(RefPost):
+    """
+    Reference Post that is additionally tagged with a set of predetermined possible tags. 
+    """
+    tags: set = Field(default_factory=set)
+
+    def __init__(self, **kwargs):
+        tags = kwargs.pop('tags', set())
+        super().__init__(**kwargs)
+
+        # include only allowed tags
+        self.tags = tags.intersection(MultiTagRefPost.allowed_tags())
+    
+    @classmethod
+    def allowed_tags(cls):
+        return PostTagsDataModel.tags()
