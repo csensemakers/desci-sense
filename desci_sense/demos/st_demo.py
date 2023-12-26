@@ -116,6 +116,9 @@ def load_config(config_path: str = None) -> Config:
             wandb_proj = os.environ.get("WANDB_PROJECT")
             config["wandb"]["project"] = wandb_proj
 
+    # add set of possible tags available in this run
+    config["prompt"]["tags"] = OPTIONS
+    
     return config
 
 
