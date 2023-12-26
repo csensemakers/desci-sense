@@ -26,7 +26,11 @@ def extract_tags(input_text: str, tags: List[str]) -> List[str]:
     """
     pattern = '|'.join(map(re.escape, tags))
     found_tags = re.findall(pattern, input_text.lower())
-    return found_tags
+
+    # make sure tags are unique
+    unique_found_tags = list(set(found_tags))
+    
+    return unique_found_tags
 
 
 class TagTypeParser(BaseOutputParser):
