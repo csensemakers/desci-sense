@@ -3,7 +3,6 @@ The available tag types are:
 <announce> this post contains an announcement of new research. The announcement is likely made by the authors but may be a third party. The research should be a paper, dataset or other type of research output that is being announced publicly.
 <discussion> this post discusses how the cited reference relates to other facts or claims. For example, post might discuss how the cited reference informs questions, provides evidence, or supports or opposes claims.
 <review> this post contains a review of another reference, such as a book, article or movie. The review could be positive or negative. A review can be detailed or a simple short endorsement.
-<review> this post contains a review of another reference, such as a book, article or movie. The review could be positive or negative. A review can be detailed or a simple short endorsement.
 <job> this post describes a job listing, for example a call for graduate students or faculty applications.
 <event> this post describes an event, either real-world or an online event. Any kind of event is relevant, some examples of events could be seminars, meetups, or hackathons.
 <reading> this post describes the reading status of the author in relation to a reference, such as a book or article. The author may either have read the reference in the past, is reading the reference in the present, or is looking forward to reading the reference in the future.
