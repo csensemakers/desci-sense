@@ -42,7 +42,8 @@ class BaseParser:
 
 
         # init model
-        model_name = "mistralai/mistral-7b-instruct" if not "name" in config["model"] else config["model"]["name"]
+        model_name = "mistralai/mistral-7b-instruct" if not "model_name" in config["model"] else config["model"]["model_name"]
+
         
         self.model = ChatOpenAI(
             model=model_name, 
