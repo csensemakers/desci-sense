@@ -30,11 +30,14 @@ class PostTagsDataModel(BaseModel):
     is_discussion_tag: bool = Field(
         description="Set to True if this post discusses how the cited reference relates to other facts or claims. For example, post might discuss how the cited reference informs questions, provides evidence, or supports or opposes claims. False otherwise."
     )
+    is_question_tag: bool = Field(
+        description="Set to True if this post is raising a question or questions about some content it's referring to. The content could be a research paper or other media like a podcast, video or blog post. False otherwise."
+    )
 
 
     @classmethod
     def tags(cls):
-        return ["announce", "reading", "event", "review", "recommendation", "listening", "job", "quote", "discussion", "watching"]
+        return ["announce", "reading", "event", "review", "recommendation", "listening", "job", "quote", "discussion", "watching", "question"]
     
     def get_selected_tags(self):
         result = set()
@@ -56,6 +59,8 @@ class PostTagsDataModel(BaseModel):
             result.add("quote")
         if self.is_discussion_tag:
             result.add("discussion")
+        if self.is_question_tag:
+            result.add("question")
         return result
     
     def get_selected_tags_str(self):

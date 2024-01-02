@@ -111,7 +111,7 @@ def load_config(config_path: str = None) -> Config:
     else:
         config = init_config(parser_type="base",
                          model_name="fireworks/mixtral-8x7b-fw-chat",
-                         template_path="desci_sense/prompting/templates/p6_multi.txt")
+                         template_path="desci_sense/prompting/templates/p7.txt")
         if "WANDB_PROJECT" in os.environ:
             wandb_proj = os.environ.get("WANDB_PROJECT")
             config["wandb"]["project"] = wandb_proj
