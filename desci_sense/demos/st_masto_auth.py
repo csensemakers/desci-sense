@@ -1,3 +1,7 @@
+"""
+Simple code to demo Mastodon OAuth in streamlit
+"""
+
 import streamlit as st
 from mastodon import Mastodon
 
@@ -54,6 +58,7 @@ if authorization_code and not st.session_state['passed_authentication_stage']:
         st.session_state['access_token'] = access_token
         st.session_state['passed_authentication_stage'] = True
         # You can now use the access_token to make Mastodon API calls
+
     except Exception as e:
         st.error(f'Authentication failed: {e}')
 
