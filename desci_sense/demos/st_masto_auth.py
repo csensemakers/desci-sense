@@ -1,14 +1,15 @@
 """
 Simple code to demo Mastodon OAuth in streamlit
-"""
 
+"""
+import os
 import streamlit as st
 from mastodon import Mastodon
 
-# Replace with your instance's API base url and your client credentials
+# Environment variables must be set with your Mastodon application id and secret 
 api_base_url = "https://mastodon.social/"
-client_id = "LHr37C4DmnyYgqlpdCA1YjARw9bon5oa4C-RhXGRDcs"
-client_secret = "-exBkiij_nMSUSp8QhL_lJXZ4gxbB2tFItSfCJTMp78"
+client_id = os.environ["MASTO_CLIENT_ID"]
+client_secret = os.environ["MASTO_CLIENT_SECRET"]
 redirect_uri = "urn:ietf:wg:oauth:2.0:oob"
 # redirect_uri = "http://localhost:8501"  # Your redirect URI
 
