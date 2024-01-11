@@ -22,6 +22,9 @@ def a_table_into_df(table_path):
     df = pd.DataFrame(rows)
     return df
 
+def text_label_pred_eval(df,config:dict):
+    
+
 #artifact path
 path = "common-sense-makers/testing/labeled_data_v0:v4"
 
