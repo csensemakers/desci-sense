@@ -12,21 +12,11 @@ def a_table_into_df(table_path):
     x = raw_data["columns"].index('Text')
     y = raw_data["columns"].index('True Label')
 
-    rows = []
-    i = 0
-    exception = 1
-    while exception:
-        try:
-            #assume x<y
-            row_d = dict(zip(["Text",'True Label'],
-                            [raw_data["data"][i][x],raw_data["data"][i][y]]))
-            #print(row_d)
-            rows.append(row_d)
-            i=i+1
-            exception = 1
-        except:
-            print("exceprion")
-            exception = 0
+    try:
+        rows = [{'Text': raw_data["data"][i][x], 'True Label': raw_data["data"][i][y]} for i in range(len(raw_data["data"]))]
+    except Exception as e:
+        print(f"Exception occurred: {e}")
+
 
 
     df = pd.DataFrame(rows)
