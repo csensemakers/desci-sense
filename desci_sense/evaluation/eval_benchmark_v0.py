@@ -1,10 +1,29 @@
+"""Script to run evaluation of label prediction models.
+
+Usage:
+  eval_benchmark_v0.py [--config=<config>] [--dataset=<dataset>]
+
+
+Options:
+--config=<config>  Optional path to configuration file.
+--dataset=<dataset> Optional path to table in wandb.
+
+"""
+
 import wandb
 from pathlib import Path
 import json
 import pandas as pd
+import sys
+import os
+import docopt
 
-#A function that get's a path to a wandb table and returns it as pd df
-# restricted to the "Text" and "True label" fields.
+sys.path.append(str(Path(__file__).parents[2]))
+
+from desci_sense.demos.st_demo import init_model, load_config
+
+
+
 def a_table_into_df(table_path):
     raw_data = json.load(table_path.open())
 
@@ -22,15 +41,27 @@ def a_table_into_df(table_path):
     df = pd.DataFrame(rows)
     return df
 
-def text_label_pred_eval(df,config:dict):
+def text_label_pred_eval(df,config):
     
+    model = init_model(config)
+    
+    
+arguments = docopt.docopt(__doc__)
 
-#artifact path
+# initialize config
+config_path = arguments.get('--config')
+config = load_config(config_path)
+
+# initialize table path
 path = "common-sense-makers/testing/labeled_data_v0:v4"
 
 wandb.login()
 
 api = wandb.Api()
+
+# initialize table path
+#add the option to call table_path =  arguments.get('--dataset')
+path = "common-sense-makers/testing/labeled_data_v0:v4"
 artifact = api.artifact(path)
 
 #get path to table
