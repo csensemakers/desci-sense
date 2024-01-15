@@ -58,9 +58,10 @@ def log_pred_wandb(wandb_run, result, human_label: str = "", labeler_name: str =
     # get a unique ID for this prediction
     pred_uid = shortuuid.ShortUUID().random(length=8)
 
-    artifact = wandb.Artifact(f"pred_{wandb_run.id}_{pred_uid}", type="prediction")
+    pred_name = f"pred_{wandb_run.id}_{pred_uid}"
+    artifact = wandb.Artifact(pred_name, type="prediction")
 
-    columns = ["User", "URL", "Text", "Reasoning Steps", "Predicted Label", "True Label", "Name of Label Provider" , "Post Source"]
+    columns = ["User", "URL", "Text", "Reasoning Steps", "Final Answer", "Predicted Label", "True Label", "Name of Label Provider" , "Post Source", "Prediction ID"]
 
     # check if prediction was post or simple text
     if "post" in result:
@@ -71,9 +72,11 @@ def log_pred_wandb(wandb_run, result, human_label: str = "", labeler_name: str =
             post.content,
             result['answer']['reasoning'],
             result['answer']['final_answer'],
+            result['answer'].get("multi_tag", list()),
             human_label, # if user supplied a label
             labeler_name, # name of person who provided label
-            post.source_network
+            post.source_network,
+            pred_name
         ]
     elif "text" in result:
         user_name = labeler_name if labeler_name != "" else "unknown app user"
@@ -83,9 +86,11 @@ def log_pred_wandb(wandb_run, result, human_label: str = "", labeler_name: str =
             result["text"],
             result['answer']['reasoning'],
             result['answer']['final_answer'],
+            result['answer'].get("multi_tag", list()),
             human_label, # if user supplied a label
             labeler_name, # name of person who provided label
-            "user input"
+            "user input",
+            pred_name
         ]
     else:
         raise ValueError("Result should have either text or post key!")
