@@ -17,22 +17,25 @@ import pandas as pd
 import sys
 import os
 import docopt
+import re
+from sklearn.preprocessing import MultiLabelBinarizer
+from sklearn.metrics import precision_recall_fscore_support
+
+
+
 
 sys.path.append(str(Path(__file__).parents[2]))
 
 from desci_sense.demos.st_demo import init_model, load_config
 
 
-
-def a_table_into_df(table_path):
+#get a path to a wandb table and populate it in a pd data frame
+def get_dataset(table_path):
     raw_data = json.load(table_path.open())
 
     #put it in a dataframe
-    x = raw_data["columns"].index('Text')
-    y = raw_data["columns"].index('True Label')
-
     try:
-        rows = [{'Text': raw_data["data"][i][x], 'True Label': raw_data["data"][i][y]} for i in range(len(raw_data["data"]))]
+        rows = [dict(zip(raw_data['columns'],raw_data['data'][i])) for i in range(len(raw_data["data"]))]
     except Exception as e:
         print(f"Exception occurred: {e}")
 
@@ -44,24 +47,59 @@ def a_table_into_df(table_path):
 def text_label_pred_eval(df,config):
     
     model = init_model(config)
-    
-    
-arguments = docopt.docopt(__doc__)
 
+#values are returned as string, we want them as lists
+def normalize_df(df):
+    # Assuming each label is a single word and there are no spaces in labels
+    # This will remove all non-word characters and split the string into words
+    df['True Label'] = df['True Label'].apply(lambda x: re.sub(r'\W+', ' ', x).split())
+
+    # Replace None with an empty list in 'Predicted label'  
+    df['Predicted Label'] = df['Predicted Label'].apply(lambda x: '' if pd.isnull(x) else x)    
+    df['Predicted Label'] = df['Predicted Label'].apply(lambda x: re.sub(r'\W+', ' ', x).split())    
+
+#assumes that the values on 'True Label' and 'Predicted Label' are lists 
+def calculate_scores(df):
+    #binarize for using skl scores
+    # Assume df['True label'] and df['Predicted label'] are your true and predicted labels
+    mlb = MultiLabelBinarizer()
+
+    # Binarize the labels
+    y_true = mlb.fit_transform(df['True Label'])
+
+    #refine prediction word list to contain only allowed labels defined by all true labels
+    df['Predicted Label'] = df['Predicted Label'].apply(lambda x: [label for label in x if label in mlb.classes_])
+    y_pred = mlb.transform(df['Predicted Label']) 
+
+    #calculate scores
+    # Calculate precision, recall, f1_score, support
+    precision, recall, f1_score, support = precision_recall_fscore_support(y_true, y_pred, average='samples')
+
+    print('Precision: ', precision)
+    print('Recall: ', recall)
+    print('F1 score: ', f1_score)
+    print('Support: ', support)
+
+    return precision,recall,f1_score,support
+      
+arguments = docopt.docopt(__doc__)
+#tqdm on prediction for loop
 # initialize config
 config_path = arguments.get('--config')
 config = load_config(config_path)
 
 # initialize table path
-path = "common-sense-makers/testing/labeled_data_v0:v4"
+path = "common-sense-makers/testing/labeled_data_v0:latest"
 
 wandb.login()
 
 api = wandb.Api()
 
+#run.summery
+
 # initialize table path
 #add the option to call table_path =  arguments.get('--dataset')
-path = "common-sense-makers/testing/labeled_data_v0:v4"
+
 artifact = api.artifact(path)
 
 #get path to table
@@ -69,5 +107,9 @@ a_path = artifact.download()
 table_path = Path(f"{a_path}/labeled_data_table.table.json")
 
 #return the pd df from the table
-df = a_table_into_df(table_path)
-print(df)
+df = get_dataset(table_path)
+#print(df)
+normalize_df(df)
+
+calculate_scores(df)
+
