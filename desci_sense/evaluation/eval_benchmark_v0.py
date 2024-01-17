@@ -54,7 +54,7 @@ def pred_labels(df):
         df['Reasoning Steps'][i] = response['answer']['reasoning']
         print('Predicted Label: ',df['Predicted Label'][i])
     print(tuple(zip(df['Predicted Label'],df['True Label'])))
-    return df
+    
 #values are returned as string, we want them as lists
 def normalize_df(df):
     # Assuming each label is a single word and there are no spaces in labels
@@ -119,7 +119,12 @@ table_path = Path(f"{a_path}/labeled_data_table.table.json")
 #return the pd df from the table
 df = get_dataset(table_path)
 
+pred_labels(df)
+
+#make sure df can be binarized
 normalize_df(df)
+
+
 
 precision,recall,f1_score,support = calculate_scores(df)
 
