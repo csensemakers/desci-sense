@@ -44,19 +44,27 @@ def get_dataset(table_path):
     df = pd.DataFrame(rows)
     return df
 
-def text_label_pred_eval(df,config):
+def pred_labels(df):
     
     model = init_model(config)
-
+    for i in range(len(df['Text'])):
+        print('in iteration',i)
+        response = model.process_text({'text':df['Text'][i]})
+        df['Predicted Label'][i] = response['answer']['multi_tag']
+        df['Reasoning Steps'][i] = response['answer']['reasoning']
+        print('Predicted Label: ',df['Predicted Label'][i])
+    print(tuple(zip(df['Predicted Label'],df['True Label'])))
+    return df
 #values are returned as string, we want them as lists
 def normalize_df(df):
     # Assuming each label is a single word and there are no spaces in labels
     # This will remove all non-word characters and split the string into words
-    df['True Label'] = df['True Label'].apply(lambda x: re.sub(r'\W+', ' ', x).split())
+    if type(df["True Label"][0])==str:
+        df['True Label'] = df['True Label'].apply(lambda x: re.sub(r'\W+', ' ', x).split())
 
-    # Replace None with an empty list in 'Predicted label'  
-    df['Predicted Label'] = df['Predicted Label'].apply(lambda x: '' if pd.isnull(x) else x)    
-    df['Predicted Label'] = df['Predicted Label'].apply(lambda x: re.sub(r'\W+', ' ', x).split())    
+    # Replace empty list with an empty 'None' in 'Predicted label' TODO 
+    #df['Predicted Label'] = df['Predicted Label'].apply(lambda x: 'None' if pd.isnull(x) else x)    
+    #df['Predicted Label'] = df['Predicted Label'].apply(lambda x: re.sub(r'\W+', ' ', x).split())    
 
 #assumes that the values on 'True Label' and 'Predicted Label' are lists 
 def calculate_scores(df):
@@ -81,6 +89,7 @@ def calculate_scores(df):
     print('Support: ', support)
 
     return precision,recall,f1_score,support
+#def create_evaluation_artifact(df,)
       
 arguments = docopt.docopt(__doc__)
 #tqdm on prediction for loop
@@ -89,27 +98,54 @@ config_path = arguments.get('--config')
 config = load_config(config_path)
 
 # initialize table path
-path = "common-sense-makers/testing/labeled_data_v0:latest"
 
 wandb.login()
 
 api = wandb.Api()
 
-#run.summery
+run = wandb.init(project="testing",job_type="evaluation")
+
+dataset_artifact_id = "common-sense-makers/testing/labeled_data_v0:latest"
+
+dataset_artifact = run.use_artifact(dataset_artifact_id)
 
 # initialize table path
 #add the option to call table_path =  arguments.get('--dataset')
 
-artifact = api.artifact(path)
-
-#get path to table
-a_path = artifact.download()
+#download path to table
+a_path = dataset_artifact.download()
 table_path = Path(f"{a_path}/labeled_data_table.table.json")
 
 #return the pd df from the table
 df = get_dataset(table_path)
-#print(df)
+
 normalize_df(df)
 
-calculate_scores(df)
+precision,recall,f1_score,support = calculate_scores(df)
 
+#Create the evaluation artifact
+artifact = wandb.Artifact("prediction_evaluation", type="evaluation")
+
+# Create a wandb.Table from the Pandas DataFrame
+table = wandb.Table(dataframe=df)
+
+# Add the wandb.Table to the artifact
+artifact.add(table, "prediction_evaluation")
+
+#add the scores as metadata
+artifact.metadata.update({'Precision': precision, 'Recall':recall, 'F1 score': f1_score})
+
+# model_info is your model metadata
+run.config.update(config) 
+
+#log scores as summary of the run
+#note that the scores are actually calculated in the cells above.
+run.summary["precision"] = precision
+run.summary["recall"] = recall
+run.summary["f1_score"] = f1_score
+
+
+# Log the artifact
+wandb.log_artifact(artifact, aliases=["latest"])
+
+wandb.run.finish()
