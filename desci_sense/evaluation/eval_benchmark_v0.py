@@ -19,7 +19,7 @@ import os
 import docopt
 import re
 from sklearn.preprocessing import MultiLabelBinarizer
-from sklearn.metrics import precision_recall_fscore_support
+from sklearn.metrics import precision_recall_fscore_support, accuracy_score
 
 
 
@@ -83,12 +83,15 @@ def calculate_scores(df):
     # Calculate precision, recall, f1_score, support
     precision, recall, f1_score, support = precision_recall_fscore_support(y_true, y_pred, average='samples')
 
+    #calculate accuracy
+    accuracy = accuracy_score(y_pred=y_pred,y_true=y_true)
+
     print('Precision: ', precision)
     print('Recall: ', recall)
     print('F1 score: ', f1_score)
     print('Support: ', support)
 
-    return precision,recall,f1_score,support
+    return precision,recall,f1_score,support,accuracy
 #def create_evaluation_artifact(df,)
       
 arguments = docopt.docopt(__doc__)
@@ -105,7 +108,7 @@ api = wandb.Api()
 
 run = wandb.init(project="testing",job_type="evaluation")
 
-dataset_artifact_id = "common-sense-makers/testing/labeled_data_v0:latest"
+dataset_artifact_id = 'common-sense-makers/testing/dataset_for_eval:latest'
 
 dataset_artifact = run.use_artifact(dataset_artifact_id)
 
@@ -114,7 +117,7 @@ dataset_artifact = run.use_artifact(dataset_artifact_id)
 
 #download path to table
 a_path = dataset_artifact.download()
-table_path = Path(f"{a_path}/labeled_data_table.table.json")
+table_path = Path(f"{a_path}/labeled_data.table.json")
 
 #return the pd df from the table
 df = get_dataset(table_path)
@@ -126,7 +129,7 @@ normalize_df(df)
 
 
 
-precision,recall,f1_score,support = calculate_scores(df)
+precision,recall,f1_score,support,accuracy = calculate_scores(df)
 
 #Create the evaluation artifact
 artifact = wandb.Artifact("prediction_evaluation", type="evaluation")
@@ -138,16 +141,20 @@ table = wandb.Table(dataframe=df)
 artifact.add(table, "prediction_evaluation")
 
 #add the scores as metadata
-artifact.metadata.update({'Precision': precision, 'Recall':recall, 'F1 score': f1_score})
+artifact.metadata.update({'Precision': precision, 'Recall':recall, 'F1 score': f1_score,'accuracy':accuracy})
 
 # model_info is your model metadata
 run.config.update(config) 
 
 #log scores as summary of the run
 #note that the scores are actually calculated in the cells above.
-run.summary["precision"] = precision
-run.summary["recall"] = recall
-run.summary["f1_score"] = f1_score
+run.summary.update({
+    'dataest_size':len(df),
+    'precision':precision,
+    'recall':recall,
+    'f1_score':f1_score,
+    'accuracy':accuracy
+    })
 
 
 # Log the artifact
