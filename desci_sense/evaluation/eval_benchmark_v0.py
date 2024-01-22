@@ -1,12 +1,13 @@
 """Script to run evaluation of label prediction models.
 
 Usage:
-  eval_benchmark_v0.py [--config=<config>] [--dataset=<dataset>]
+  eval_benchmark_v0.py [--config=<config>] [--dataset=<dataset>] [--file=<file>]
 
 
 Options:
 --config=<config>  Optional path to configuration file.
---dataset=<dataset> Optional path to table in wandb.
+--dataset=<dataset> Optional path to a wandb artifact.
+--file=<file> Optional file name e.g. labeled_dataset.table.json indeed it should be a table.json format
 
 """
 
@@ -104,6 +105,8 @@ arguments = docopt.docopt(__doc__)
 #tqdm on prediction for loop
 # initialize config
 config_path = arguments.get('--config')
+dataset_path = arguments.get('--dataset')
+file_name = arguments.get('--file')
 config = load_config(config_path)
 
 # initialize table path
@@ -114,8 +117,13 @@ api = wandb.Api()
 
 run = wandb.init(project="testing",job_type="evaluation")
 
-dataset_artifact_id = 'common-sense-makers/testing/dataset_for_eval:latest'
+#get artifact path
+if dataset_path:
+    dataset_artifact_id = dataset_path
+else:
+    dataset_artifact_id = 'common-sense-makers/testing/dataset_for_eval:latest'
 
+#set artifact as input artifact
 dataset_artifact = run.use_artifact(dataset_artifact_id)
 
 # initialize table path
@@ -123,7 +131,12 @@ dataset_artifact = run.use_artifact(dataset_artifact_id)
 
 #download path to table
 a_path = dataset_artifact.download()
-table_path = Path(f"{a_path}/labeled_data.table.json")
+
+#get file name
+if file_name:
+    table_path = Path(f"{a_path}/{file_name}")
+else:
+    table_path = Path(f"{a_path}/labeled_data.table.json")
 
 #return the pd df from the table
 df = get_dataset(table_path)
