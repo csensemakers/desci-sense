@@ -27,8 +27,7 @@ from sklearn.metrics import precision_recall_fscore_support, accuracy_score, mul
 
 sys.path.append(str(Path(__file__).parents[2]))
 
-from desci_sense.demos.st_demo import init_model, load_config
-
+from desci_sense.runner import init_model, load_config
 
 #get a path to a wandb table and populate it in a pd data frame
 def get_dataset(table_path):
