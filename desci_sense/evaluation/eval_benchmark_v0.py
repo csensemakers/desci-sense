@@ -87,11 +87,6 @@ def calculate_scores(df):
     #calculate accuracy
     accuracy = accuracy_score(y_pred=y_pred,y_true=y_true)
 
-    print('Precision: ', precision)
-    print('Recall: ', recall)
-    print('F1 score: ', f1_score)
-    print('Support: ', support)
-
     # Calculate the confusion matrix using sklearn for each class/label
     cms = multilabel_confusion_matrix(y_true, y_pred)
 
@@ -115,13 +110,13 @@ wandb.login()
 
 api = wandb.Api()
 
-run = wandb.init(project="testing",job_type="evaluation")
+run = wandb.init(project="evaluation_benchmark",job_type="evaluation")
 
 #get artifact path
 if dataset_path:
     dataset_artifact_id = dataset_path
 else:
-    dataset_artifact_id = 'common-sense-makers/testing/dataset_for_eval:latest'
+    dataset_artifact_id = 'common-sense-makers/evaluation_benchmark/dataset_for_eval:latest'
 
 #set artifact as input artifact
 dataset_artifact = run.use_artifact(dataset_artifact_id)
