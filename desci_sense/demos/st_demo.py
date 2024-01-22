@@ -20,6 +20,7 @@ sys.path.append(str(Path(__file__).parents[2]))
 
 import streamlit as st
 import wandb
+import pandas as pd
 import shortuuid
 from confection import Config
 
@@ -27,6 +28,8 @@ from desci_sense.schema.post import RefPost
 
 from desci_sense.prompting.post_tags_pydantic import PostTagsDataModel
 
+from desci_sense.semantic_publisher import create_triples_from_prediction
+from desci_sense.schema.templates import TEMPLATES, LABEL_TEMPLATE_MAP, DEFAULT_PREDICATE_LABEL, DISP_NAME_TEMPLATES_MAP
 
 from desci_sense.dataloaders.twitter.twitter_utils import scrape_tweet
 from desci_sense.dataloaders.mastodon.mastodon_utils import scrape_mastodon_post
@@ -39,6 +42,10 @@ from desci_sense.schema.templates import PREDICATE_LABELS
 # add option for `other` tag for manual labelling
 OPTIONS = PREDICATE_LABELS + ["other"]
 
+# display name for post for rendering in streamlit
+SUBJ_DISPLAY_NAME_MAP =  { 
+            "post": "💬 Your post"
+         }
 
 
 result = None
@@ -52,8 +59,55 @@ if 'result' not in st.session_state:
 def click_run():
     st.session_state.clicked_run = True
 
+def predicate_data_editor(df: pd.DataFrame):
+    """Create editable dataframe displaying the prediction results 
 
-def log_pred_wandb(wandb_run, result, human_label: str = "", labeler_name: str = ""):
+    Args:
+        df (pd.DataFrame): _description_
+    """
+
+    df['subject'] = df['subject'].map(SUBJ_DISPLAY_NAME_MAP)
+    df['predicate'] = df['predicate'].apply(lambda x: TEMPLATES[LABEL_TEMPLATE_MAP[x]]["display_name"])
+    predicate_display_names = [p["display_name"] for _,p in TEMPLATES.items()]
+    
+    # Get unique values from the 'object' column
+    unique_objs = df['object'].unique()
+
+    edited_df = st.data_editor(
+        df,
+        column_config={
+            "subject": st.column_config.SelectboxColumn(
+                "Subject",
+                help="The subject of the triplet",
+                width="medium",
+                options=[
+                    list(SUBJ_DISPLAY_NAME_MAP.values())
+                ],
+                required=True,
+            ),
+            "predicate": st.column_config.SelectboxColumn(
+                "Predicate",
+                help="The predicate of the triplet",
+                width="medium",
+                options=predicate_display_names,
+                required=True,
+            ),
+            "object": st.column_config.SelectboxColumn(
+                "Object",
+                help="The object of the triplet",
+                width="medium",
+                options=unique_objs,
+                required=True,
+            )
+        },
+        hide_index=True, num_rows="dynamic"
+    )
+
+    return edited_df
+
+
+
+def log_pred_wandb(wandb_run, result, triplet_df: pd.DataFrame, human_label: str = "", labeler_name: str = ""):
 
     # get a unique ID for this prediction
     pred_uid = shortuuid.ShortUUID().random(length=8)
@@ -101,14 +155,12 @@ def log_pred_wandb(wandb_run, result, human_label: str = "", labeler_name: str =
     table =  wandb.Table(data=data, columns=columns)
     artifact.add(table, "predictions")
 
+    # add triplet dataframe
+    artifact.add(wandb.Table(dataframe=triplet_df), "triplets")
+
     # log immediately since we don't know when user will close the session
     wandb.log_artifact(artifact)
     
-
-
-
-
-
    
 
 def init_wandb_run(model_config):
@@ -184,7 +236,7 @@ def scrape_post(post_url):
 def process_text(text, model):
     # parse text
     with st.spinner('Parsing text...'):
-        result = model.process_text(text)
+        result = model.process_text(text, author="unknown", source="raw_text_input")
         # st.write(result["answer"])
         return result
 
@@ -208,8 +260,6 @@ if __name__ == "__main__":
     # initialize config
     config_path = arguments.get('--config')
     config = load_config(config_path)
-
-    
     
 
     st.title("LLM Nanopublishing assistant demo")
@@ -220,22 +270,16 @@ if __name__ == "__main__":
     input_section = st.container()
     nanobot_section = st.container()
     bottom_section = st.container()
-    
+
+
+    # label description section
+    labels_descriptions = [f"{d['display_name']}: {d['description']}" for d in TEMPLATES.values()]
+    labels_text = "\n\n".join(labels_descriptions)
     
     with pre_amble_section:
-        st.markdown('''The bot will categorize a tweet as one of the following types:''')
+        st.markdown('''The bot will categorize a post as one or a few of the following types:''')
         with st.expander("Label types"):
-            st.markdown('''
-            - Announcement: post announcing a paper, dataset or other type of research output.
-            - Job: for a post that describes a job listing, for example a call for graduate students or faculty. applications.
-            - Review: review of another reference, such as a book, article or movie. The review can be detailed or a simple short endorsement.
-            - Event: Either real-world or an online event. Any kind of event is relevant, some examples of events could be seminars, meetups, or hackathons.
-            - Reading: Post describes the reading status of the author in relation to a reference, such as a book or article. The author may either have read the reference in the past, is reading the reference in the present, or is looking forward to reading the reference in the future.
-            - Listening: Post describes the listening status of the author in relation to a reference, such as a podcast or talk. The author may have listened to the content in the past, is listening to the content in the present, or is looking forward to listening the content in the future.
-            - Recommendation: The author is recommending any kind of content: an article, a movie, podcast, book, another post, etc. This tag can also be used for cases of implicit recommendation, where the author is expressing enjoyment of some content but not explicitly recommending it.
-            - Quote: A post is quoting text from an article it's referring to.
-            - Discussion: Post discusses how the cited reference relates to other facts or claims. For example, a post might discuss how the cited reference informs questions, provides evidence, or supports or opposes claims.
-            - Other: used if none of the tags above are suitable.''')
+            st.markdown(labels_text)
         
             st.markdown("""👷In the future, more types will be added, this is just a hacky demo!""")
 
@@ -302,16 +346,19 @@ if __name__ == "__main__":
                 selected = st.multiselect("Predicted tags", OPTIONS, st.session_state.result["answer"]["multi_tag"], disabled=True)
             else:
                 selected = []
-            
 
+            # display editable table of predicted triplets
+            rows = create_triples_from_prediction(st.session_state.result)
+
+            # create dataframe from rows
+            df = pd.DataFrame(rows, columns=["subject", "predicate" ,"object"])
+
+            # form to edit prediction and submit results for logging purposes
             with st.form("log_form"):
-                
-                if "answer" in st.session_state.result:
-                    selected_human = st.multiselect("Are these actually the right tags? Choose the tags you think fit best (or leave the predicted options) and click 'Log Results'!", OPTIONS, st.session_state.result["answer"]["multi_tag"])
-                else:
-                    selected_human = []
-                
-                
+
+                st.markdown("Are these actually the right triplets? Choose the relations you think fit best by editing/adding/removing triplets (or leave the predicted options), and then click 'Log Results'!")
+
+                edited_df = predicate_data_editor(df)
                 
                 labeler_name = st.text_input("Optionally add your name or other identifier.", "")
                 log_results_btn = st.form_submit_button("Log results")
@@ -322,20 +369,18 @@ if __name__ == "__main__":
                 if log_results_btn:
                 # log results
                     
-                    if "other" in selected_human:
-                        # user selected 'other' label - let them write a new one if they want
-                        other_label_text = st.text_input("You selected the 'other' tag, so before we log the results - please add a new label you were thinking of (or simply write 'other') and press enter!")
-                        if not other_label_text:
-                            st.warning('Please input a new label.')
-                            st.stop()
-                        else:
-                            selected_human += [f"other:{other_label_text}"]
+                    # get labels selected by human
+                    selected_human = list(edited_df.predicate.unique())
+ 
+                    # convert from predicate display names to labels
+                    converted_to_labels = [TEMPLATES[DISP_NAME_TEMPLATES_MAP[x]]["label"] for x in selected_human if x in DISP_NAME_TEMPLATES_MAP]
+                    
                     
                     with st.spinner("Logging result..."):
                         # log results to wandb DB
                         pred = list(st.session_state.result["answer"]["multi_tag"])
                         wandb_run = init_wandb_run(model.config)
-                        log_pred_wandb(wandb_run, st.session_state.result, selected_human, labeler_name)
+                        log_pred_wandb(wandb_run, st.session_state.result, edited_df, converted_to_labels, labeler_name)
                         wandb_run.finish()
                     st.success("Logged results!")
                     st.session_state.clicked_run = False

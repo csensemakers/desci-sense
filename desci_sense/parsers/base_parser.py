@@ -13,7 +13,7 @@ from langchain.schema import (
     HumanMessage,
 )
 
-
+from ..dataloaders import convert_text_to_ref_post
 from ..dataloaders.twitter.twitter_utils import scrape_tweet, extract_external_ref_urls
 from ..dataloaders.mastodon.mastodon_utils import scrape_mastodon_post, extract_external_masto_ref_urls
 from ..utils import extract_and_expand_urls, identify_social_media
@@ -66,11 +66,12 @@ class BaseParser:
 
         self.chain = self.prompt_template | self.model | self.output_parser
         
-    def process_text(self, text: str):
+    def process_text(self, text: str, author: str = "deafult_author", 
+                                        source: str = "default_source"):
         # print("Text received: ", text)
         # process tweet in the format of the output of scrape_tweet
 
-        answer = self.chain.invoke({"text": text})
+        # answer = self.chain.invoke({"text": text})
 
         # check if there is an external link in this post - if not, tag as <no-ref>
         # expanded_urls = extract_and_expand_urls(text)
@@ -83,9 +84,11 @@ class BaseParser:
         #     answer = self.chain.invoke({"text": text})
 
         # TODO fix results
-        result = {"text": text,
-                  "answer": answer
-                  }
+
+        # convert text to RefPost
+        post: RefPost = convert_text_to_ref_post(text, author, source)
+
+        result = self.process_ref_post(post)
 
         return result
 
