@@ -1,12 +1,13 @@
 """Script to run evaluation of label prediction models.
 
 Usage:
-  eval_benchmark_v0.py [--config=<config>] [--dataset=<dataset>]
+  eval_benchmark_v0.py [--config=<config>] [--dataset=<dataset>] [--file=<file>]
 
 
 Options:
 --config=<config>  Optional path to configuration file.
---dataset=<dataset> Optional path to table in wandb.
+--dataset=<dataset> Optional path to a wandb artifact.
+--file=<file> Optional file name e.g. labeled_dataset.table.json indeed it should be a table.json format
 
 """
 
@@ -19,15 +20,14 @@ import os
 import docopt
 import re
 from sklearn.preprocessing import MultiLabelBinarizer
-from sklearn.metrics import precision_recall_fscore_support
+from sklearn.metrics import precision_recall_fscore_support, accuracy_score, multilabel_confusion_matrix
 
 
 
 
 sys.path.append(str(Path(__file__).parents[2]))
 
-from desci_sense.demos.st_demo import init_model, load_config
-
+from desci_sense.runner import init_model, load_config
 
 #get a path to a wandb table and populate it in a pd data frame
 def get_dataset(table_path):
@@ -83,18 +83,24 @@ def calculate_scores(df):
     # Calculate precision, recall, f1_score, support
     precision, recall, f1_score, support = precision_recall_fscore_support(y_true, y_pred, average='samples')
 
-    print('Precision: ', precision)
-    print('Recall: ', recall)
-    print('F1 score: ', f1_score)
-    print('Support: ', support)
+    #calculate accuracy
+    accuracy = accuracy_score(y_pred=y_pred,y_true=y_true)
 
-    return precision,recall,f1_score,support
+    # Calculate the confusion matrix using sklearn for each class/label
+    cms = multilabel_confusion_matrix(y_true, y_pred)
+
+    # Get class labels
+    labels = mlb.classes_
+
+    return precision,recall,f1_score,support,accuracy, labels, cms
 #def create_evaluation_artifact(df,)
       
 arguments = docopt.docopt(__doc__)
 #tqdm on prediction for loop
 # initialize config
 config_path = arguments.get('--config')
+dataset_path = arguments.get('--dataset')
+file_name = arguments.get('--file')
 config = load_config(config_path)
 
 # initialize table path
@@ -103,10 +109,15 @@ wandb.login()
 
 api = wandb.Api()
 
-run = wandb.init(project="testing",job_type="evaluation")
+run = wandb.init(project="evaluation_benchmark",job_type="evaluation")
 
-dataset_artifact_id = "common-sense-makers/testing/labeled_data_v0:latest"
+#get artifact path
+if dataset_path:
+    dataset_artifact_id = dataset_path
+else:
+    dataset_artifact_id = 'common-sense-makers/evaluation_benchmark/dataset_for_eval:latest'
 
+#set artifact as input artifact
 dataset_artifact = run.use_artifact(dataset_artifact_id)
 
 # initialize table path
@@ -114,7 +125,12 @@ dataset_artifact = run.use_artifact(dataset_artifact_id)
 
 #download path to table
 a_path = dataset_artifact.download()
-table_path = Path(f"{a_path}/labeled_data_table.table.json")
+
+#get file name
+if file_name:
+    table_path = Path(f"{a_path}/{file_name}")
+else:
+    table_path = Path(f"{a_path}/labeled_data.table.json")
 
 #return the pd df from the table
 df = get_dataset(table_path)
@@ -126,7 +142,7 @@ normalize_df(df)
 
 
 
-precision,recall,f1_score,support = calculate_scores(df)
+precision,recall,f1_score,support,accuracy, labels, cms = calculate_scores(df)
 
 #Create the evaluation artifact
 artifact = wandb.Artifact("prediction_evaluation", type="evaluation")
@@ -137,17 +153,33 @@ table = wandb.Table(dataframe=df)
 # Add the wandb.Table to the artifact
 artifact.add(table, "prediction_evaluation")
 
+#meta data and scores to log
+meta_data = {
+    'dataest_size':len(df),
+    'precision':precision,
+    'recall':recall,
+    'f1_score':f1_score,
+    'accuracy':accuracy
+    }
+
 #add the scores as metadata
-artifact.metadata.update({'Precision': precision, 'Recall':recall, 'F1 score': f1_score})
+artifact.metadata.update(meta_data)
 
 # model_info is your model metadata
 run.config.update(config) 
 
+# Log the confusion matrices to wandb
+for label, cm in zip(labels, cms):
+    wandb.log({f"confusion_matrix_{label}": wandb.plots.HeatMap(
+        ["False", "True"], 
+        ["False", "True"], 
+        cm, 
+        show_text=True
+    )})
+
 #log scores as summary of the run
 #note that the scores are actually calculated in the cells above.
-run.summary["precision"] = precision
-run.summary["recall"] = recall
-run.summary["f1_score"] = f1_score
+run.summary.update(meta_data)
 
 
 # Log the artifact
