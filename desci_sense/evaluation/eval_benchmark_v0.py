@@ -94,95 +94,97 @@ def calculate_scores(df):
 
     return precision,recall,f1_score,support,accuracy, labels, cms
 #def create_evaluation_artifact(df,)
-      
-arguments = docopt.docopt(__doc__)
-#tqdm on prediction for loop
-# initialize config
-config_path = arguments.get('--config')
-dataset_path = arguments.get('--dataset')
-file_name = arguments.get('--file')
-config = load_config(config_path)
 
-# initialize table path
+if __name__=='__main__':
 
-wandb.login()
+    arguments = docopt.docopt(__doc__)
 
-api = wandb.Api()
+    # initialize config
+    config_path = arguments.get('--config')
+    dataset_path = arguments.get('--dataset')
+    file_name = arguments.get('--file')
+    config = load_config(config_path)
 
-run = wandb.init(project="evaluation_benchmark",job_type="evaluation")
+    # initialize table path
 
-#get artifact path
-if dataset_path:
-    dataset_artifact_id = dataset_path
-else:
-    dataset_artifact_id = 'common-sense-makers/evaluation_benchmark/dataset_for_eval:latest'
+    wandb.login()
 
-#set artifact as input artifact
-dataset_artifact = run.use_artifact(dataset_artifact_id)
+    api = wandb.Api()
 
-# initialize table path
-#add the option to call table_path =  arguments.get('--dataset')
+    run = wandb.init(project="evaluation_benchmark",job_type="evaluation")
 
-#download path to table
-a_path = dataset_artifact.download()
+    #get artifact path
+    if dataset_path:
+        dataset_artifact_id = dataset_path
+    else:
+        dataset_artifact_id = 'common-sense-makers/evaluation_benchmark/dataset_for_eval:latest'
 
-#get file name
-if file_name:
-    table_path = Path(f"{a_path}/{file_name}")
-else:
-    table_path = Path(f"{a_path}/labeled_data.table.json")
+    #set artifact as input artifact
+    dataset_artifact = run.use_artifact(dataset_artifact_id)
 
-#return the pd df from the table
-df = get_dataset(table_path)
+    # initialize table path
+    #add the option to call table_path =  arguments.get('--dataset')
 
-pred_labels(df)
+    #download path to table
+    a_path = dataset_artifact.download()
 
-#make sure df can be binarized
-normalize_df(df)
+    #get file name
+    if file_name:
+        table_path = Path(f"{a_path}/{file_name}")
+    else:
+        table_path = Path(f"{a_path}/labeled_data.table.json")
 
+    #return the pd df from the table
+    df = get_dataset(table_path)
 
+    pred_labels(df)
 
-precision,recall,f1_score,support,accuracy, labels, cms = calculate_scores(df)
-
-#Create the evaluation artifact
-artifact = wandb.Artifact("prediction_evaluation", type="evaluation")
-
-# Create a wandb.Table from the Pandas DataFrame
-table = wandb.Table(dataframe=df)
-
-# Add the wandb.Table to the artifact
-artifact.add(table, "prediction_evaluation")
-
-#meta data and scores to log
-meta_data = {
-    'dataest_size':len(df),
-    'precision':precision,
-    'recall':recall,
-    'f1_score':f1_score,
-    'accuracy':accuracy
-    }
-
-#add the scores as metadata
-artifact.metadata.update(meta_data)
-
-# model_info is your model metadata
-run.config.update(config) 
-
-# Log the confusion matrices to wandb
-for label, cm in zip(labels, cms):
-    wandb.log({f"confusion_matrix_{label}": wandb.plots.HeatMap(
-        ["False", "True"], 
-        ["False", "True"], 
-        cm, 
-        show_text=True
-    )})
-
-#log scores as summary of the run
-#note that the scores are actually calculated in the cells above.
-run.summary.update(meta_data)
+    #make sure df can be binarized
+    normalize_df(df)
 
 
-# Log the artifact
-wandb.log_artifact(artifact, aliases=["latest"])
 
-wandb.run.finish()
+    precision,recall,f1_score,support,accuracy, labels, cms = calculate_scores(df)
+
+    #Create the evaluation artifact
+    artifact = wandb.Artifact("prediction_evaluation", type="evaluation")
+
+    # Create a wandb.Table from the Pandas DataFrame
+    table = wandb.Table(dataframe=df)
+
+    # Add the wandb.Table to the artifact
+    artifact.add(table, "prediction_evaluation")
+
+    #meta data and scores to log
+    meta_data = {
+        'dataest_size':len(df),
+        'precision':precision,
+        'recall':recall,
+        'f1_score':f1_score,
+        'accuracy':accuracy
+        }
+
+    #add the scores as metadata
+    artifact.metadata.update(meta_data)
+
+    # model_info is your model metadata
+    run.config.update(config) 
+
+    # Log the confusion matrices to wandb
+    for label, cm in zip(labels, cms):
+        wandb.log({f"confusion_matrix_{label}": wandb.plots.HeatMap(
+            ["False", "True"], 
+            ["False", "True"], 
+            cm, 
+            show_text=True
+        )})
+
+    #log scores as summary of the run
+    #note that the scores are actually calculated in the cells above.
+    run.summary.update(meta_data)
+
+
+    # Log the artifact
+    wandb.log_artifact(artifact, aliases=["latest"])
+
+    wandb.run.finish()
