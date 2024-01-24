@@ -17,6 +17,7 @@ import json
 import pandas as pd
 import sys
 import os
+from tqdm import tqdm
 import docopt
 import re
 from sklearn.preprocessing import MultiLabelBinarizer
@@ -47,13 +48,14 @@ def get_dataset(table_path):
 def pred_labels(df):
     
     model = init_model(config)
-    for i in range(len(df['Text'])):
-        print('in iteration',i)
-        response = model.process_text({'text':df['Text'][i]})
+    for i in tqdm(range(len(df)),desc="Processing",unit="pred"):
+        #print('in iteration',i)
+        response = model.process_text(df['Text'][i])
         df['Predicted Label'][i] = response['answer']['multi_tag']
         df['Reasoning Steps'][i] = response['answer']['reasoning']
-        print('Predicted Label: ',df['Predicted Label'][i])
-    print(tuple(zip(df['Predicted Label'],df['True Label'])))
+        
+        """ print('Predicted Label: ',df['Predicted Label'][i])
+    print(tuple(zip(df['Predicted Label'],df['True Label'])))"""
     
 #values are returned as string, we want them as lists
 def normalize_df(df):
