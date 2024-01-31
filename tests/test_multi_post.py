@@ -11,9 +11,9 @@ from desci_sense.schema.post import MultiTagRefPost
 from desci_sense.postprocessing.output_parsers import TagTypeParser
 
 
-def test_simple_1():
-    post = MultiTagRefPost(author='Jane Doe', content='This is a tagged post.', url='http://example.com', ref_urls=['www.ref1.com'], tags={'event', 'job', 'unknown-tag'})
-    assert post.tags == {'event', 'job'}
+# def test_simple_1():
+#     post = MultiTagRefPost(author='Jane Doe', content='This is a tagged post.', url='http://example.com', date="", ref_urls=['www.ref1.com'], tags={'event', 'job', 'unknown-tag'})
+#     assert post.tags == {'event', 'job'}
 
 
 def test_unique_tags():

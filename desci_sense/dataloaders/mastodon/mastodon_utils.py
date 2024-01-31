@@ -2,13 +2,36 @@
 import requests
 import re
 
+
+from datetime import datetime
 from urllib.parse import urlparse
 
 from ...schema.post import RefPost
 from ...utils import convert_html_to_plain_text, extract_and_expand_urls, normalize_url
 
 
-def extract_external_masto_ref_urls(post: RefPost, add_qrt_url: bool = True):
+def convert_mastodon_time_to_datetime(date_str):
+    """
+    Convert a date string in ISO 8601 format to a datetime object.
+
+    Args:
+    date_str (str): A string representing the date in ISO 8601 format.
+
+    Returns:
+    datetime: A datetime object representing the given date and time.
+    """
+    # Define the format string corresponding to the '2023-11-13T16:15:47.094Z' format
+    format_str = '%Y-%m-%dT%H:%M:%S.%fZ'
+
+    # Convert the string to a datetime object
+    try:
+        return datetime.strptime(date_str, format_str)
+    except ValueError as e:
+        print(f"Error in date conversion: {e}")
+        return None
+
+
+def extract_external_masto_ref_urls(post: dict, add_qrt_url: bool = True):
     """
     Extract list of URLs referenced by this post (in the post text body).
     Shortened URLs are expanded to long form.
@@ -59,6 +82,7 @@ def convert_post_json_to_ref_post(post_json: dict) -> RefPost:
     text = convert_html_to_plain_text(post_json["content"])
     post_json["plain_content"] = text
     url = post_json["url"]
+    created_at = convert_mastodon_time_to_datetime(post_json["created_at"])
     
     # extract external reference urls from post
     ext_ref_urls = extract_external_masto_ref_urls(post_json)
@@ -68,6 +92,7 @@ def convert_post_json_to_ref_post(post_json: dict) -> RefPost:
     post = RefPost(author=author,
                 content=text,
                 url=url,
+                created_at=created_at,
                 source_network="mastodon",
                 metadata=post_json,
                 ref_urls=ext_ref_urls)

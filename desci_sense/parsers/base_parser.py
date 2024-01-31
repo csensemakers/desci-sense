@@ -66,23 +66,8 @@ class BaseParser:
 
         self.chain = self.prompt_template | self.model | self.output_parser
         
-    def process_text(self, text: str, author: str = "deafult_author", 
+    def process_text(self, text: str, author: str = "default_author", 
                                         source: str = "default_source"):
-        # print("Text received: ", text)
-        # process tweet in the format of the output of scrape_tweet
-
-        # answer = self.chain.invoke({"text": text})
-
-        # check if there is an external link in this post - if not, tag as <no-ref>
-        # expanded_urls = extract_and_expand_urls(text)
-
-        # if not expanded_urls:
-        #     answer = {"reasoning": "[System msg: no urls detected - categorizing as <no-ref>]", 
-        #                      "final_answer": "<no-ref>"}
-        # else:
-        #     # url detected, process to find relation of text to referenced url
-        #     answer = self.chain.invoke({"text": text})
-
         # TODO fix results
 
         # convert text to RefPost

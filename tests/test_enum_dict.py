@@ -20,6 +20,12 @@ class Size(EnumDictKey):
     MEDIUM = "MEDIUM"
     LARGE = "LARGE"
 
+
+class PromptCase(EnumDictKey):
+    ZERO_REF = "ZERO_REF"
+    SINGLE_REF = "SINGLE_REF"
+    MULTI_REF = "MULTI_REF"
+
 def test_init_with_valid_enum():
     """Test initialization with a valid EnumDictKey subclass."""
     try:
@@ -57,3 +63,9 @@ def test_multiple_enum_types():
     
     assert color_dict[Color.RED] == 'red'
     assert size_dict[Size.SMALL] == 'small'
+
+
+def test_prompt_case_enum_types():
+    prompt_dict = EnumDict(PromptCase)
+    prompt_dict[PromptCase.ZERO_REF] = 123
+    assert prompt_dict["ZERO_REF"] == 123

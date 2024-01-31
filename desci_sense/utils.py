@@ -1,5 +1,6 @@
 import re
 import requests
+from enum import Enum
 import html2text
 from urllib.parse import urlparse
 from url_normalize import url_normalize

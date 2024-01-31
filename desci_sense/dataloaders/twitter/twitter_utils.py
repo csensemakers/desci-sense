@@ -4,14 +4,75 @@
 from typing import Optional, Union
 import re
 import requests
+from datetime import datetime
 
 from ...schema.post import RefPost
 from ...utils import extract_and_expand_urls, extract_twitter_status_id, normalize_url
 
-def do_work(data: dict) -> None:
-    # do actual work with data
-    return data
 
+def convert_twitter_time_to_datetime(date_str):
+    """
+    Convert a date string in Twitter format to a datetime object.
+
+    Args:
+    date_str (str): A string representing the date in Twitter format.
+
+    Returns:
+    datetime: A datetime object representing the given date and time.
+    """
+    # Define the format string corresponding to the '2023-11-13T16:15:47.094Z' format
+    format_str = '%a %b %d %H:%M:%S %z %Y'
+
+    # Convert the string to a datetime object
+    try:
+        return datetime.strptime(date_str, format_str)
+    except ValueError as e:
+        print(f"Error in date conversion: {e}")
+        return None
+
+
+# https://twitter.com/rtk254/status/1750149313399832818
+def convert_archive_tweet_to_ref_post(data: dict, user_name: str) -> RefPost:
+    """
+    Convert a raw twitter post (dict format) from twitter archive to RefPost format
+    """
+    tweet = data["tweet"]
+    author = user_name
+    text = tweet["full_text"]
+    url = f"https://twitter.com/{user_name}/status/{tweet['id']}"
+    created_at = convert_twitter_time_to_datetime(tweet["created_at"])
+
+    # extract external reference urls from post
+    ext_ref_urls = [url_data["expanded_url"] for url_data in tweet["entities"]["urls"]]
+
+    post = RefPost(author=author,
+                content=text,
+                url=url,
+                created_at=created_at,
+                source_network="twitter",
+                ref_urls=ext_ref_urls)
+    return post
+
+def convert_vxtweet_to_ref_post(tweet: dict) -> RefPost:
+    """
+    Convert a raw twitter post (dict format) from vxtwitter API to RefPost format
+    """
+    author = tweet["user_name"]
+    text = tweet["text"]
+    url = tweet["tweetURL"]
+    date = convert_twitter_time_to_datetime(tweet["date"])
+
+    # extract external reference urls from post
+    ext_ref_urls = extract_external_ref_urls(tweet)
+
+    post = RefPost(author=author,
+                content=text,
+                url=url,
+                created_at=date,
+                source_network="twitter",
+                metadata=tweet,
+                ref_urls=ext_ref_urls)
+    return post
 
 def scrape_tweet(tweet_id: Union[str, int]) -> RefPost:
     response = requests.get(url=f"https://api.vxtwitter.com/Twitter/status/{tweet_id}")
@@ -19,24 +80,13 @@ def scrape_tweet(tweet_id: Union[str, int]) -> RefPost:
         print("Couldn't get tweet.")
         return
     try:
-        data = do_work(response.json())
-        author = data["user_name"]
-        text = data["text"]
-        url = data["tweetURL"]
-
-        # extract external reference urls from post
-        ext_ref_urls = extract_external_ref_urls(data)
-
-        post = RefPost(author=author,
-                    content=text,
-                    url=url,
-                    source_network="twitter",
-                    metadata=data,
-                    ref_urls=ext_ref_urls)
+        data = response.json()
+        post: RefPost = convert_vxtweet_to_ref_post(data)
         return post
     except requests.JSONDecodeError:
         print("Couldn't decode response.")
         return
+
 
 
 def extract_status_id(url):
@@ -64,8 +114,9 @@ def extract_external_ref_urls(tweet: dict, add_qrt_url: bool = True):
 
     # add qrt url if this was a qrt
     if add_qrt_url:
-        if tweet["qrtURL"]:
-            urls += [tweet["qrtURL"]]
+        qrt_url = tweet.get("qrtURL", None)
+        if qrt_url:
+            urls += [qrt_url]
 
     # normalize urls
     urls = [normalize_url(u) for u in urls]

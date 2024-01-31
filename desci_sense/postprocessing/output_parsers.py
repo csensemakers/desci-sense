@@ -36,9 +36,15 @@ def extract_tags(input_text: str, tags: List[str]) -> List[str]:
 class TagTypeParser(BaseOutputParser):
     """Parse the output of an LLM call to a dict ."""
 
-    @classmethod
-    def tags(cls):
-        return PostTagsDataModel.tags()
+    allowed_tags: List[str] = None
+
+    @property
+    def valid_tags(self):
+        if self.allowed_tags:
+            return self.allowed_tags
+        else:
+            # TODO remove PostTagsDataModel.tags() - only for backwards compatiblity
+            return PostTagsDataModel.tags()
 
     def parse(self, text: str):
         """Parse the output of an LLM call."""
@@ -66,7 +72,7 @@ class TagTypeParser(BaseOutputParser):
         final_reasoning = "[Reasoning Steps]\n\n" + reasoning_steps.strip() + "\n\n[Candidate Tags]\n\n" + candidate_tags.strip()
 
         # force final answer to conform to closed set of tags
-        multi_tags = extract_tags(final_answer, TagTypeParser.tags())
+        multi_tags = extract_tags(final_answer, self.valid_tags)
 
         # if we only want to choose single tag - take first
         single_tag = multi_tags[:1]

@@ -12,9 +12,11 @@ Options:
 """
 
 import sys
+from typing import List
 import os
 from docopt import docopt
 from pathlib import Path
+from loguru import logger
 
 sys.path.append(str(Path(__file__).parents[2]))
 
@@ -29,18 +31,20 @@ from desci_sense.schema.post import RefPost
 from desci_sense.prompting.post_tags_pydantic import PostTagsDataModel
 
 from desci_sense.semantic_publisher import create_triples_from_prediction
-from desci_sense.schema.templates import TEMPLATES, LABEL_TEMPLATE_MAP, DEFAULT_PREDICATE_LABEL, DISP_NAME_TEMPLATES_MAP
+# from desci_sense.schema.templates import TEMPLATES, LABEL_TEMPLATE_MAP, DEFAULT_PREDICATE_LABEL, DISP_NAME_TEMPLATES_MAP
 
+from desci_sense.schema.notion_ontology_base import NotionOntologyBase
+from desci_sense.dataloaders import scrape_post
 from desci_sense.dataloaders.twitter.twitter_utils import scrape_tweet
 from desci_sense.dataloaders.mastodon.mastodon_utils import scrape_mastodon_post
 from desci_sense.configs import ST_OPENROUTER_REFERRER, init_config
 from desci_sense.utils import identify_social_media
 from desci_sense.runner import init_model, load_config
-from desci_sense.schema.templates import PREDICATE_LABELS
+# from desci_sense.schema.templates import PREDICATE_LABELS
 
 
 # add option for `other` tag for manual labelling
-OPTIONS = PREDICATE_LABELS + ["other"]
+# OPTIONS = PREDICATE_LABELS + ["other"]
 
 # display name for post for rendering in streamlit
 SUBJ_DISPLAY_NAME_MAP =  { 
@@ -59,16 +63,18 @@ if 'result' not in st.session_state:
 def click_run():
     st.session_state.clicked_run = True
 
-def predicate_data_editor(df: pd.DataFrame):
+def predicate_data_editor(df: pd.DataFrame, possible_labels: List[str], ontology: NotionOntologyBase):
     """Create editable dataframe displaying the prediction results 
 
     Args:
         df (pd.DataFrame): _description_
     """
-
+    label_map = ontology.label_df.loc[possible_labels].to_dict(orient="index")
+    # logger.debug(f"Possible labels: {possible_labels}")
+    
     df['subject'] = df['subject'].map(SUBJ_DISPLAY_NAME_MAP)
-    df['predicate'] = df['predicate'].apply(lambda x: TEMPLATES[LABEL_TEMPLATE_MAP[x]]["display_name"])
-    predicate_display_names = [p["display_name"] for _,p in TEMPLATES.items()]
+    df['predicate'] = df['predicate'].apply(lambda x: label_map[x]["display_name"])
+    predicate_display_names = ontology.label_df.loc[possible_labels].display_name.to_list()
     
     # Get unique values from the 'object' column
     unique_objs = df['object'].unique()
@@ -107,7 +113,8 @@ def predicate_data_editor(df: pd.DataFrame):
 
 
 
-def log_pred_wandb(wandb_run, result, triplet_df: pd.DataFrame, human_label: str = "", labeler_name: str = ""):
+def log_pred_wandb(wandb_run, result, triplet_df: pd.DataFrame, ontology_df: pd.DataFrame,
+                   human_label: str = "", labeler_name: str = ""):
 
     # get a unique ID for this prediction
     pred_uid = shortuuid.ShortUUID().random(length=8)
@@ -115,8 +122,10 @@ def log_pred_wandb(wandb_run, result, triplet_df: pd.DataFrame, human_label: str
     pred_name = f"pred_{wandb_run.id}_{pred_uid}"
     artifact = wandb.Artifact(pred_name, type="prediction")
 
-    columns = ["User", "URL", "Text", "Reasoning Steps", "Final Answer", "Predicted Label", "True Label", "Name of Label Provider" , "Post Source", "Prediction ID"]
-
+    columns = ["User", "URL", "Text", "Full Prompt", "Reasoning Steps", 
+               "Final Answer", "Predicted Label", "True Label", 
+               "Name of Label Provider" , "Post Source", "Prediction ID"]
+    
     # check if prediction was post or simple text
     if "post" in result:
         post: RefPost = result["post"]
@@ -124,6 +133,7 @@ def log_pred_wandb(wandb_run, result, triplet_df: pd.DataFrame, human_label: str
             post.author,
             post.url,
             post.content,
+            result.get("full_prompt", None),
             result['answer']['reasoning'],
             result['answer']['final_answer'],
             result['answer'].get("multi_tag", list()),
@@ -132,22 +142,8 @@ def log_pred_wandb(wandb_run, result, triplet_df: pd.DataFrame, human_label: str
             post.source_network,
             pred_name
         ]
-    elif "text" in result:
-        user_name = labeler_name if labeler_name != "" else "unknown app user"
-        pred_row = [
-            user_name,
-            "",
-            result["text"],
-            result['answer']['reasoning'],
-            result['answer']['final_answer'],
-            result['answer'].get("multi_tag", list()),
-            human_label, # if user supplied a label
-            labeler_name, # name of person who provided label
-            "user input",
-            pred_name
-        ]
     else:
-        raise ValueError("Result should have either text or post key!")
+        raise ValueError("Result should have `post` key!")
 
     data = [pred_row]
 
@@ -157,6 +153,9 @@ def log_pred_wandb(wandb_run, result, triplet_df: pd.DataFrame, human_label: str
 
     # add triplet dataframe
     artifact.add(wandb.Table(dataframe=triplet_df), "triplets")
+
+    # add ontology dataframe
+    artifact.add(wandb.Table(dataframe=ontology_df), "ontology")
 
     # log immediately since we don't know when user will close the session
     wandb.log_artifact(artifact)
@@ -197,40 +196,21 @@ def print_post(post: RefPost):
     st.divider()
 
 
-def scrape_tweet_post(tweet_url):
-    # scrape tweet
-    with st.spinner('Scraping tweet...'):
-        tweet = scrape_tweet(tweet_url)
-    st.success('Scraped tweet successfully!')  
 
-    return tweet
 
-def scrape_toot_post(toot_url):
-    # scrape tweet
-    with st.spinner('Scraping toot...'):
-        post = scrape_mastodon_post(toot_url)
-    st.success('Scraped toot successfully!')  
-
-    return post
-
-def scrape_post(post_url):
+def st_scrape_post(post_url):
     """
     Scrape Twitter or Mastodon post
     """
-    # check social media type
-    social_type = identify_social_media(post_url)
+    post = scrape_post(post_url)
 
-    if social_type == "twitter":
-        result = scrape_tweet(post_url)
-        
-    elif social_type == "mastodon":
-        result = scrape_toot_post(post_url)
-
-    else:
+    if not post:
         st.error('Could not detect post social media type. Please try another URL.', icon="🚨")
         st.stop()
+    else:
+        st.success('Scraped post successfully!')
 
-    return result
+    return post
 
 
 def process_text(text, model):
@@ -252,6 +232,10 @@ def process_post(post: RefPost, model):
         return result
 
 
+@st.cache_resource
+def load_model(config):
+    model = init_model(config)
+    return model
 
 if __name__ == "__main__":
 
@@ -260,7 +244,15 @@ if __name__ == "__main__":
     # initialize config
     config_path = arguments.get('--config')
     config = load_config(config_path)
+
     
+    
+    with st.spinner("Creating model..."):
+        model = load_model(config)
+        ontology = model.ontology
+    
+    # add set of possible predicate labels available in this run
+    config["prompt"]["tags"] = ontology.get_all_labels()
 
     st.title("LLM Nanopublishing assistant demo")
     
@@ -273,7 +265,7 @@ if __name__ == "__main__":
 
 
     # label description section
-    labels_descriptions = [f"{d['display_name']}: {d['description']}" for d in TEMPLATES.values()]
+    labels_descriptions = [f"{d['display_name']}: {d['prompt']}" for d in ontology.template_type_df.to_dict(orient="records")]
     labels_text = "\n\n".join(labels_descriptions)
     
     with pre_amble_section:
@@ -294,8 +286,7 @@ if __name__ == "__main__":
                         https://mastodon.social/@yoginho@spore.social/111335863558977253
                         ''',language='markdown')
 
-        with st.spinner("Creating model..."):
-            model = init_model(config)
+        
 
     with bottom_section:
         st.divider()
@@ -315,7 +306,7 @@ if __name__ == "__main__":
             target_text = user_text
 
         if post_url:
-            post = scrape_post(post_url)
+            post = st_scrape_post(post_url)
             print_post(post)
             target_text = post.content
             
@@ -343,7 +334,7 @@ if __name__ == "__main__":
 
         if st.session_state.clicked_run:
             if "answer" in st.session_state.result:
-                selected = st.multiselect("Predicted tags", OPTIONS, st.session_state.result["answer"]["multi_tag"], disabled=True)
+                selected = st.multiselect("Predicted tags", st.session_state.result["possible_labels"], st.session_state.result["answer"]["multi_tag"], disabled=True)
             else:
                 selected = []
 
@@ -358,7 +349,7 @@ if __name__ == "__main__":
 
                 st.markdown("Are these actually the right triplets? Choose the relations you think fit best by editing/adding/removing triplets (or leave the predicted options), and then click 'Log Results'!")
 
-                edited_df = predicate_data_editor(df)
+                edited_df = predicate_data_editor(df, st.session_state.result["possible_labels"], ontology)
                 
                 labeler_name = st.text_input("Optionally add your name or other identifier.", "")
                 log_results_btn = st.form_submit_button("Log results")
@@ -368,19 +359,19 @@ if __name__ == "__main__":
                 
                 if log_results_btn:
                 # log results
-                    
                     # get labels selected by human
                     selected_human = list(edited_df.predicate.unique())
  
                     # convert from predicate display names to labels
-                    converted_to_labels = [TEMPLATES[DISP_NAME_TEMPLATES_MAP[x]]["label"] for x in selected_human if x in DISP_NAME_TEMPLATES_MAP]
+                    converted_to_labels = [ontology.display_name_df.loc[x]["label"] for x in selected_human if x in ontology.display_name_df.index]
                     
                     
                     with st.spinner("Logging result..."):
                         # log results to wandb DB
                         pred = list(st.session_state.result["answer"]["multi_tag"])
                         wandb_run = init_wandb_run(model.config)
-                        log_pred_wandb(wandb_run, st.session_state.result, edited_df, converted_to_labels, labeler_name)
+                        log_pred_wandb(wandb_run, st.session_state.result, edited_df, ontology.ont_df,
+                                       converted_to_labels, labeler_name)
                         wandb_run.finish()
                     st.success("Logged results!")
                     st.session_state.clicked_run = False

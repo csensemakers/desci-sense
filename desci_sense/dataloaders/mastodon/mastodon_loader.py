@@ -29,8 +29,8 @@ class MastodonLoader:
     def load_profiles(self,
                       mastodon_accounts: Sequence[str],
                     number_toots: Optional[int] = 5,
-                    exclude_replies: bool = False,
-                    exclude_reposts: bool = False) -> List[RefPost]:
+                    exclude_replies: bool = True,
+                    exclude_reposts: bool = True) -> List[RefPost]:
         """
         Return list of posts (toots) from selected accts.
 
@@ -40,18 +40,18 @@ class MastodonLoader:
             exclude_replies (bool, optional): Whether to exclude reply toots from the load.
                 Defaults to False.
             exclude_reposts (bool, optional): Whether to exclude reposts ("retoots") from the load.
-                Defaults to False.
+                Defaults to True.
         """
         results: List[RefPost] = []
         for account in mastodon_accounts:
             user = self.api.account_lookup(account)
             toots = self.api.account_statuses(
-                user.id,
+                user["id"],
                 only_media=False,
                 pinned=False,
                 exclude_replies=exclude_replies,
                 exclude_reblogs=exclude_reposts,
-                limit=number_toots,
+                limit=number_toots
             )
             docs = self._format_toots(toots, user)
             results.extend(docs)

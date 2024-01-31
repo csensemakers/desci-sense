@@ -4,8 +4,10 @@ openai==0.28.1
 pytest
 wandb
 docopt
+loguru
 confection
 shortuuid
 html2text
 Mastodon.py
 url_normalize
+notion-client

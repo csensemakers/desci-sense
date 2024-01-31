@@ -6,6 +6,7 @@ import asyncio
 from abc import ABC, abstractmethod
 from functools import partial
 from typing import Any, Literal, Sequence, List
+from datetime import datetime
 
 from langchain.load.serializable import Serializable
 from langchain.pydantic_v1 import Field
@@ -22,6 +23,8 @@ class Post(Serializable):
     """String text."""
     url: str
     """URL of the post."""
+    created_at: datetime = Field(default=None)
+    """Publishing date for the post."""
     metadata: dict = Field(default_factory=dict)
     """
     Arbitrary metadata about the post content (e.g., source, relationships to other
