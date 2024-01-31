@@ -29,7 +29,7 @@ from confection import Config
 from desci_sense.schema.post import RefPost
 
 from desci_sense.prompting.post_tags_pydantic import PostTagsDataModel
-
+from desci_sense.web_extractors.metadata_extractors import MetadataExtractionType
 from desci_sense.semantic_publisher import create_triples_from_prediction
 # from desci_sense.schema.templates import TEMPLATES, LABEL_TEMPLATE_MAP, DEFAULT_PREDICATE_LABEL, DISP_NAME_TEMPLATES_MAP
 
@@ -318,6 +318,14 @@ if __name__ == "__main__":
     selected = None
     with nanobot_section:
         st.markdown("### 🤖 Nanobot")
+
+        # let users select metadata extraction method type (or None)
+        md_values = [x.value for x in MetadataExtractionType]
+        metadata_type = st.radio("Select metadata extraction method:", options=md_values)
+        if "ref_metadata_method" in model.config["general"]:
+            model.set_md_extract_method(metadata_type)
+
+        
         start_run_btn = st.button("Run!", on_click=click_run)
         if start_run_btn:
             if post_url:

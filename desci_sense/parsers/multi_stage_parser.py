@@ -71,7 +71,7 @@ class MultiStageParser:
         self.config = config
 
         # get method for extracting metadata of references
-        self.md_extract_method = set_metadata_extraction_type(config["general"].get("ref_metadata_method", MetadataExtractionType.NONE.value))
+        self.set_md_extract_method(config["general"].get("ref_metadata_method", MetadataExtractionType.NONE.value))
 
 
         # if no api key passed as arg, default to environment config
@@ -111,7 +111,10 @@ class MultiStageParser:
         for case_dict in self.prompt_case_dict.values():
             self.all_labels += case_dict["labels"]
             
-    
+    def set_md_extract_method(self, md_extract_method: str):
+        logger.info(f"Setting metadata extraction method to {md_extract_method}...")
+        self.md_extract_method = set_metadata_extraction_type(md_extract_method)
+
     def init_prompt_case_dict(self, ontology: NotionOntologyBase):
         # organize information in ontology for quick retrieval by prompter
         prompt_case_dict = EnumDict(PromptCase)
