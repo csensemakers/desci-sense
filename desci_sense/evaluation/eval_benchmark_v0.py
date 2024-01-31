@@ -83,7 +83,7 @@ def calculate_scores(df):
 
     #calculate scores
     # Calculate precision, recall, f1_score, support
-    precision, recall, f1_score, support = precision_recall_fscore_support(y_true, y_pred, average='samples')
+    precision, recall, f1_score, support = precision_recall_fscore_support(y_true, y_pred, average=None)
 
     #calculate accuracy
     accuracy = accuracy_score(y_pred=y_pred,y_true=y_true)
@@ -96,6 +96,20 @@ def calculate_scores(df):
 
     return precision,recall,f1_score,support,accuracy, labels, cms
 #def create_evaluation_artifact(df,)
+
+#Log chart of metrics per label
+def score_chart_by_label(labels,precision,recall,f1_score):
+    df = pd.DataFrame({'Labels':labels,
+                       'Precision':precision,
+                       'Recall':recall,
+                       'F1 score':f1_score})
+    avg_row = pd.DataFrame({'Labels': 'Average',
+                            'Precision': pd.Series(precision).mean(),
+                            'Recall': pd.Series(recall).mean(),
+                            'F1 score': pd.Series(f1_score).mean()}, index=[0])
+    df = df._append(avg_row, ignore_index=True)
+    return df
+    
 
 if __name__=='__main__':
 
@@ -157,12 +171,17 @@ if __name__=='__main__':
     # Add the wandb.Table to the artifact
     artifact.add(table, "prediction_evaluation")
 
+    #Log score chart per label
+    score_chart = score_chart_by_label(labels,precision,recall,f1_score)
+
+    wandb.log({'Label Score Chart':wandb.Table(dataframe=score_chart)})
+
     #meta data and scores to log
     meta_data = {
         'dataest_size':len(df),
-        'precision':precision,
-        'recall':recall,
-        'f1_score':f1_score,
+        'precision':pd.Series(precision).mean(),
+        'recall':pd.Series(recall).mean(),
+        'f1_score':pd.Series(f1_score).mean(),
         'accuracy':accuracy
         }
 
