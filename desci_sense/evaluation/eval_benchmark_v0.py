@@ -88,13 +88,10 @@ def calculate_scores(df):
     #calculate accuracy
     accuracy = accuracy_score(y_pred=y_pred,y_true=y_true)
 
-    # Calculate the confusion matrix using sklearn for each class/label
-    cms = multilabel_confusion_matrix(y_true, y_pred)
-
     # Get class labels
     labels = mlb.classes_
 
-    return precision,recall,f1_score,support,accuracy, labels, cms
+    return precision,recall,f1_score,support,accuracy, labels
 #def create_evaluation_artifact(df,)
 
 #Log chart of metrics per label
@@ -160,7 +157,7 @@ if __name__=='__main__':
 
 
 
-    precision,recall,f1_score,support,accuracy, labels, cms = calculate_scores(df)
+    precision,recall,f1_score,support,accuracy, labels = calculate_scores(df)
 
     #Create the evaluation artifact
     artifact = wandb.Artifact("prediction_evaluation", type="evaluation")
@@ -190,15 +187,6 @@ if __name__=='__main__':
 
     # model_info is your model metadata
     run.config.update(config) 
-
-    # Log the confusion matrices to wandb
-    for label, cm in zip(labels, cms):
-        wandb.log({f"confusion_matrix_{label}": wandb.plots.HeatMap(
-            ["False", "True"], 
-            ["False", "True"], 
-            cm, 
-            show_text=True
-        )})
 
     #log scores as summary of the run
     #note that the scores are actually calculated in the cells above.
