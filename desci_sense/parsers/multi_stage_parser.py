@@ -177,7 +177,7 @@ class MultiStageParser:
     def all_allowed_template_types(self) -> List[dict]:
         all_template_types = []
         for case_dict in self.prompt_case_dict.values():
-            all_tags += case_dict["labels"]
+            all_template_types += case_dict["type_templates"]
     
     def process_by_case(self, post: RefPost, case: PromptCase, 
                         metadata_list: List[RefMetadata] = None) -> dict:
