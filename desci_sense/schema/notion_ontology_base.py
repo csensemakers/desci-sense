@@ -3,6 +3,17 @@ import os
 import pandas as pd
 from notion_client import Client
 
+def load_ontology_from_config(config):
+    # use keys if passed in config or otherwise take from environment settings.
+    db_id = config["ontology"].get("notion_db_id", None)
+    if not db_id:
+        db_id = os.environ.get("NOTION_SENSEBOT_DB", None)
+    if not db_id:
+        raise IOError("missing notion_db_id - must be set either in config or environment settings")
+    ontology = NotionOntologyBase(versions=config["ontology"]["versions"], notion_db_id=db_id)
+    return ontology
+
+
 def create_df_from_notion_db(raw_notion_db) -> pd.DataFrame:
     """ Load raw notion db representing ontology into a Dataframe"""
     data = []

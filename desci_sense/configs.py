@@ -64,7 +64,8 @@ def init_multi_stage_parser_config(model_name: str = "mistralai/mistral-7b-instr
                 multi_ref_template_name: str = "multi_ref_template.j2",
                 wandb_entity: str = "common-sense-makers",
                 wandb_project: str = WANDB_SANDBOX_PROJ,
-                ref_metadata_method: str = "citoid"
+                ref_metadata_method: str = "citoid",
+                notion_db_id: str = None
                 ):
     config = Config(
                     {
@@ -79,7 +80,8 @@ def init_multi_stage_parser_config(model_name: str = "mistralai/mistral-7b-instr
                             "temperature": temperature
                         },
                     "ontology": {
-                        "versions": versions
+                        "versions": versions,
+                        "notion_db_id": notion_db_id
                     },
                     "prompt": {
                         "template_dir": template_dir,

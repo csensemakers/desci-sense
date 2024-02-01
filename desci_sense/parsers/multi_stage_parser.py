@@ -13,7 +13,7 @@ from langchain.chat_models import ChatOpenAI
 from langchain.prompts import PromptTemplate
 
 import desci_sense.configs as configs
-from ..schema.notion_ontology_base import NotionOntologyBase
+from ..schema.notion_ontology_base import NotionOntologyBase, load_ontology_from_config
 from ..schema.post import RefPost
 from ..postprocessing.output_parsers import TagTypeParser
 from ..dataloaders import convert_text_to_ref_post, scrape_post
@@ -60,7 +60,6 @@ def load_prompt_j2_templates(templates_dir: str,
     
 
 
-
 class MultiStageParser:
     def __init__(self, 
                  config: Config,
@@ -96,7 +95,7 @@ class MultiStageParser:
 
         # load ontology
         logger.info("Loading ontology...")
-        self.ontology = NotionOntologyBase(versions=self.config["ontology"]["versions"])
+        self.ontology = load_ontology_from_config(self.config)
         
         # organize information in ontology for quick retrieval by prompter
         self.init_prompt_case_dict(self.ontology)
