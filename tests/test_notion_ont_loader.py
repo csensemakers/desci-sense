@@ -1,4 +1,5 @@
 import sys
+import os
 from pathlib import Path
 ROOT = Path(__file__).parents[1]
 sys.path.append(str(ROOT))
@@ -18,4 +19,12 @@ def test_load_notion_config_by_id():
     config = Config().from_disk(str(config_path))
     ontology = load_ontology_from_config(config)
     assert len(ontology.ont_df) == 1
+
+
+def test_load_notion_config_default():
+    # no notion db id provided in file - should load default
+    config_path = ROOT / "tests/etc/configs/notion_test_default.cfg"
+    config = Config().from_disk(str(config_path))
+    ontology = load_ontology_from_config(config)
+    assert ontology.db_id == os.environ["NOTION_SENSEBOT_DB"]
 

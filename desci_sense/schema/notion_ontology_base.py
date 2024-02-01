@@ -58,13 +58,13 @@ class NotionOntologyBase:
         
         # use keys if passed as args or otherwise take from environment settings.
         sensebot_key = notion_sensebot_api_key if notion_sensebot_api_key else os.environ["NOTION_SENSEBOT_TOKEN"]
-        db_id = notion_db_id if notion_db_id else os.environ["NOTION_SENSEBOT_DB"]
+        self.db_id = notion_db_id if notion_db_id else os.environ["NOTION_SENSEBOT_DB"]
 
         # create Notion client
         notion = Client(auth=sensebot_key)
 
         # Fetch the database
-        results = notion.databases.query(db_id)["results"]
+        results = notion.databases.query(self.db_id)["results"]
 
         # Process the results into a format suitable for DataFrame
         ont_df = create_df_from_notion_db(results)
