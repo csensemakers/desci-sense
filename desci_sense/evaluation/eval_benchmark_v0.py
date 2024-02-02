@@ -15,13 +15,14 @@ import wandb
 from pathlib import Path
 import json
 import pandas as pd
+import numpy as np
 import sys
 import os
 from tqdm import tqdm
 import docopt
 import re
 from sklearn.preprocessing import MultiLabelBinarizer
-from sklearn.metrics import precision_recall_fscore_support, accuracy_score, multilabel_confusion_matrix
+from sklearn.metrics import precision_recall_fscore_support, accuracy_score, confusion_matrix
 
 
 
@@ -68,19 +69,24 @@ def normalize_df(df):
     #df['Predicted Label'] = df['Predicted Label'].apply(lambda x: 'None' if pd.isnull(x) else x)    
     #df['Predicted Label'] = df['Predicted Label'].apply(lambda x: re.sub(r'\W+', ' ', x).split())    
 
-#assumes that the values on 'True Label' and 'Predicted Label' are lists 
-def calculate_scores(df):
-    #binarize for using skl scores
+def binarize(y_pred,y_true):
+    #binarize for using skl functions
     # Assume df['True label'] and df['Predicted label'] are your true and predicted labels
     mlb = MultiLabelBinarizer()
 
     # Binarize the labels
-    y_true = mlb.fit_transform(df['True Label'])
+    mlb.fit(y_pred+y_true)
+    
+    #binarize true and predicted labels vectors
+    y_true = mlb.transform(y_true)
 
-    #refine prediction word list to contain only allowed labels defined by all true labels
-    df['Predicted Label'] = df['Predicted Label'].apply(lambda x: [label for label in x if label in mlb.classes_])
-    y_pred = mlb.transform(df['Predicted Label']) 
-
+    y_pred = mlb.transform(y_pred)
+    print("y_pred: ",y_pred)
+    print("y_true: ",y_true)
+    return y_pred,y_true , mlb.classes_
+#assumes that the values on 'True Label' and 'Predicted Label' are lists 
+def calculate_scores(y_pred,y_true):
+    
     #calculate scores
     # Calculate precision, recall, f1_score, support
     precision, recall, f1_score, support = precision_recall_fscore_support(y_true, y_pred, average=None)
@@ -88,11 +94,33 @@ def calculate_scores(df):
     #calculate accuracy
     accuracy = accuracy_score(y_pred=y_pred,y_true=y_true)
 
-    # Get class labels
-    labels = mlb.classes_
+    #calculate label confusion chart
 
-    return precision,recall,f1_score,support,accuracy, labels
+
+    return precision,recall,f1_score,support,accuracy
 #def create_evaluation_artifact(df,)
+
+#Create a custom confusion matrix: on the diagonal you see the true positives
+# off the diagonal you see the false positives incase the row label was predicted as false negative
+
+def create_custom_confusion_matrix(y_true, y_pred, labels):
+    # Initialize an empty matrix
+    matrix = np.zeros((len(labels), len(labels)))
+
+    # Calculate confusion matrix for each label
+    for i, label_i in enumerate(labels):
+        for j, label_j in enumerate(labels):
+            if i == j:
+                # Diagonal: True Positives for label i
+                tp = confusion_matrix(y_true[:, i], y_pred[:, i]).ravel()[3]
+                matrix[i, i] = tp
+            else:
+                # Off-diagonal: i was true (fn for i) but j was predicted (fp for j)
+                fn_i = y_true[:, i] & ~y_pred[:, i]
+                fp_j = ~y_true[:, j] & y_pred[:, j]
+                matrix[i, j] = np.sum(fn_i & fp_j)
+
+    return pd.DataFrame(matrix, index=labels, columns=labels)
 
 #Log chart of metrics per label
 def score_chart_by_label(labels,precision,recall,f1_score):
@@ -155,9 +183,11 @@ if __name__=='__main__':
     #make sure df can be binarized
     normalize_df(df)
 
+    #return binarized predictions and true labels, as well as labels names
+    y_pred, y_true, labels = binarize(y_pred=df['Predicted Label'],y_true=df['True Label'])
 
-
-    precision,recall,f1_score,support,accuracy, labels = calculate_scores(df)
+    #calculate scores
+    precision,recall,f1_score,support,accuracy = calculate_scores(y_pred=y_pred,y_true=y_true)
 
     #Create the evaluation artifact
     artifact = wandb.Artifact("prediction_evaluation", type="evaluation")
@@ -172,6 +202,10 @@ if __name__=='__main__':
     score_chart = score_chart_by_label(labels,precision,recall,f1_score)
 
     wandb.log({'Label Score Chart':wandb.Table(dataframe=score_chart)})
+
+    #Log c
+    matrix = create_custom_confusion_matrix(y_true=y_true,y_pred=y_pred,labels=labels)
+    print(matrix)
 
     #meta data and scores to log
     meta_data = {
