@@ -15,11 +15,11 @@ from langchain.prompts import PromptTemplate
 import desci_sense.configs as configs
 from ..schema.notion_ontology_base import NotionOntologyBase, load_ontology_from_config
 from ..schema.post import RefPost
-from ..postprocessing.output_parsers import TagTypeParser
+from ..postprocessing.output_parsers import TagTypeParser, KeywordParser
 from ..dataloaders import convert_text_to_ref_post, scrape_post
 
 from ..enum_dict import EnumDict, EnumDictKey
-from ..web_extractors.metadata_extractors import MetadataExtractionType, RefMetadata, extract_metadata_by_type
+from ..web_extractors.metadata_extractors import MetadataExtractionType, RefMetadata, extract_metadata_by_type, extract_all_metadata_by_type
 
     
 
@@ -56,7 +56,17 @@ def load_prompt_j2_templates(templates_dir: str,
 
     return zero_ref_template, single_ref_template, multi_ref_template
 
-
+def create_model(model_name: str, temperature: float, 
+               api_key: str, openapi_referer: str):
+        model = ChatOpenAI(
+            model=model_name, 
+            temperature=temperature,
+            openai_api_key=api_key,
+            openai_api_base=configs.OPENROUTER_API_BASE,
+            headers={"HTTP-Referer": openapi_referer}, 
+        )
+        return model
+    
     
 
 
@@ -71,6 +81,15 @@ class MultiStageParser:
 
         # get method for extracting metadata of references
         self.set_md_extract_method(config["general"].get("ref_metadata_method", MetadataExtractionType.NONE.value))
+
+        # enable/disable keyword extraction mode
+        kw_config = config.get("keyword_extraction", False)
+        if kw_config:
+            kw_enabled = kw_config.get("enabled", False)
+        else:
+            kw_enabled = False
+        self.set_keyword_extraction_mode(kw_enabled)
+
 
 
         # if no api key passed as arg, default to environment config
@@ -93,6 +112,11 @@ class MultiStageParser:
             headers={"HTTP-Referer": openapi_referer}, 
         )
 
+        # init kw extraction chain
+        self.init_keyword_extraction_chain(api_key=openai_api_key,
+                                           openapi_referer=openapi_referer)
+
+
         # load ontology
         logger.info("Loading ontology...")
         self.ontology = load_ontology_from_config(self.config)
@@ -110,9 +134,16 @@ class MultiStageParser:
         for case_dict in self.prompt_case_dict.values():
             self.all_labels += case_dict["labels"]
             
+    def set_keyword_extraction_mode(self, enabled: bool):
+        self.kw_mode_enabled = enabled
+    
     def set_md_extract_method(self, md_extract_method: str):
         logger.info(f"Setting metadata extraction method to {md_extract_method}...")
         self.md_extract_method = set_metadata_extraction_type(md_extract_method)
+
+    def set_kw_md_extract_method(self, md_extract_method: str):
+        logger.info(f"Setting keywords metadata extraction method to {md_extract_method}...")
+        self.kw_md_extract_method = set_metadata_extraction_type(md_extract_method)
 
     def init_prompt_case_dict(self, ontology: NotionOntologyBase):
         # organize information in ontology for quick retrieval by prompter
@@ -209,7 +240,79 @@ class MultiStageParser:
 
         return result
 
+    def init_keyword_extraction_chain(self, api_key, openapi_referer):
+        # setup chain for topic extraction
+        if not self.kw_mode_enabled:
+            self.kw_extraction = {}
+            return False
+        
+        max_keywords = self.config["keyword_extraction"].get("max_keywords")
 
+        # get method for extracting metadata of references
+        self.set_kw_md_extract_method(self.config["keyword_extraction"].get("ref_metadata_method", MetadataExtractionType.NONE.value))
+
+        # load template
+        templates_dir=self.config["prompt"]["template_dir"]
+        keyword_template_name = self.config["keyword_extraction"]["template"]
+        full_templates_dir = ROOT / templates_dir
+        j2_env = Environment(loader=FileSystemLoader(str(full_templates_dir)))
+        kw_template = j2_env.get_template(keyword_template_name)
+
+
+
+        # init model
+        model_name = self.config["keyword_extraction"]["model"]["model_name"]
+        logger.info(f"Loading keyword model (type={model_name})...")
+        self.kw_model = create_model(model_name,
+                                     self.config["keyword_extraction"]["model"]["temperature"],
+                                     api_key,
+                                     openapi_referer)
+        
+        # init kw output parser
+
+        self.kw_extraction = {
+            "prompt_j2_template": kw_template,
+            "chain": self.prompt_template | self.kw_model | KeywordParser(max_keywords=max_keywords),
+            "max_keywords": max_keywords
+        }
+
+        return True
+
+    def extract_post_topics(self, post: RefPost, 
+                        metadata_list: List[RefMetadata] = None) -> dict:
+        
+        prompt_j2_template = self.kw_extraction["prompt_j2_template"]
+
+        # load corresponding chain
+        chain = self.kw_extraction["chain"]
+        
+        # instantiate prompt with ref post details
+        full_prompt = prompt_j2_template.render(
+                                  author_name=post.author,
+                                  content=post.content,
+                                  metadata_list=metadata_list,
+                                  max_keywords=self.kw_extraction["max_keywords"]
+                                  )
+        
+        # run chain on full prompt
+        answer = chain.invoke({"input": full_prompt})
+
+        # TODO make structured output type
+        result = {"post": post,
+                  "full_prompt": full_prompt,
+                  "answer": answer
+                  }
+
+        return result
+    
+    def extract_post_topics_w_metadata(self, post: RefPost) -> List[str]:
+        
+        md_list = extract_all_metadata_by_type(post.ref_urls, 
+                                               self.kw_md_extract_method)
+
+        result = self.extract_post_topics(post, md_list)
+
+        return result
     
     def process_ref_post(self, post: RefPost):
         
@@ -263,6 +366,19 @@ class MultiStageParser:
         result = self.process_ref_post(post)
 
         return result
+    
+
+    def kw_process_post(self, post_url: str):
+        # extract post and run kw extraction model
+        post: RefPost = scrape_post(post_url)
+        if not post:
+            # TODO fix exception handling to return empty output
+            raise IOError(f"Could not detect social media type of input URL: {post_url}")
+        
+        result = self.extract_post_topics_w_metadata(post)
+
+        return result
+
 
 
 
