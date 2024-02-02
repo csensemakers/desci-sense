@@ -10,7 +10,7 @@ Options:
 --file=<file> Optional file name e.g. labeled_dataset.table.json indeed it should be a table.json format
 
 """
-
+from datetime import datetime
 import wandb
 from pathlib import Path
 import json
@@ -190,7 +190,12 @@ if __name__=='__main__':
     precision,recall,f1_score,support,accuracy = calculate_scores(y_pred=y_pred,y_true=y_true)
 
     #Create the evaluation artifact
-    artifact = wandb.Artifact("prediction_evaluation", type="evaluation")
+    current_datetime = datetime.now()
+
+    # Format the date to a custom alphanumeric format to comply with artifact name
+    time = current_datetime.strftime("%Y%m%d%H%M%S")
+
+    artifact = wandb.Artifact("prediction_evaluation-"+str(time), type="evaluation")
 
     # Create a wandb.Table from the Pandas DataFrame
     table = wandb.Table(dataframe=df)
@@ -205,7 +210,13 @@ if __name__=='__main__':
 
     #Log c
     matrix = create_custom_confusion_matrix(y_true=y_true,y_pred=y_pred,labels=labels)
-    print(matrix)
+    wandb.log({f"costume_confusion_matrix": wandb.plots.HeatMap(
+            matrix_values = matrix,
+            y_labels=labels, 
+            x_labels=labels,
+            show_text=True
+        )})
+
 
     #meta data and scores to log
     meta_data = {
