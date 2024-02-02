@@ -21,6 +21,12 @@ def test_load_notion_config_by_id():
     assert len(ontology.ont_df) == 1
 
 
+def test_load_notion_config_by_id_w_name():
+    config_path = ROOT / "etc/configs/notion_dev.cfg"
+    config = Config().from_disk(str(config_path))
+    ontology = load_ontology_from_config(config)
+    assert ontology.name == "SenseNets Dev Ontology"
+
 def test_load_notion_config_default():
     # no notion db id provided in file - should load default
     config_path = ROOT / "tests/etc/configs/notion_test_default.cfg"

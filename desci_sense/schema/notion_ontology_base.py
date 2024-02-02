@@ -53,8 +53,20 @@ def filter_ontology_by_version(ont_df: pd.DataFrame, allowed_versions: List[str]
 
     return filtered_df
 
+# Fetch the database information
+def get_notion_db_name(notion_client, database_id: str) -> str:
+
+    db_info = notion_client.databases.retrieve(database_id)
+
+    # Extract the database name from the title property
+    db_name = db_info['title'][0]['plain_text'] if db_info['title'] else 'Unnamed Database'
+    
+    return db_name
+
 class NotionOntologyBase:
-    def __init__(self, versions: List[str] = None, notion_sensebot_api_key = None, notion_db_id = None) -> None:
+    def __init__(self, versions: List[str] = None, 
+                 notion_sensebot_api_key = None,
+                  notion_db_id = None) -> None:
         
         # use keys if passed as args or otherwise take from environment settings.
         sensebot_key = notion_sensebot_api_key if notion_sensebot_api_key else os.environ["NOTION_SENSEBOT_TOKEN"]
@@ -62,6 +74,9 @@ class NotionOntologyBase:
 
         # create Notion client
         notion = Client(auth=sensebot_key)
+
+        # fetch db name
+        self.name = get_notion_db_name(notion, self.db_id)
 
         # Fetch the database
         results = notion.databases.query(self.db_id)["results"]
