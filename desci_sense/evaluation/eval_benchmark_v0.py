@@ -119,7 +119,7 @@ def create_custom_confusion_matrix(y_true, y_pred, labels):
                 fn_i = y_true[:, i] & ~y_pred[:, i]
                 fp_j = ~y_true[:, j] & y_pred[:, j]
                 matrix[i, j] = np.sum(fn_i & fp_j)
-
+    
     return pd.DataFrame(matrix, index=labels, columns=labels)
 
 #Log chart of metrics per label
