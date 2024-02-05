@@ -75,6 +75,8 @@ def extract_urls_citoid_metadata(target_urls: List[str]):
     Args:
         target_urls (List[str]): _description_
     """
+    if len(target_urls) == 0:
+        return []
     if len(target_urls) == 1:
         return [extract_citoid_metadata(target_urls[0])]
     else:

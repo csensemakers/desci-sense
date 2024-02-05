@@ -231,6 +231,14 @@ def process_post(post: RefPost, model):
         # st.write(result["answer"])
         return result
 
+def process_keywords(result, model):
+    post = result.get("post")
+    model.set_kw_md_extract_method("citoid")
+    with st.spinner(f"Extracting keywords..."):
+        kw_result = model.extract_post_topics_w_metadata(post)
+        result["keywords"] = kw_result["answer"].get("valid_keywords")
+        result["kw_prompt"] = kw_result["full_prompt"]
+        return result
 
 @st.cache_resource
 def load_model(config):
@@ -317,13 +325,21 @@ if __name__ == "__main__":
 
     selected = None
     with nanobot_section:
-        st.markdown("### 🤖 Nanobot")
+        st.markdown("## 🤖 Nanobot")
+        col1, col2 = st.columns(2)
 
-        # let users select metadata extraction method type (or None)
-        md_values = [x.value for x in MetadataExtractionType]
-        metadata_type = st.radio("Select metadata extraction method:", options=md_values)
-        if "ref_metadata_method" in model.config["general"]:
-            model.set_md_extract_method(metadata_type)
+        with col1:
+            st.markdown("### Semantic parsing")
+            # let users select metadata extraction method type (or None)
+            md_values = [x.value for x in MetadataExtractionType]
+            metadata_type = st.radio("Select metadata extraction method:", options=md_values)
+            if "ref_metadata_method" in model.config["general"]:
+                model.set_md_extract_method(metadata_type)
+
+        with col2:
+            st.markdown("### Keyword extraction")
+            enable_keywords = st.checkbox(label="Extract keywords?")
+
 
         
         start_run_btn = st.button("Run!", on_click=click_run)
@@ -335,16 +351,26 @@ if __name__ == "__main__":
                 # free text option
                 result = process_text(target_text, model)
                 st.session_state.result = result
+            
+            if enable_keywords:
+                # extract keywords
+                result = process_keywords(st.session_state.result, model)
+                st.session_state.result = result
             with st.expander("Full output result"):
                 st.write(result)
 
             
 
         if st.session_state.clicked_run:
+            if "keywords" in st.session_state.result:
+                selected = st.multiselect("Predicted keywords", st.session_state.result["keywords"], st.session_state.result["keywords"], disabled=True)
+                
             if "answer" in st.session_state.result:
                 selected = st.multiselect("Predicted tags", st.session_state.result["possible_labels"], st.session_state.result["answer"]["multi_tag"], disabled=True)
             else:
                 selected = []
+
+            
 
             # display editable table of predicted triplets
             rows = create_triples_from_prediction(st.session_state.result)
