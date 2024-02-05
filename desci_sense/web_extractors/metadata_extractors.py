@@ -1,7 +1,7 @@
 from typing import List
 from enum import Enum
 from dataclasses import dataclass
-from .citoid import fetch_citation
+from .citoid import fetch_citation, fetch_all_citations
 
 from ..configs import MAX_SUMMARY_LEN
 
@@ -67,3 +67,37 @@ def extract_metadata_by_type(target_url, md_type: MetadataExtractionType) -> Lis
         return [extract_citoid_metadata(target_url)]
     else:
         raise ValueError(f"Unsupported extraaction type:{md_type.value}")
+    
+
+def extract_urls_citoid_metadata(target_urls: List[str]):
+    """_summary_
+
+    Args:
+        target_urls (List[str]): _description_
+    """
+    if len(target_urls) == 0:
+        return []
+    if len(target_urls) == 1:
+        return [extract_citoid_metadata(target_urls[0])]
+    else:
+        # use parallel call
+        metadatas_raw = fetch_all_citations(target_urls)
+        return [normalize_citoid_metadata(md) for md in metadatas_raw]
+    
+
+def extract_all_metadata_by_type(target_urls, md_type: MetadataExtractionType) -> List[RefMetadata]:
+    """_summary_
+
+    Args:
+        target_url (_type_): _description_
+        md_type (MetadataExtractionType): _description_
+
+    Returns:
+        List[RefMetadata]: _description_
+    """
+    if md_type == MetadataExtractionType.NONE:
+        return []
+    if md_type == MetadataExtractionType.CITOID:
+        return extract_urls_citoid_metadata(target_urls)
+    else:
+        raise ValueError(f"Unsupported extraction type:{md_type.value}")

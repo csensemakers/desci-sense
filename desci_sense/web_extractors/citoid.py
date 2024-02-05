@@ -2,6 +2,7 @@
 
 from typing import List
 
+from loguru import logger
 import asyncio
 import aiohttp
 from aiohttp.client import ClientSession
@@ -16,6 +17,7 @@ async def fetch_citation_async(target_url, session: ClientSession):
     base_url = 'https://en.wikipedia.org/api/rest_v1/data/citation/zotero/'
 
     # URL-encoding the target URL
+    logger.debug(f"target_url={target_url}")
     encoded_url = quote(target_url, safe='')
 
     # Constructing the full URL

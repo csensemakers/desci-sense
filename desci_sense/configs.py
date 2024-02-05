@@ -16,7 +16,7 @@ WEB_APP_WANDB_PROJ = "st-app-multi-v1"
 WANDB_SANDBOX_PROJ = "st-demo-sandbox"
 
 # max number of chars for extracted summaries in URL metadata
-MAX_SUMMARY_LEN = 300
+MAX_SUMMARY_LEN = 500
     
 
 def init_config(model_name: str = "mistralai/mistral-7b-instruct",
