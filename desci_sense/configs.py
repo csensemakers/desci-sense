@@ -65,7 +65,13 @@ def init_multi_stage_parser_config(model_name: str = "mistralai/mistral-7b-instr
                 wandb_entity: str = "common-sense-makers",
                 wandb_project: str = WANDB_SANDBOX_PROJ,
                 ref_metadata_method: str = "citoid",
-                notion_db_id: str = None
+                notion_db_id: str = None,
+                enable_keywords: bool = True,
+                kw_template: str = "keywords_extraction.j2",
+                kw_ref_metadata_method: str = "citoid",
+                max_keywords: int = 6,
+                keyword_extraction_model: str = "mistralai/mistral-7b-instruct"
+
                 ):
     config = Config(
                     {
@@ -88,6 +94,18 @@ def init_multi_stage_parser_config(model_name: str = "mistralai/mistral-7b-instr
                         "zero_ref_template_name": zero_ref_template_name,
                         "single_ref_template_name": single_ref_template_name,
                         "multi_ref_template_name": multi_ref_template_name
+                    },
+                    "keyword_extraction":
+                    {
+                        "enabled": enable_keywords,
+                        "template": kw_template,
+                        "ref_metadata_method": kw_ref_metadata_method,
+                        "max_keywords": max_keywords,
+                        "model":
+                        {
+                            "model_name": keyword_extraction_model, 
+                            "temperature": temperature
+                        }
                     },
                     "wandb": {
                         "entity": wandb_entity,
