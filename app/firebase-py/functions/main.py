@@ -7,7 +7,7 @@ from shared_functions.tagger import SM_FUNCTION_post_tagger_imp
 
 app = initialize_app()
 
-@https_fn.on_request()
+@https_fn.on_request(min_instances=1)
 def SM_FUNCTION_post_tagger(request):
     request_json = request.get_json()
     content =  request_json['content'];
