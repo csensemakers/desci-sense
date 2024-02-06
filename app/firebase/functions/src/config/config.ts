@@ -10,7 +10,12 @@ export const TWITTER_BEARER_TOKEN = env.TWITTER_BEARER_TOKEN as string;
 export const TWITTER_API_KEY = env.TWITTER_API_KEY as string;
 export const TWITTER_API_SECRET_KEY = env.TWITTER_API_SECRET_KEY as string;
 
-export const TWITTER_CALLBACK_URL = 'http://127.0.0.1:3000/';
+export const APP_URL =
+  process.env.NODE_ENV === 'development'
+    ? 'http://127.0.0.1:3000/'
+    : 'https://split--sensemakers.netlify.app/';
+
+export const TWITTER_CALLBACK_URL = APP_URL;
 
 export const SENSENET_DOMAIN = 'http://127.0.0.1:3000/';
 export const FUNCTIONS_PY_URL =

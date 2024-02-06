@@ -1,8 +1,8 @@
 import {
+  APP_URL,
   ORCID_API_URL,
   ORCID_CLIENT_ID,
   ORCID_SECRET,
-  SENSENET_DOMAIN,
 } from '../config/config';
 
 export const getAuthenticatedOrcidId = async (code: string) => {
@@ -12,7 +12,7 @@ export const getAuthenticatedOrcidId = async (code: string) => {
   params.append('client_secret', ORCID_SECRET);
   params.append('grant_type', 'authorization_code');
   params.append('code', code);
-  params.append('redirect_uri', SENSENET_DOMAIN);
+  params.append('redirect_uri', APP_URL);
 
   const response = await fetch(`${ORCID_API_URL}/oauth/token`, {
     headers: [
