@@ -10,10 +10,10 @@ export const postPost = async (userId: string, post: AppPostCreate) => {
   let tweet: TweetRead | undefined = undefined;
 
   if (post.platforms.includes(PLATFORM.X)) {
-    const newContent =
-      post.content +
-      '\n\n' +
-      post.meta.tags.map((tag: string) => `#${tag}`).join(' ');
+    const append = post.meta?.tags
+      ? '\n\n' + post.meta.tags.map((tag: string) => `#${tag}`).join(' ')
+      : '';
+    const newContent = post.content + append;
 
     tweet = await postMessageTwitter(userId, newContent);
   }

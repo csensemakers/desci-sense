@@ -11,19 +11,22 @@ cd firebase
 // install yarn here to use emulation and deploy scripts
 yarn install
 
-// the first time you need to do two things
-// 1) go into the functions folder and install the dependencies
+// the first time you need to do a few things inside the functions folder
+// 1) install the dependencies
 cd functions
 yarn install 
-cd ..
 
 // 2) create the env.ts file by copying the env.sample.ts file and filling its values (ask maintainer)
 cp src/config/env.sample.ts src/config/env.ts
 
+// 3) build the functions 
+yarn build
+cd ..
+
 // run the emulation script from the firebase folder
 yarn emulate
 
-// if you want to make changes to the server and load them in the emulator automatically build:watch the functions folder
+// if you want to make changes to the server and load them in the emulator automatically use build:watch to build the functions
 cd functions
 yarn build:watch
 
