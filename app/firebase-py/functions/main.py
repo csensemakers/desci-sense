@@ -1,10 +1,9 @@
 import json
 
 from firebase_functions import https_fn
-
 from firebase_admin import initialize_app
 
-from models.tagger import SM_FUNCTION_post_tagger_imp
+from shared_functions.tagger import SM_FUNCTION_post_tagger_imp
 
 app = initialize_app()
 

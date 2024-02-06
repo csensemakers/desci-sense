@@ -1,7 +1,7 @@
 import { RequestHandler } from 'express';
 import { logger } from 'firebase-functions/v1';
 
-import { AppPostGetMeta } from '../../@webapp/types';
+import { AppPostGetMeta } from '../../@shared/types';
 import { getPostMeta } from '../posts.service';
 import { getPostMetaValidationScheme } from './posts.schemas';
 

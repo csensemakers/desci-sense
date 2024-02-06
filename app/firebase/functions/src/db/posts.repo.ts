@@ -1,4 +1,4 @@
-import { AppPost, AppPostStore } from '../@webapp/types';
+import { AppPost, AppPostStore } from '../@shared/types';
 import { collections } from '../db/db';
 
 export const createPost = async (post: AppPostStore): Promise<AppPost> => {

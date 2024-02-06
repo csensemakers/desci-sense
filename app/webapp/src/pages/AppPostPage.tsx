@@ -9,7 +9,7 @@ import { TweetAnchor } from '../app/TwitterAnchor';
 import { ViewportPage } from '../app/Viewport';
 import { PostEditor } from '../post/PostEditor';
 import { getPostMeta, postMessage } from '../post/post.utils';
-import { AppPost, AppPostCreate, AppPostMeta, PLATFORM } from '../types';
+import { AppPost, AppPostCreate, AppPostMeta, PLATFORM } from '../shared/types';
 import { AppButton, AppCard, AppHeading } from '../ui-components';
 import { BoxCentered } from '../ui-components/BoxCentered';
 import { Loading } from '../ui-components/LoadingDiv';

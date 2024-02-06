@@ -1,5 +1,5 @@
 import { FUNCTIONS_BASE } from '../app/config';
-import { AppPostCreate } from '../types';
+import { AppPostCreate } from '../shared/types';
 
 export const postMessage = async (
   post: AppPostCreate,

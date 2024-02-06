@@ -1,7 +1,7 @@
 import { RequestHandler } from 'express';
 import { logger } from 'firebase-functions/v1';
 
-import { AppPostCreate } from '../../@webapp/types';
+import { AppPostCreate } from '../../@shared/types';
 import { postPost } from '../posts.service';
 import { postsValidationScheme } from './posts.schemas';
 

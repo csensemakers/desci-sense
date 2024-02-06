@@ -9,7 +9,7 @@ import {
 import { useSearchParams } from 'react-router-dom';
 
 import { getLoggedUser, postOrcidCode } from '../auth/auth.requests';
-import { AppUserRead } from '../types';
+import { AppUserRead } from '../shared/types';
 import { TwitterContext } from './TwitterContext';
 import { ORCID_API_URL, ORCID_CLIENT_ID, ORCID_REDIRECT_URL } from './config';
 

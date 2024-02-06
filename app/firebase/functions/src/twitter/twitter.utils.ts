@@ -1,6 +1,6 @@
 import { TweetV2PostTweetResult, TwitterApi } from 'twitter-api-v2';
 
-import { TwitterUser } from '../@webapp/types';
+import { TwitterUser } from '../@shared/types';
 import {
   TWITTER_API_KEY,
   TWITTER_API_SECRET_KEY,

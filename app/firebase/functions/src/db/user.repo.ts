@@ -1,4 +1,4 @@
-import { AppUser, DefinedIfTrue } from '../@webapp/types';
+import { AppUser, DefinedIfTrue } from '../@shared/types';
 import { collections } from '../db/db';
 
 export const getUser = async <T extends boolean>(

@@ -12,7 +12,7 @@ import {
   getTwitterAuthLink,
   postTwitterVerifierToken,
 } from '../auth/auth.requests';
-import { TwitterUser } from '../types';
+import { TwitterUser } from '../shared/types';
 import { useAccountContext } from './AccountContext';
 
 const DEBUG = true;

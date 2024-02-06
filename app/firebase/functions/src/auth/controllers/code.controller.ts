@@ -1,7 +1,7 @@
 import { RequestHandler } from 'express';
 import { logger } from 'firebase-functions/v1';
 
-import { AppUser } from '../../@webapp/types';
+import { AppUser } from '../../@shared/types';
 import { TOKEN_EXPIRATION } from '../../config/config';
 import { setUser } from '../../db/user.repo';
 import { getAuthenticatedOrcidId } from '../orcid.auth.utils';

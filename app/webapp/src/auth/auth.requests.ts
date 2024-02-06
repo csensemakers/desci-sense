@@ -1,5 +1,5 @@
 import { FUNCTIONS_BASE } from '../app/config';
-import { AppUserRead } from '../types';
+import { AppUserRead } from '../shared/types';
 
 export const postOrcidCode = async (code: string) => {
   const res = await fetch(FUNCTIONS_BASE + '/auth/code', {

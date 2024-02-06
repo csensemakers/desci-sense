@@ -1,6 +1,6 @@
 import { logger } from 'firebase-functions/v1';
 
-import { AppPostCreate, PLATFORM, TweetRead } from '../@webapp/types';
+import { AppPostCreate, PLATFORM, TweetRead } from '../@shared/types';
 import { FUNCTIONS_PY_URL } from '../config/config';
 import { createPost } from '../db/posts.repo';
 import { postMessageTwitter } from '../twitter/twitter.utils';
