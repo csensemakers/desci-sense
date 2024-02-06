@@ -2,11 +2,13 @@ from typing import List, Dict
 import pandas as pd
 from notion_client import Client
 
+from ..configs import environ
+
 def load_ontology_from_config(config):
     # use keys if passed in config or otherwise take from environment settings.
     db_id = config["ontology"].get("notion_db_id", None)
     if not db_id:
-        db_id = environ["NOTION_SENSEBOT_DB"] | None
+        db_id = environ["NOTION_SENSEBOT_DB"]
     if not db_id:
         raise IOError("missing notion_db_id - must be set either in config or environment settings")
     ontology = NotionOntologyBase(versions=config["ontology"]["versions"], notion_db_id=db_id)

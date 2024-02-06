@@ -11,8 +11,6 @@ from datetime import datetime
 from langchain.load.serializable import Serializable
 from langchain.pydantic_v1 import Field
 
-from ..prompting.post_tags_pydantic import PostTagsDataModel
-
 
 class Post(Serializable):
     """Class for storing a piece of text and associated metadata."""
@@ -57,19 +55,3 @@ class RefPost(Post):
     
 
 
-class MultiTagRefPost(RefPost):
-    """
-    Reference Post that is additionally tagged with a set of predetermined possible tags. 
-    """
-    tags: set = Field(default_factory=set)
-
-    def __init__(self, **kwargs):
-        tags = kwargs.pop('tags', set())
-        super().__init__(**kwargs)
-
-        # include only allowed tags
-        self.tags = tags.intersection(MultiTagRefPost.allowed_tags())
-    
-    @classmethod
-    def allowed_tags(cls):
-        return PostTagsDataModel.tags()

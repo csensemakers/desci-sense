@@ -3,7 +3,6 @@ import re
 from typing import List
 from langchain.schema import BaseOutputParser
 
-from ..prompting.post_tags_pydantic import PostTagsDataModel
 
 # GPT4
 def extract_unique_keywords(input_str: str) -> List[str]:
@@ -52,15 +51,11 @@ def extract_tags(input_text: str, tags: List[str]) -> List[str]:
 class TagTypeParser(BaseOutputParser):
     """Parse the output of an LLM call to a dict ."""
 
-    allowed_tags: List[str] = None
+    allowed_tags: List[str]
 
     @property
     def valid_tags(self):
-        if self.allowed_tags:
-            return self.allowed_tags
-        else:
-            # TODO remove PostTagsDataModel.tags() - only for backwards compatiblity
-            return PostTagsDataModel.tags()
+        return self.allowed_tags
 
     def parse(self, text: str):
         """Parse the output of an LLM call."""
