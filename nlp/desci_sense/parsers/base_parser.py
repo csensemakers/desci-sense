@@ -1,5 +1,3 @@
-import os
-
 from pathlib import Path
 from typing import Optional, Dict
 import desci_sense.configs as configs

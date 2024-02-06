@@ -13,7 +13,6 @@ Options:
 
 import sys
 from typing import List
-import os
 from docopt import docopt
 from pathlib import Path
 from loguru import logger

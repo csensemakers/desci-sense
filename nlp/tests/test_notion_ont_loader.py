@@ -1,5 +1,4 @@
 import sys
-import os
 from pathlib import Path
 ROOT = Path(__file__).parents[1]
 sys.path.append(str(ROOT))

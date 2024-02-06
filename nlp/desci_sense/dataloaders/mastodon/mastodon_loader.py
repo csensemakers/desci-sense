@@ -1,10 +1,5 @@
 # based on https://github.com/langchain-ai/langchain/blob/master/libs/langchain/langchain/document_loaders/mastodon.py
 
-
-import os
-
-
-import os
 from typing import Any, Dict, Iterable, List, Optional, Sequence
 from mastodon import Mastodon
 

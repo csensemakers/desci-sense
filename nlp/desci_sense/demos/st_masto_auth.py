@@ -2,7 +2,6 @@
 Simple code to demo Mastodon OAuth in streamlit
 
 """
-import os
 import streamlit as st
 from mastodon import Mastodon
 

@@ -1,5 +1,4 @@
 from typing import List, Dict
-import os
 import pandas as pd
 from notion_client import Client
 
