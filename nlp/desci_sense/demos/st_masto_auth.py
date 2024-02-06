@@ -8,8 +8,8 @@ from mastodon import Mastodon
 
 # Environment variables must be set with your Mastodon application id and secret 
 api_base_url = "https://mastodon.social/"
-client_id = os.environ["MASTO_CLIENT_ID"]
-client_secret = os.environ["MASTO_CLIENT_SECRET"]
+client_id = environ["MASTO_CLIENT_ID"]
+client_secret = environ["MASTO_CLIENT_SECRET"]
 redirect_uri = "urn:ietf:wg:oauth:2.0:oob"
 # redirect_uri = "http://localhost:8501"  # Your redirect URI
 

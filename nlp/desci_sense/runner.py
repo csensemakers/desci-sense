@@ -1,10 +1,10 @@
-import os
-
 from confection import Config
 
 from desci_sense.configs import ST_OPENROUTER_REFERRER, init_config, init_multi_stage_parser_config
 from desci_sense.parsers.multi_stage_parser import MultiStageParser
 from desci_sense.schema.templates import PREDICATE_LABELS
+
+load_dotenv() 
 
 def load_config(config_path: str = None) -> Config:
     """
@@ -19,8 +19,8 @@ def load_config(config_path: str = None) -> Config:
         config = init_multi_stage_parser_config(
                          model_name="fireworks/mixtral-8x7b-fw-chat"
                         )
-        if "WANDB_PROJECT" in os.environ:
-            wandb_proj = os.environ.get("WANDB_PROJECT")
+        if "WANDB_PROJECT" in environ:
+            wandb_proj = environ["WANDB_PROJECT"]
             config["wandb"]["project"] = wandb_proj
 
     return config
@@ -30,8 +30,8 @@ def load_config(config_path: str = None) -> Config:
 def init_model(config: Config):
 
     # if fail to get from environment config, default to streamlit referrer
-    openrouter_referrer = os.environ.get("OPENROUTER_REFERRER", ST_OPENROUTER_REFERRER)
-    api_key = os.environ.get("OPENROUTER_API_KEY")
+    openrouter_referrer = environ["OPENROUTER_REFERRER"] | ST_OPENROUTER_REFERRER)
+    api_key = environ["OPENROUTER_API_KEY"]
 
     # create parser
     # if config["general"]["parser_type"] == "base":

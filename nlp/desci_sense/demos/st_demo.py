@@ -164,7 +164,7 @@ def log_pred_wandb(wandb_run, result, triplet_df: pd.DataFrame, ontology_df: pd.
 
 def init_wandb_run(model_config):
 
-    wandb.login(key=os.environ["WANDB_API_KEY"])
+    wandb.login(key=environ["WANDB_API_KEY"])
     wandb_run = wandb.init(job_type="demo",project=model_config["wandb"]["project"], config=model_config, 
                                        entity=model_config["wandb"]["entity"])
     

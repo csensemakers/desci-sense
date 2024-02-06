@@ -7,3 +7,4 @@ scripts/artifacts/*
 notebooks/artifacts/*
 artifacts/*
 **.pyc
+.env

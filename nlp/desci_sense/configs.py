@@ -1,8 +1,25 @@
+import os
+from dotenv import load_dotenv
+
 from typing import List
 
 from dataclasses import dataclass
 # import pydantic as pyd
 from confection import Config
+
+load_dotenv() 
+
+# environment
+environ = {
+    "OPENROUTER_API_KEY": os.environ.get("OPENROUTER_API_KEY"),
+    "OPENROUTER_REFERRER": os.environ.get("OPENROUTER_API_KEY"),
+    "WANDB_PROJECT": os.environ.get("WANDB_PROJECT"),
+    "MASTO_CLIENT_ID": os.environ.get("MASTO_CLIENT_ID"),
+    "MASTO_CLIENT_SECRET": os.environ.get("MASTO_CLIENT_SECRET"),
+    "NOTION_SENSEBOT_DB"
+    "NOTION_SENSEBOT_TOKEN"
+}
+  
 
 OPENROUTER_API_BASE = "https://openrouter.ai/api/v1"
 
@@ -17,7 +34,7 @@ WANDB_SANDBOX_PROJ = "st-demo-sandbox"
 
 # max number of chars for extracted summaries in URL metadata
 MAX_SUMMARY_LEN = 500
-    
+  
 
 def init_config(model_name: str = "mistralai/mistral-7b-instruct",
                 parser_type: str = "base",

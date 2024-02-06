@@ -7,7 +7,7 @@ def load_ontology_from_config(config):
     # use keys if passed in config or otherwise take from environment settings.
     db_id = config["ontology"].get("notion_db_id", None)
     if not db_id:
-        db_id = os.environ.get("NOTION_SENSEBOT_DB", None)
+        db_id = environ["NOTION_SENSEBOT_DB"] | None
     if not db_id:
         raise IOError("missing notion_db_id - must be set either in config or environment settings")
     ontology = NotionOntologyBase(versions=config["ontology"]["versions"], notion_db_id=db_id)
@@ -69,8 +69,8 @@ class NotionOntologyBase:
                   notion_db_id = None) -> None:
         
         # use keys if passed as args or otherwise take from environment settings.
-        sensebot_key = notion_sensebot_api_key if notion_sensebot_api_key else os.environ["NOTION_SENSEBOT_TOKEN"]
-        self.db_id = notion_db_id if notion_db_id else os.environ["NOTION_SENSEBOT_DB"]
+        sensebot_key = notion_sensebot_api_key if notion_sensebot_api_key else environ["NOTION_SENSEBOT_TOKEN"]
+        self.db_id = notion_db_id if notion_db_id else environ["NOTION_SENSEBOT_DB"]
 
         # create Notion client
         notion = Client(auth=sensebot_key)

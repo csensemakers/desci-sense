@@ -93,9 +93,9 @@ class MultiStageParser:
 
 
         # if no api key passed as arg, default to environment config
-        openai_api_key = api_key if api_key else os.environ["OPENROUTER_API_KEY"]
+        openai_api_key = api_key if api_key else environ["OPENROUTER_API_KEY"]
         
-        openapi_referer = openapi_referer if openapi_referer else os.environ["OPENROUTER_REFERRER"]
+        openapi_referer = openapi_referer if openapi_referer else environ["OPENROUTER_REFERRER"]
 
 
         # basic prompt template that takes a string as input

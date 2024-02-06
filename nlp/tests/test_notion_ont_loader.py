@@ -32,5 +32,5 @@ def test_load_notion_config_default():
     config_path = ROOT / "tests/etc/configs/notion_test_default.cfg"
     config = Config().from_disk(str(config_path))
     ontology = load_ontology_from_config(config)
-    assert ontology.db_id == os.environ["NOTION_SENSEBOT_DB"]
+    assert ontology.db_id == environ["NOTION_SENSEBOT_DB"]
 

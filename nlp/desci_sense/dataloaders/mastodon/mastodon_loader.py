@@ -17,7 +17,7 @@ class MastodonLoader:
     def __init__(self, base_url: str = 'https://mastodon.social',
                         access_token: str = None) -> None:
         
-        access_token = access_token if access_token else os.environ["MASTODON_ACCESS_TOKEN"]
+        access_token = access_token if access_token else environ["MASTODON_ACCESS_TOKEN"]
 
         self.api = Mastodon(
         api_base_url= base_url,
