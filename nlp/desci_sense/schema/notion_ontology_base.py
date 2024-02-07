@@ -2,6 +2,8 @@ from typing import List, Dict
 import pandas as pd
 from notion_client import Client
 
+from desci_sense.configs import environ
+
 def load_ontology_from_config(config):
     # use keys if passed in config or otherwise take from environment settings.
     db_id = config["ontology"].get("notion_db_id", None)

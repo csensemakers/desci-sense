@@ -8,6 +8,7 @@ from enum import Enum
 
 from confection import Config
 
+from desci_sense.configs import environ
 from desci_sense.schema.notion_ontology_base import load_ontology_from_config
 
 

@@ -36,7 +36,7 @@ from desci_sense.schema.notion_ontology_base import NotionOntologyBase
 from desci_sense.dataloaders import scrape_post
 from desci_sense.dataloaders.twitter.twitter_utils import scrape_tweet
 from desci_sense.dataloaders.mastodon.mastodon_utils import scrape_mastodon_post
-from desci_sense.configs import ST_OPENROUTER_REFERRER, init_config
+from desci_sense.configs import ST_OPENROUTER_REFERRER, environ
 from desci_sense.utils import identify_social_media
 from desci_sense.runner import init_model, load_config
 # from desci_sense.schema.templates import PREDICATE_LABELS

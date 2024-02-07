@@ -11,6 +11,8 @@ from langchain.chat_models import ChatOpenAI
 from langchain.prompts import PromptTemplate
 
 import desci_sense.configs as configs
+from desci_sense.configs import environ
+
 from ..schema.notion_ontology_base import NotionOntologyBase, load_ontology_from_config
 from ..schema.post import RefPost
 from ..postprocessing.output_parsers import TagTypeParser, KeywordParser
