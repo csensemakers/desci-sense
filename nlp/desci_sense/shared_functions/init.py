@@ -59,7 +59,8 @@ def init_multi_stage_parser_config(config: ParserInitConfig, optional: ParserIni
                     {
                     "general": {
                         "parser_type": config["parser_type"],
-                        "ref_metadata_method": config["ref_metadata_method"]
+                        "ref_metadata_method": config["ref_metadata_method"],
+                        "max_summary_length": config["max_summary_length"]
                     },
                     "openai_api": {
                         "openai_api_base": config["openai_api_base"],

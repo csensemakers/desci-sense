@@ -1,7 +1,7 @@
 from shared_functions.main import SM_FUNCTION_post_parser_imp, SM_FUNCTION_post_parser_config
 from config import openai_api_key
 
-content = 'Test post'
+content = 'This is definititely an announcement of https://www.alink.com'
 parameters = {}
 
 config: SM_FUNCTION_post_parser_config = {
@@ -13,3 +13,5 @@ config: SM_FUNCTION_post_parser_config = {
     }
     
 semantics = SM_FUNCTION_post_parser_imp(content, parameters, config)
+
+print("semantics: {}", semantics)

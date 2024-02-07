@@ -15,8 +15,10 @@ from ..postprocessing.output_parsers import TagTypeParser, KeywordParser
 from ..enum_dict import EnumDict, EnumDictKey
 from ..web_extractors.metadata_extractors import MetadataExtractionType, RefMetadata, extract_metadata_by_type, extract_all_metadata_by_type
 
-from ..prompting.jinja import keywords_extraction_template, zero_ref_template, single_ref_template, multi_ref_template
-
+from ..prompting.jinja.zero_ref_template import zero_ref_template
+from ..prompting.jinja.single_ref_template import single_ref_template
+from ..prompting.jinja.keywords_extraction_template import keywords_extraction_template
+from ..prompting.jinja.multi_ref_template import multi_ref_template
 
 class PromptCase(EnumDictKey):
     ZERO_REF = "ZERO_REF"
@@ -128,9 +130,6 @@ class FirebaseAPIParser:
         prompt_case_dict[PromptCase.ZERO_REF]['output_parser'] = TagTypeParser(allowed_tags=prompt_case_dict[PromptCase.ZERO_REF]['labels'])
         prompt_case_dict[PromptCase.ZERO_REF]['chain'] = self.prompt_template | self.parser_model | prompt_case_dict[PromptCase.ZERO_REF]['output_parser']
         prompt_case_dict[PromptCase.ZERO_REF]['prompt_j2_template'] = zero_ref_template
-        
-        logger.info("zero_ref_template {}", zero_ref_template)
-        zero_ref_template.render(author_name='A')
         
         # configure single ref case
         prompt_case_dict[PromptCase.SINGLE_REF] = {
@@ -283,7 +282,7 @@ class FirebaseAPIParser:
             if len(post.ref_urls) == 1:
                 case = PromptCase.SINGLE_REF
                 # if metadata flag is active, retreive metadata
-                md_list = extract_metadata_by_type(post.ref_urls[0], self.md_extract_method, self.config["max_summary_length"])
+                md_list = extract_metadata_by_type(post.ref_urls[0], self.md_extract_method, self.config["general"]["max_summary_length"])
             
             else:
                 case = PromptCase.MULTI_REF

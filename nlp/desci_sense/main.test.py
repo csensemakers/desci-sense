@@ -13,3 +13,5 @@ config: SM_FUNCTION_post_parser_config = {
     }
     
 semantics = SM_FUNCTION_post_parser_imp(content, parameters, config)
+
+print('semantics {}', semantics)

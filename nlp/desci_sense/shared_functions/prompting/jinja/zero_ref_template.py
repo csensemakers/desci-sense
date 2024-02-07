@@ -22,5 +22,3 @@ zero_ref_template = Template("""
 
   Output:
   """)
-
-zero_ref_template.render(author_name='A')
