@@ -1,3 +1,6 @@
+from jinja2 import Template
+
+multi_ref_template = Template("""
 You are an expert annotator tasked with assigning keywords to social media posts. The keywords should represent the most salient topics discussed by the post. The keywords should consist of two types: general and specific. The general keywords should indicate the general topics discussed by the posts and its references, like "#AI" or "#blockchain". The specific keywords should highlight specific that will help people in the field better understand the post's contents (like "#monte-carlo-tree-search", or "#consensus-algorithms"). {% if metadata_list|length > 0 %}  The post also includes references to external content. Details about the external references will be provided alongside the input post under "Reference Metadata". The keywords should also represent the external references! {% endif %}
 
 Rules:
@@ -23,3 +26,4 @@ Content: {{ content }}
 {% endif %}
 
 # Output:
+"""

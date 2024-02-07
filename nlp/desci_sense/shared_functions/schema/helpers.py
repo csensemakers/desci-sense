@@ -1,6 +1,6 @@
 
 from .post import RefPost
-from ...utils import extract_and_expand_urls
+from ..utils import extract_and_expand_urls
 
 def convert_text_to_ref_post(text: str, 
                              author: str = "deafult_author", 

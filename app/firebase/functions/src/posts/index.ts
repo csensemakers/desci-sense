@@ -4,13 +4,13 @@ import * as functions from 'firebase-functions';
 import { RUNTIME_OPTIONS } from '../config/RUNTIME_OPTIONS';
 import { REGION } from '../config/config';
 import { app } from '../instances/app';
-import { getPostMetaController } from './controllers/getPostMeta.controller';
+import { getPostSemanticsController } from './controllers/get.semantics.controller';
 import { postController } from './controllers/posts.controller';
 
 const postsRouter = express.Router();
 
 postsRouter.post('/post', postController);
-postsRouter.post('/getMeta', getPostMetaController);
+postsRouter.post('/getSemantics', getPostSemanticsController);
 
 export const postsApp = functions
   .region(REGION)

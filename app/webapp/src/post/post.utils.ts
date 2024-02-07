@@ -18,8 +18,11 @@ export const postMessage = async (
   return body.post;
 };
 
-export const getPostMeta = async (content: string, appAccessToken: string) => {
-  const res = await fetch(FUNCTIONS_BASE + '/posts/getMeta', {
+export const getPostSemantics = async (
+  content: string,
+  appAccessToken: string
+) => {
+  const res = await fetch(FUNCTIONS_BASE + '/posts/getSemantics', {
     method: 'post',
     headers: {
       'Content-Type': 'application/json',

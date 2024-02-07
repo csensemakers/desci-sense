@@ -1,9 +1,13 @@
-from typing import List, TypedDict
+from typing import List, TypedDict, Any
 
 from confection import Config
 
 class ParserInitConfig(TypedDict, total=True):
     wandb_project: str
+    zero_ref_template_name: Any
+    single_ref_template_name: Any
+    multi_ref_template_name: Any
+        
     
 class ParserInitConfigOptional(TypedDict, total=False):
     # Optional parameters
@@ -12,9 +16,9 @@ class ParserInitConfigOptional(TypedDict, total=False):
     temperature: float
     versions: List[str]
     template_dir: str
-    zero_ref_template_name: str
-    single_ref_template_name: str
-    multi_ref_template_name: str
+    zero_ref_template: str
+    single_ref_template: str
+    multi_ref_template: str
     wandb_entity: str
     ref_metadata_method: str
     notion_db_id: str
@@ -31,9 +35,6 @@ def init_multi_stage_parser_config(config: ParserInitConfig, optional: ParserIni
         "parser_type": "multi_stage",
         "temperature": 0.6,
         "versions": None,
-        "zero_ref_template_name": "zero_ref_template.j2",
-        "single_ref_template_name": "single_ref_template.j2",
-        "multi_ref_template_name": "multi_ref_template.j2",
         "wandb_entity": "common-sense-makers",
         "ref_metadata_method": "citoid",
         "notion_db_id": None,
@@ -54,7 +55,6 @@ def init_multi_stage_parser_config(config: ParserInitConfig, optional: ParserIni
                     "general": {
                         "parser_type": config["parser_type"],
                         "ref_metadata_method": config["ref_metadata_method"]
-
                     },
 
                     "model": {
@@ -67,9 +67,9 @@ def init_multi_stage_parser_config(config: ParserInitConfig, optional: ParserIni
                     },
                     "prompt": {
                         "template_dir": config["template_dir"],
-                        "zero_ref_template_name": config["zero_ref_template_name"],
-                        "single_ref_template_name": config["single_ref_template_name"],
-                        "multi_ref_template_name": config["multi_ref_template_name"]
+                        "zero_ref_template": config["zero_ref_template"],
+                        "single_ref_template": config["single_ref_template"],
+                        "multi_ref_template": config["multi_ref_template"]
                     },
                     "keyword_extraction":
                     {

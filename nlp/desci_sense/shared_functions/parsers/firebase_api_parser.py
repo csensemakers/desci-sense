@@ -15,6 +15,9 @@ from ..postprocessing.output_parsers import TagTypeParser, KeywordParser
 from ..enum_dict import EnumDict, EnumDictKey
 from ..web_extractors.metadata_extractors import MetadataExtractionType, RefMetadata, extract_metadata_by_type, extract_all_metadata_by_type
 
+from ..prompting.jinja import zero_ref_template, single_ref_template, multi_ref_template
+
+
 class PromptCase(EnumDictKey):
     ZERO_REF = "ZERO_REF"
     SINGLE_REF = "SINGLE_REF"
@@ -124,13 +127,6 @@ class FirebaseAPIParser:
         # organize information in ontology for quick retrieval by prompter
         prompt_case_dict = EnumDict(PromptCase)
 
-        # load jinja templates
-
-        zero_ref_template, single_ref_template, multi_ref_template = load_prompt_j2_templates(
-                self.config.get("templates")
-        )
-        
-        
         # configure zero ref case
         prompt_case_dict[PromptCase.ZERO_REF] = {
                     "labels": ontology.get_valid_templates(subject_type="post", 

@@ -1,11 +1,11 @@
 import { RequestHandler } from 'express';
 import { logger } from 'firebase-functions/v1';
 
-import { AppPostGetMeta } from '../../@shared/types';
-import { getPostMeta } from '../posts.service';
-import { getPostMetaValidationScheme } from './posts.schemas';
+import { AppPostGetSemantics } from '../../@shared/types';
+import { getPostSemantics } from '../posts.service';
+import { getPostSemanticsValidationScheme } from './posts.schemas';
 
-export const getPostMetaController: RequestHandler = async (
+export const getPostSemanticsController: RequestHandler = async (
   request,
   response
 ) => {
@@ -15,11 +15,11 @@ export const getPostMetaController: RequestHandler = async (
       response.status(403).send({});
       return;
     }
-    const payload = (await getPostMetaValidationScheme.validate(
+    const payload = (await getPostSemanticsValidationScheme.validate(
       request.body
-    )) as AppPostGetMeta;
+    )) as AppPostGetSemantics;
 
-    const post = await getPostMeta(payload.content);
+    const post = await getPostSemantics(payload.content);
 
     response.status(200).send({ success: true, post });
   } catch (error: any) {

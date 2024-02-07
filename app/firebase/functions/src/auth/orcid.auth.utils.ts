@@ -1,3 +1,5 @@
+import { logger } from 'firebase-functions/v1';
+
 import {
   APP_URL,
   ORCID_API_URL,
@@ -24,7 +26,9 @@ export const getAuthenticatedOrcidId = async (code: string) => {
   });
 
   if (!response.ok) {
-    throw new Error(`Error: ${response.status}`);
+    const body = await response.json();
+    logger.error('Error getting Orcid token', { body });
+    throw new Error(`Error getting Orcid token: ${response.status}`);
   }
 
   const data = await response.json();
