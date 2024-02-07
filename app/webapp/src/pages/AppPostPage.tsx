@@ -17,7 +17,7 @@ import {
 } from '../shared/types';
 import { AppButton, AppCard, AppHeading } from '../ui-components';
 import { BoxCentered } from '../ui-components/BoxCentered';
-import { Loading } from '../ui-components/LoadingDiv';
+import { Loading, LoadingDiv } from '../ui-components/LoadingDiv';
 import { useThemeContext } from '../ui-components/ThemedApp';
 
 const DEBUG = true;
@@ -35,6 +35,8 @@ export const AppPostPage = (props: {}) => {
   const [semantics, setPostSemantics] = useState<AppPostSemantics>();
 
   const [isSending, setIsSending] = useState<boolean>();
+  const [isGettingSemantics, setIsGettingSemantics] = useState<boolean>();
+
   const [postSentError, setPostSentError] = useState<boolean>();
 
   /** the published post */
@@ -64,9 +66,11 @@ export const AppPostPage = (props: {}) => {
   const getSemantics = () => {
     if (postText && appAccessToken) {
       if (DEBUG) console.log('getPostMeta', { postText });
+      setIsGettingSemantics(true);
       getPostSemantics(postText, appAccessToken).then((semantics) => {
         if (DEBUG) console.log({ semantics });
         setPostSemantics(semantics);
+        setIsGettingSemantics(false);
       });
     }
   };
@@ -116,7 +120,9 @@ export const AppPostPage = (props: {}) => {
           }}></PostEditor>
 
         <Box direction="row" gap="medium" margin={{ bottom: 'medium' }}>
-          {semantics ? (
+          {isGettingSemantics ? (
+            <LoadingDiv></LoadingDiv>
+          ) : semantics ? (
             semantics.tags.map((tag, ix) => <Text key={ix}>{`#${tag}`}</Text>)
           ) : (
             <></>
