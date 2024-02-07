@@ -316,10 +316,11 @@ class MultiStageParser:
     
     def process_ref_post(self, post: RefPost):
         
+        md_list = []
+
         # check how many external references post mentions
         if len(post.ref_urls) == 0:
             case = PromptCase.ZERO_REF
-            md_list = []
             
         else:
             # at least one external reference
