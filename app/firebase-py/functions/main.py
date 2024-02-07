@@ -4,6 +4,7 @@ from firebase_functions import https_fn
 from firebase_admin import initialize_app
 
 from shared_functions.main import SM_FUNCTION_post_parser_config, SM_FUNCTION_post_parser_imp
+from config import openai_api_key
 
 app = initialize_app()
 
@@ -13,10 +14,12 @@ def SM_FUNCTION_post_parser(request):
     content =  request_json['content'];
     parameters =  request_json['parameters'];
     
-    config:SM_FUNCTION_post_parser_config = {
+    config: SM_FUNCTION_post_parser_config = {
         "wandb_project": "st-demo-sandbox",
         "max_summary_length": 500,
+        "openai_api_key": openai_api_key,
         "openai_api_base": "https://openrouter.ai/api/v1",
+        "openapi_referer": "https://127.0.0.1:3000/"
     }
     
     meta = SM_FUNCTION_post_parser_imp(content, parameters, config)

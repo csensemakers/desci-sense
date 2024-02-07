@@ -9,15 +9,15 @@ class SM_FUNCTION_post_parser_config(TypedDict, total=True):
     wandb_project: str
     openai_api_base: str
     max_summary_length: int
+    openai_api_key: int
+    openai_api_referer: int
 
 def SM_FUNCTION_post_parser_imp(content, parameters, config) -> dict:
 
-    paserConfig = init_multi_stage_parser_config(config)
+    paserConfig = init_multi_stage_parser_config(config, {})
     
-    parser = FirebaseAPIParser(paserConfig, 
-                               openai_api_key=config["openai_api_key"],
-                               openapi_referer=config["openapi_referer"]
-                               )
+    parser = FirebaseAPIParser(paserConfig)                                
+                               
     logger.info(f"Running parser on {content}...")
     
     result = parser.process_text(content)

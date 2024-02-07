@@ -1,11 +1,11 @@
 import os
-# from dotenv import load_dotenv
+from dotenv import load_dotenv
 
 from dataclasses import dataclass
 # import pydantic as pyd
 from confection import Config
 
-# load_dotenv() 
+load_dotenv() 
 
 # environment
 environ = {

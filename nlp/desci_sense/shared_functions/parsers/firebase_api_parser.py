@@ -15,7 +15,7 @@ from ..postprocessing.output_parsers import TagTypeParser, KeywordParser
 from ..enum_dict import EnumDict, EnumDictKey
 from ..web_extractors.metadata_extractors import MetadataExtractionType, RefMetadata, extract_metadata_by_type, extract_all_metadata_by_type
 
-from ..prompting.jinja import zero_ref_template, single_ref_template, multi_ref_template
+from ..prompting.jinja import keywords_extraction_template, zero_ref_template, single_ref_template, multi_ref_template
 
 
 class PromptCase(EnumDictKey):
@@ -33,18 +33,13 @@ def set_metadata_extraction_type(extract_type: str):
     
     return metadata_extract_type
 
-
-def load_prompt_j2_templates(templates):
-    # load prompt templates into jinja and return j2 templates for each case
-
-    zero_ref_template = templates["zero_ref_template_name"]
-    single_ref_template = templates["single_ref_template_name"]
-    multi_ref_template = templates["multi_ref_template_name"]
-
-    return zero_ref_template, single_ref_template, multi_ref_template
-
-def create_model(model_name: str, temperature: float, api_base: str,
-               api_key: str, openapi_referer: str):
+def create_model(
+    model_name: str, 
+    temperature: float, 
+    api_base: str,
+    api_key: str, 
+    openapi_referer: str):
+    
         model = ChatOpenAI(
             model=model_name, 
             temperature=temperature,
@@ -56,11 +51,7 @@ def create_model(model_name: str, temperature: float, api_base: str,
     
     
 class FirebaseAPIParser:
-    def __init__(self, 
-                 config: Config,
-                 openai_api_key: str,
-                 openapi_referer: str
-                 ) -> None:
+    def __init__(self, config: Config) -> None:
         
         self.config = config
 
@@ -82,18 +73,17 @@ class FirebaseAPIParser:
         # init model
         model_name = "mistralai/mistral-7b-instruct" if not "model_name" in config["model"] else config["model"]["model_name"]
         logger.info(f"Loading parser model (type={model_name})...")
+        logger.info('self.config {}',  self.config)
         self.parser_model = ChatOpenAI(
             model=model_name, 
             temperature=self.config["model"]["temperature"],
-            openai_api_key=openai_api_key,
-            openai_api_base=self.config["openai_api_base"],
-            headers={"HTTP-Referer": openapi_referer}, 
+            openai_api_key=self.config["openai_api"]["openai_api_key"],
+            openai_api_base=self.config["openai_api"]["openai_api_base"],
+            headers={"HTTP-Referer": self.config["openai_api"]["openai_api_referer"]}, 
         )
 
         # init kw extraction chain
-        self.init_keyword_extraction_chain(api_key=openai_api_key,
-                                           openapi_referer=openapi_referer)
-
+        self.init_keyword_extraction_chain()
 
         # load ontology
         logger.info("Loading ontology...")
@@ -138,6 +128,9 @@ class FirebaseAPIParser:
         prompt_case_dict[PromptCase.ZERO_REF]['output_parser'] = TagTypeParser(allowed_tags=prompt_case_dict[PromptCase.ZERO_REF]['labels'])
         prompt_case_dict[PromptCase.ZERO_REF]['chain'] = self.prompt_template | self.parser_model | prompt_case_dict[PromptCase.ZERO_REF]['output_parser']
         prompt_case_dict[PromptCase.ZERO_REF]['prompt_j2_template'] = zero_ref_template
+        
+        logger.info("zero_ref_template {}", zero_ref_template)
+        zero_ref_template.render(author_name='A')
         
         # configure single ref case
         prompt_case_dict[PromptCase.SINGLE_REF] = {
@@ -208,7 +201,7 @@ class FirebaseAPIParser:
 
         return result
 
-    def init_keyword_extraction_chain(self, api_key, openapi_referer):
+    def init_keyword_extraction_chain(self):
         # setup chain for topic extraction
         if not self.kw_mode_enabled:
             self.kw_extraction = {}
@@ -220,21 +213,17 @@ class FirebaseAPIParser:
         self.set_kw_md_extract_method(self.config["keyword_extraction"].get("ref_metadata_method", MetadataExtractionType.NONE.value))
 
         # load template
-        templates_dir=self.config["prompt"]["template_dir"]
-        keyword_template_name = self.config["keyword_extraction"]["template"]
-        full_templates_dir = ROOT / templates_dir
-        j2_env = Environment(loader=FileSystemLoader(str(full_templates_dir)))
-        kw_template = j2_env.get_template(keyword_template_name)
-
-
+        kw_template = keywords_extraction_template
 
         # init model
-        model_name = self.config["keyword_extraction"]["model"]["model_name"]
-        logger.info(f"Loading keyword model (type={model_name})...")
-        self.kw_model = create_model(model_name,
+        model = self.config["keyword_extraction"]["model"]
+        name = model["model_name"]
+        logger.info(f"Loading keyword model (type={name})...")
+        self.kw_model = create_model(name,
+                                     model["temperature"],
                                      self.config["keyword_extraction"]["model"]["temperature"],
-                                     api_key,
-                                     openapi_referer)
+                                     self.config["openai_api"]["openai_api_key"],
+                                     self.config["openai_api"]["openai_api_referer"])
         
         # init kw output parser
 

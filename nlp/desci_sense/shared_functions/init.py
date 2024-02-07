@@ -1,13 +1,16 @@
 from typing import List, TypedDict, Any
 
 from confection import Config
+from loguru import logger
 
 class ParserInitConfig(TypedDict, total=True):
     wandb_project: str
     zero_ref_template_name: Any
     single_ref_template_name: Any
     multi_ref_template_name: Any
-        
+    openai_api_key: str
+    openai_api_base: str
+    openai_api_referer: str   
     
 class ParserInitConfigOptional(TypedDict, total=False):
     # Optional parameters
@@ -42,13 +45,15 @@ def init_multi_stage_parser_config(config: ParserInitConfig, optional: ParserIni
         "kw_template": "keywords_extraction.j2",
         "kw_ref_metadata_method": "citoid",
         "max_keywords": 6,
-        "keyword_extraction_model": "mistralai/mistral-7b-instruct"
+        "keyword_extraction_model": "mistralai/mistral-7b-instruct",
     }
     
     if optional is None:
         optional = {}
    
     config = {**defaults, **config, **optional}
+    
+    logger.info(f"config {{}}", config)
 
     paserConfig = Config(
                     {
@@ -56,7 +61,11 @@ def init_multi_stage_parser_config(config: ParserInitConfig, optional: ParserIni
                         "parser_type": config["parser_type"],
                         "ref_metadata_method": config["ref_metadata_method"]
                     },
-
+                    "openai_api": {
+                        "openai_api_base": config["openai_api_base"],
+                        "openai_api_key": config["openai_api_key"],
+                        "openai_api_referer": config["openai_api_referer"]
+                    },
                     "model": {
                             "model_name": config["model_name"], 
                             "temperature": config["temperature"]
@@ -64,12 +73,6 @@ def init_multi_stage_parser_config(config: ParserInitConfig, optional: ParserIni
                     "ontology": {
                         "versions": config["versions"],
                         "notion_db_id": config["notion_db_id"]
-                    },
-                    "prompt": {
-                        "template_dir": config["template_dir"],
-                        "zero_ref_template": config["zero_ref_template"],
-                        "single_ref_template": config["single_ref_template"],
-                        "multi_ref_template": config["multi_ref_template"]
                     },
                     "keyword_extraction":
                     {
