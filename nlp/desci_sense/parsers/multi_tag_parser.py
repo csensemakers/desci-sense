@@ -17,7 +17,7 @@ from desci_sense.configs import environ
 from ..dataloaders.twitter.twitter_utils import scrape_tweet, extract_external_ref_urls
 from ..dataloaders.mastodon.mastodon_utils import scrape_mastodon_post, extract_external_masto_ref_urls
 from ..utils import extract_and_expand_urls, identify_social_media
-from ..schema.post import RefPost
+from ..shared_functions.schema.post import RefPost
 from ..prompting.post_tags_pydantic import PostTagsDataModel
 from ..postprocessing.parser_utils import fix_json_string_with_backslashes
 

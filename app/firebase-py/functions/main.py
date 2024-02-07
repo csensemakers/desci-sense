@@ -3,7 +3,7 @@ import json
 from firebase_functions import https_fn
 from firebase_admin import initialize_app
 
-from shared_functions.tagger import SM_FUNCTION_post_tagger_imp
+from shared_functions.main import SM_FUNCTION_post_parser_imp
 
 app = initialize_app()
 
@@ -13,7 +13,7 @@ def SM_FUNCTION_post_tagger(request):
     content =  request_json['content'];
     parameters =  request_json['parameters'];
     
-    meta = SM_FUNCTION_post_tagger_imp(content, parameters)
+    meta = SM_FUNCTION_post_parser_imp(content, parameters, config)
     
     return https_fn.Response(
         json.dumps({"meta": meta }),

@@ -1,25 +1,19 @@
 
-from jinja2 import Environment, FileSystemLoader
 from confection import Config
 
-from pathlib import Path
 from loguru import logger
-from typing import List, Optional
+from typing import List
 
 from langchain.chat_models import ChatOpenAI
 from langchain.prompts import PromptTemplate
 
-import desci_sense.configs as configs
-from desci_sense.schema.ontology_base import OntologyBase
+from ..schema.ontology_base import OntologyBase
+from ..schema.post import RefPost
+from ..schema.helpers import convert_text_to_ref_post
+from ..postprocessing.output_parsers import TagTypeParser, KeywordParser
 
-from desci_sense.schema.post import RefPost
-from desci_sense.postprocessing.output_parsers import TagTypeParser, KeywordParser
-
-from desci_sense.schema.helpers import convert_text_to_ref_post
-from desci_sense.enum_dict import EnumDict, EnumDictKey
-from desci_sense.web_extractors.metadata_extractors import MetadataExtractionType, RefMetadata, extract_metadata_by_type, extract_all_metadata_by_type
-
-ROOT = Path("/Users/ronentamari/Documents/dev/common_sense/sensemaker_app/firebase_branch/nlp")
+from ..enum_dict import EnumDict, EnumDictKey
+from ..web_extractors.metadata_extractors import MetadataExtractionType, RefMetadata, extract_metadata_by_type, extract_all_metadata_by_type
 
 class PromptCase(EnumDictKey):
     ZERO_REF = "ZERO_REF"
@@ -37,29 +31,22 @@ def set_metadata_extraction_type(extract_type: str):
     return metadata_extract_type
 
 
-def load_prompt_j2_templates(templates_dir: str, 
-                             zero_ref_template_name: str, 
-                             single_ref_template_name: str, 
-                             multi_ref_template_name: str, 
-                             ):
+def load_prompt_j2_templates(templates):
     # load prompt templates into jinja and return j2 templates for each case
 
-    full_templates_dir = ROOT / templates_dir
-    j2_env = Environment(loader=FileSystemLoader(str(full_templates_dir)))
-
-    zero_ref_template = j2_env.get_template(zero_ref_template_name)
-    single_ref_template = j2_env.get_template(single_ref_template_name)
-    multi_ref_template = j2_env.get_template(multi_ref_template_name)
+    zero_ref_template = templates["zero_ref_template_name"]
+    single_ref_template = templates["single_ref_template_name"]
+    multi_ref_template = templates["multi_ref_template_name"]
 
     return zero_ref_template, single_ref_template, multi_ref_template
 
-def create_model(model_name: str, temperature: float, 
+def create_model(model_name: str, temperature: float, api_base: str,
                api_key: str, openapi_referer: str):
         model = ChatOpenAI(
             model=model_name, 
             temperature=temperature,
             openai_api_key=api_key,
-            openai_api_base=configs.OPENROUTER_API_BASE,
+            openai_api_base=api_base,
             headers={"HTTP-Referer": openapi_referer}, 
         )
         return model
@@ -96,7 +83,7 @@ class FirebaseAPIParser:
             model=model_name, 
             temperature=self.config["model"]["temperature"],
             openai_api_key=openai_api_key,
-            openai_api_base=configs.OPENROUTER_API_BASE,
+            openai_api_base=self.config["openai_api_base"],
             headers={"HTTP-Referer": openapi_referer}, 
         )
 
@@ -140,10 +127,7 @@ class FirebaseAPIParser:
         # load jinja templates
 
         zero_ref_template, single_ref_template, multi_ref_template = load_prompt_j2_templates(
-                templates_dir=self.config["prompt"]["template_dir"],
-                zero_ref_template_name=self.config["prompt"]["zero_ref_template_name"],
-                single_ref_template_name=self.config["prompt"]["single_ref_template_name"],
-                multi_ref_template_name=self.config["prompt"]["multi_ref_template_name"]
+                self.config.get("templates")
         )
         
         
@@ -314,7 +298,7 @@ class FirebaseAPIParser:
             if len(post.ref_urls) == 1:
                 case = PromptCase.SINGLE_REF
                 # if metadata flag is active, retreive metadata
-                md_list = extract_metadata_by_type(post.ref_urls[0], self.md_extract_method)
+                md_list = extract_metadata_by_type(post.ref_urls[0], self.md_extract_method, self.config["max_summary_length"])
             
             else:
                 case = PromptCase.MULTI_REF

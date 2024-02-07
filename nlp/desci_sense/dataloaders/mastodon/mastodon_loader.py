@@ -5,7 +5,7 @@ from mastodon import Mastodon
 
 from desci_sense.configs import environ
 from .mastodon_utils import convert_post_json_to_ref_post
-from ...schema.post import RefPost
+from ...shared_functions.schema.post import RefPost
 
 
 

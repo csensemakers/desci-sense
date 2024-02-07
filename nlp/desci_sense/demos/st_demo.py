@@ -25,10 +25,10 @@ import pandas as pd
 import shortuuid
 from confection import Config
 
-from desci_sense.schema.post import RefPost
+from nlp.desci_sense.shared_functions.schema.post import RefPost
 
 from desci_sense.prompting.post_tags_pydantic import PostTagsDataModel
-from desci_sense.web_extractors.metadata_extractors import MetadataExtractionType
+from nlp.desci_sense.shared_functions.web_extractors.metadata_extractors import MetadataExtractionType
 from desci_sense.semantic_publisher import create_triples_from_prediction
 # from desci_sense.schema.templates import TEMPLATES, LABEL_TEMPLATE_MAP, DEFAULT_PREDICATE_LABEL, DISP_NAME_TEMPLATES_MAP
 

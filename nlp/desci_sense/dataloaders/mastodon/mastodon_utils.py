@@ -6,7 +6,7 @@ import re
 from datetime import datetime
 from urllib.parse import urlparse
 
-from ...schema.post import RefPost
+from ...shared_functions.schema.post import RefPost
 from ...utils import convert_html_to_plain_text, extract_and_expand_urls, normalize_url
 
 

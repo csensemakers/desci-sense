@@ -1,6 +1,6 @@
 
 from ..schema.templates import TEMPLATES, LABEL_TEMPLATE_MAP, DEFAULT_PREDICATE_LABEL
-from ..schema.post import RefPost
+from ..shared_functions.schema.post import RefPost
 
 
 

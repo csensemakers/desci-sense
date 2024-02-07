@@ -1,11 +1,8 @@
 from typing import List
 from loguru import logger
 
-from ..schema.post import RefPost
-from ..web_extractors.citoid import fetch_citation
-
-
-
+from ..shared_functions.schema.post import RefPost
+from ..shared_functions.web_extractors.citoid import fetch_citation
 
 def filter_url_by_type(url: str, accepted_types: List[str]):
     cite_data = fetch_citation(url)

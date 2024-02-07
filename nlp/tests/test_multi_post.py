@@ -6,8 +6,8 @@ sys.path.append(str(ROOT))
 
 
 
-from desci_sense.schema.post import MultiTagRefPost
-from desci_sense.postprocessing.output_parsers import TagTypeParser
+from nlp.desci_sense.shared_functions.schema.post import MultiTagRefPost
+from nlp.desci_sense.shared_functions.postprocessing.output_parsers import TagTypeParser
 
 
 # def test_simple_1():
