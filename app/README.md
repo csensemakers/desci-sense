@@ -2,9 +2,20 @@
 
 To run the app locally
 
+**Requirements**
+
+- Node 18
+- `firebase-tools` installed globally 
+
+If you don't have firebase-tools installed run
+
+```
+npm install -g firebase-tools
+```
+
 ## Express Server
 
-Run the express server in a local firestore emulator
+Run the express server, and firestore, in a local emulator 
 
 ```
 cd firebase
@@ -34,7 +45,7 @@ yarn build:watch
 
 ## Python Server
 
-Run the python processing functions in another local firestore emulator
+Run the python processing functions in another local firebase emulator
 
 ```
 cd firebase-py/functions  
