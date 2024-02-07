@@ -1,6 +1,6 @@
 import { Box, Text } from 'grommet';
 import { Send } from 'grommet-icons';
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDebounce } from 'use-debounce';
 
@@ -8,8 +8,13 @@ import { useAccountContext } from '../app/AccountContext';
 import { TweetAnchor } from '../app/TwitterAnchor';
 import { ViewportPage } from '../app/Viewport';
 import { PostEditor } from '../post/PostEditor';
-import { getPostMeta, postMessage } from '../post/post.utils';
-import { AppPost, AppPostCreate, AppPostMeta, PLATFORM } from '../shared/types';
+import { getPostSemantics, postMessage } from '../post/post.utils';
+import {
+  AppPost,
+  AppPostCreate,
+  AppPostSemantics,
+  PLATFORM,
+} from '../shared/types';
 import { AppButton, AppCard, AppHeading } from '../ui-components';
 import { BoxCentered } from '../ui-components/BoxCentered';
 import { Loading } from '../ui-components/LoadingDiv';
@@ -27,7 +32,7 @@ export const AppPostPage = (props: {}) => {
   const [postTextDebounced] = useDebounce(postText, 2500);
 
   /** meta is the metadata of the post */
-  const [meta, setPostMeta] = useState<AppPostMeta>();
+  const [semantics, setPostSemantics] = useState<AppPostSemantics>();
 
   const [isSending, setIsSending] = useState<boolean>();
   const [postSentError, setPostSentError] = useState<boolean>();
@@ -40,7 +45,7 @@ export const AppPostPage = (props: {}) => {
       setIsSending(true);
       const postCreate: AppPostCreate = {
         content: postText,
-        meta,
+        semantics: semantics,
         platforms: [PLATFORM.X],
       };
       if (DEBUG) console.log('postMessage', { postCreate });
@@ -56,12 +61,12 @@ export const AppPostPage = (props: {}) => {
     }
   };
 
-  const getMeta = () => {
+  const getSemantics = () => {
     if (postText && appAccessToken) {
       if (DEBUG) console.log('getPostMeta', { postText });
-      getPostMeta(postText, appAccessToken).then((meta) => {
-        if (DEBUG) console.log({ meta });
-        setPostMeta(meta);
+      getPostSemantics(postText, appAccessToken).then((semantics) => {
+        if (DEBUG) console.log({ semantics });
+        setPostSemantics(semantics);
       });
     }
   };
@@ -69,13 +74,13 @@ export const AppPostPage = (props: {}) => {
   useEffect(() => {
     if (DEBUG) console.log({ postTextDebounced, postText });
     if (postTextDebounced) {
-      getMeta();
+      getSemantics();
     }
   }, [postTextDebounced]);
 
   const newPost = () => {
     setPost(undefined);
-    setPostMeta(undefined);
+    setPostSemantics(undefined);
   };
 
   const content = (() => {
@@ -111,8 +116,8 @@ export const AppPostPage = (props: {}) => {
           }}></PostEditor>
 
         <Box direction="row" gap="medium" margin={{ bottom: 'medium' }}>
-          {meta ? (
-            meta.tags.map((tag, ix) => <Text key={ix}>{`#${tag}`}</Text>)
+          {semantics ? (
+            semantics.tags.map((tag, ix) => <Text key={ix}>{`#${tag}`}</Text>)
           ) : (
             <></>
           )}

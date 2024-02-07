@@ -1,9 +1,8 @@
 from typing import List
 from enum import Enum
 from dataclasses import dataclass
-from .citoid import fetch_citation, fetch_all_citations
 
-from ..configs import MAX_SUMMARY_LEN
+from .citoid import fetch_citation, fetch_all_citations
 
 class MetadataExtractionType(Enum):
     NONE = "none"
@@ -29,7 +28,7 @@ class RefMetadata:
         
 
 
-def normalize_citoid_metadata(metadata_list: List[dict]):
+def normalize_citoid_metadata(metadata_list: List[dict], max_summary_length):
     results = []
     for metadata in metadata_list:
         results.append(RefMetadata(**
@@ -37,21 +36,21 @@ def normalize_citoid_metadata(metadata_list: List[dict]):
                 "url": metadata.get("url", None),
                 "item_type": metadata.get("itemType", None),
                 "title": metadata.get("title", ""),
-                "summary": metadata.get("abstractNote", "")[:MAX_SUMMARY_LEN]
+                "summary": metadata.get("abstractNote", "")[:max_summary_length]
              })
         )
     return results
 
 
-def extract_citoid_metadata(target_url):
+def extract_citoid_metadata(target_url, max_summary_length):
     
     citoid_metadata = [fetch_citation(target_url)]
     assert len(citoid_metadata) == 1
-    return normalize_citoid_metadata(citoid_metadata)[0]
+    return normalize_citoid_metadata(citoid_metadata, max_summary_length)[0]
 
 
 
-def extract_metadata_by_type(target_url, md_type: MetadataExtractionType) -> List[RefMetadata]:
+def extract_metadata_by_type(target_url, md_type: MetadataExtractionType, max_summary_length) -> List[RefMetadata]:
     """_summary_
 
     Args:
@@ -64,7 +63,7 @@ def extract_metadata_by_type(target_url, md_type: MetadataExtractionType) -> Lis
     if md_type == MetadataExtractionType.NONE:
         return []
     if md_type == MetadataExtractionType.CITOID:
-        return [extract_citoid_metadata(target_url)]
+        return [extract_citoid_metadata(target_url, max_summary_length)]
     else:
         raise ValueError(f"Unsupported extraaction type:{md_type.value}")
     

@@ -17,8 +17,8 @@ from ..dataloaders import convert_text_to_ref_post
 from ..dataloaders.twitter.twitter_utils import scrape_tweet, extract_external_ref_urls
 from ..dataloaders.mastodon.mastodon_utils import scrape_mastodon_post, extract_external_masto_ref_urls
 from ..utils import extract_and_expand_urls, identify_social_media
-from ..schema.post import RefPost
-from ..postprocessing.output_parsers import TagTypeParser
+from ..shared_functions.schema.post import RefPost
+from ..shared_functions.postprocessing.output_parsers import TagTypeParser
 
 
 

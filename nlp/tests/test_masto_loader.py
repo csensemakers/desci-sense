@@ -6,7 +6,7 @@ sys.path.append(str(ROOT))
 from langchain.document_loaders import MastodonTootsLoader
 
 
-from desci_sense.schema.post import RefPost
+from nlp.desci_sense.shared_functions.schema.post import RefPost
 from desci_sense.dataloaders.mastodon.mastodon_loader import MastodonLoader
 from desci_sense.dataloaders.mastodon.mastodon_utils import scrape_mastodon_post
 

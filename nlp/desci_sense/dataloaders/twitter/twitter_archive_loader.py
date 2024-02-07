@@ -6,7 +6,7 @@ from datetime import datetime
 from typing import List
 
 
-from ...schema.post import RefPost
+from ...shared_functions.schema.post import RefPost
 from ...dataloaders.twitter.twitter_archive_parser import parse_tweets, PathConfig, extract_username, read_json_from_js_file
 from ...dataloaders.twitter.twitter_utils import convert_archive_tweet_to_ref_post
 

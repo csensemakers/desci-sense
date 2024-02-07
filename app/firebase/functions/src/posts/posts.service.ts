@@ -10,8 +10,8 @@ export const postPost = async (userId: string, post: AppPostCreate) => {
   let tweet: TweetRead | undefined = undefined;
 
   if (post.platforms.includes(PLATFORM.X)) {
-    const append = post.meta?.tags
-      ? '\n\n' + post.meta.tags.map((tag: string) => `#${tag}`).join(' ')
+    const append = post.semantics?.tags
+      ? '\n\n' + post.semantics.tags.map((tag: string) => `#${tag}`).join(' ')
       : '';
     const newContent = post.content + append;
 
@@ -23,10 +23,10 @@ export const postPost = async (userId: string, post: AppPostCreate) => {
   return createdPost;
 };
 
-export const getPostMeta = async (content: string) => {
+export const getPostSemantics = async (content: string) => {
   const parameters = { options: TAG_OPTIONS };
 
-  const response = await fetch(`${FUNCTIONS_PY_URL}/SM_FUNCTION_post_tagger`, {
+  const response = await fetch(`${FUNCTIONS_PY_URL}/SM_FUNCTION_post_parser`, {
     headers: [
       ['Accept', 'application/json'],
       ['Content-Type', 'application/json'],
@@ -37,8 +37,8 @@ export const getPostMeta = async (content: string) => {
 
   const body = await response.json();
 
-  const meta = body.meta;
-  logger.debug('getPostMeta', meta);
+  const semantics = body.semantics;
+  logger.debug('getPostSemantics', semantics);
 
-  return meta;
+  return semantics;
 };

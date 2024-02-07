@@ -8,7 +8,6 @@ import aiohttp
 from aiohttp.client import ClientSession
 
 import requests
-import sys
 from urllib.parse import quote
 
 # https://plainenglish.io/blog/send-http-requests-as-fast-as-possible-in-python-304134d46604

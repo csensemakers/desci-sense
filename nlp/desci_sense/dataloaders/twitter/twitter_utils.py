@@ -6,7 +6,7 @@ import re
 import requests
 from datetime import datetime
 
-from ...schema.post import RefPost
+from ...shared_functions.schema.post import RefPost
 from ...utils import extract_and_expand_urls, extract_twitter_status_id, normalize_url
 
 

@@ -2,8 +2,9 @@ firebase_functions~=0.1.0
 langchain==0.0.327
 openai==0.28.1
 confection
-notion-client
 pandas==2.2.0
 loguru
 html2text==2020.1.16
 url-normalize==1.4.3
+python-dotenv 
+jinja2

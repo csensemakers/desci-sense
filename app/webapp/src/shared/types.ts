@@ -43,11 +43,11 @@ export enum PLATFORM {
 
 export interface AppPostCreate {
   content: string;
-  meta: any;
+  semantics: any;
   platforms: [PLATFORM];
 }
 
-export interface AppPostGetMeta {
+export interface AppPostGetSemantics {
   content: string;
 }
 
@@ -62,6 +62,6 @@ export type AppPost = AppPostStore & {
   id: string;
 };
 
-export interface AppPostMeta {
+export interface AppPostSemantics {
   tags: string[];
 }

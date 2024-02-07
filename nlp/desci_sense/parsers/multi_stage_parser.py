@@ -14,12 +14,12 @@ import desci_sense.configs as configs
 from desci_sense.configs import environ
 
 from ..schema.notion_ontology_base import NotionOntologyBase, load_ontology_from_config
-from ..schema.post import RefPost
-from ..postprocessing.output_parsers import TagTypeParser, KeywordParser
+from ..shared_functions.schema.post import RefPost
+from ..shared_functions.postprocessing.output_parsers import TagTypeParser, KeywordParser
 from ..dataloaders import convert_text_to_ref_post, scrape_post
 
-from ..enum_dict import EnumDict, EnumDictKey
-from ..web_extractors.metadata_extractors import MetadataExtractionType, RefMetadata, extract_metadata_by_type, extract_all_metadata_by_type
+from ..shared_functions.enum_dict import EnumDict, EnumDictKey
+from ..shared_functions.web_extractors.metadata_extractors import MetadataExtractionType, RefMetadata, extract_metadata_by_type, extract_all_metadata_by_type
 
     
 

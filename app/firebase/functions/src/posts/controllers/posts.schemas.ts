@@ -3,9 +3,9 @@ import { array, object, string } from 'yup';
 export const postsValidationScheme = object({
   content: string().required(),
   platforms: array().of(string()).required(),
-  meta: object().optional(),
+  semantics: object().optional(),
 }).noUnknown(true);
 
-export const getPostMetaValidationScheme = object({
+export const getPostSemanticsValidationScheme = object({
   content: string().required(),
 }).noUnknown(true);

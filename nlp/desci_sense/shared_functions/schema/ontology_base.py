@@ -1,7 +1,6 @@
 from typing import List, Dict
 import pandas as pd
 
-from ..configs import environ
 from .ontology import ontology
 
 def load_ontology_from_dict(ont_dict):
