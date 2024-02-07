@@ -10,14 +10,18 @@ export const TWITTER_BEARER_TOKEN = env.TWITTER_BEARER_TOKEN as string;
 export const TWITTER_API_KEY = env.TWITTER_API_KEY as string;
 export const TWITTER_API_SECRET_KEY = env.TWITTER_API_SECRET_KEY as string;
 
-export const TWITTER_CALLBACK_URL = 'http://127.0.0.1:3000/';
+export const APP_URL =
+  process.env.NODE_ENV === 'development'
+    ? 'http://127.0.0.1:3000/'
+    : 'https://split--sensemakers.netlify.app/';
+
+export const TWITTER_CALLBACK_URL = APP_URL;
 
 export const SENSENET_DOMAIN = 'http://127.0.0.1:3000/';
 export const FUNCTIONS_PY_URL =
-  'http://127.0.0.1:5002/sensenets-9ef26/us-central1';
-
-// export const FUNCTIONS_PY_URL =
-//   'https://sm-function-post-tagger-eeshylf4jq-uc.a.run.app';
+  process.env.NODE_ENV === 'development'
+    ? 'http://127.0.0.1:5002/sensenets-9ef26/us-central1'
+    : 'https://sm-function-post-tagger-eeshylf4jq-uc.a.run.app/';
 
 export const TOKEN_EXPIRATION = '30d';
 

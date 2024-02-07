@@ -17,9 +17,8 @@ environ = {
     "MASTO_CLIENT_ID": os.environ.get("MASTO_CLIENT_ID"),
     "MASTO_CLIENT_SECRET": os.environ.get("MASTO_CLIENT_SECRET"),
     "NOTION_SENSEBOT_DB": os.environ.get("NOTION_SENSEBOT_DB"),
-    "NOTION_SENSEBOT_TOKEN": os.environ.get("NOTION_SENSEBOT_TOKEN")
+    "NOTION_SENSEBOT_TOKEN": os.environ.get("NOTION_SENSEBOT_TOKEN"),
 }
-  
 
 OPENROUTER_API_BASE = "https://openrouter.ai/api/v1"
 

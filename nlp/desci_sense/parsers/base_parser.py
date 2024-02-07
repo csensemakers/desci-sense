@@ -11,6 +11,8 @@ from langchain.schema import (
     HumanMessage,
 )
 
+from desci_sense.configs import environ
+
 from ..dataloaders import convert_text_to_ref_post
 from ..dataloaders.twitter.twitter_utils import scrape_tweet, extract_external_ref_urls
 from ..dataloaders.mastodon.mastodon_utils import scrape_mastodon_post, extract_external_masto_ref_urls

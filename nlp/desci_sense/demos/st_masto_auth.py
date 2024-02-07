@@ -5,6 +5,8 @@ Simple code to demo Mastodon OAuth in streamlit
 import streamlit as st
 from mastodon import Mastodon
 
+from desci_sense.configs import environ
+
 # Environment variables must be set with your Mastodon application id and secret 
 api_base_url = "https://mastodon.social/"
 client_id = environ["MASTO_CLIENT_ID"]
