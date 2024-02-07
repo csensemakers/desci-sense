@@ -25,7 +25,7 @@ export const SENSENET_DOMAIN = 'http://127.0.0.1:3000/';
 export const FUNCTIONS_PY_URL =
   process.env.NODE_ENV === 'local'
     ? 'http://127.0.0.1:5002/sensenets-9ef26/us-central1'
-    : 'https://sm-function-post-tagger-eeshylf4jq-uc.a.run.app/';
+    : 'https://sm-function-post-parser-eeshylf4jq-uc.a.run.app/';
 
 export const TOKEN_EXPIRATION = '30d';
 
