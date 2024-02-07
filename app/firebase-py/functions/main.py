@@ -19,13 +19,13 @@ def SM_FUNCTION_post_parser(request):
         "max_summary_length": 500,
         "openai_api_key": openai_api_key,
         "openai_api_base": "https://openrouter.ai/api/v1",
-        "openapi_referer": "https://127.0.0.1:3000/"
+        "openai_api_referer": "https://127.0.0.1:3000/"
     }
     
-    meta = SM_FUNCTION_post_parser_imp(content, parameters, config)
+    semantics = SM_FUNCTION_post_parser_imp(content, parameters, config)
     
     return https_fn.Response(
-        json.dumps({"meta": meta }),
+        json.dumps({"semantics": semantics }),
         status=200,
         headers={"Content-Type": "application/json"}
     )
