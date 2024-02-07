@@ -1,28 +1,25 @@
-from pathlib import Path
-from typing import Optional, Dict, List
-
-ROOT = Path(__file__).parents[2] 
 
 from jinja2 import Environment, FileSystemLoader
 from confection import Config
+
+from pathlib import Path
 from loguru import logger
+from typing import List, Optional
 
 from langchain.chat_models import ChatOpenAI
 from langchain.prompts import PromptTemplate
 
 import desci_sense.configs as configs
-from desci_sense.configs import environ
+from desci_sense.schema.ontology_base import OntologyBase
 
-from ..schema.notion_ontology_base import NotionOntologyBase, load_ontology_from_config
-from ..schema.post import RefPost
-from ..postprocessing.output_parsers import TagTypeParser, KeywordParser
-from ..dataloaders import convert_text_to_ref_post, scrape_post
+from desci_sense.schema.post import RefPost
+from desci_sense.postprocessing.output_parsers import TagTypeParser, KeywordParser
 
-from ..enum_dict import EnumDict, EnumDictKey
-from ..web_extractors.metadata_extractors import MetadataExtractionType, RefMetadata, extract_metadata_by_type, extract_all_metadata_by_type
+from desci_sense.schema.helpers import convert_text_to_ref_post
+from desci_sense.enum_dict import EnumDict, EnumDictKey
+from desci_sense.web_extractors.metadata_extractors import MetadataExtractionType, RefMetadata, extract_metadata_by_type, extract_all_metadata_by_type
 
-    
-
+ROOT = Path("/Users/ronentamari/Documents/dev/common_sense/sensemaker_app/firebase_branch/nlp")
 
 class PromptCase(EnumDictKey):
     ZERO_REF = "ZERO_REF"
@@ -68,13 +65,11 @@ def create_model(model_name: str, temperature: float,
         return model
     
     
-
-
-class MultiStageParser:
+class FirebaseAPIParser:
     def __init__(self, 
                  config: Config,
-                 api_key: Optional[str]=None,
-                 openapi_referer: Optional[str]=None
+                 openai_api_key: str,
+                 openapi_referer: str
                  ) -> None:
         
         self.config = config
@@ -89,13 +84,6 @@ class MultiStageParser:
         else:
             kw_enabled = False
         self.set_keyword_extraction_mode(kw_enabled)
-
-
-
-        # if no api key passed as arg, default to environment config
-        openai_api_key = api_key if api_key else environ["OPENROUTER_API_KEY"]
-        
-        openapi_referer = openapi_referer if openapi_referer else environ["OPENROUTER_REFERRER"]
 
 
         # basic prompt template that takes a string as input
@@ -119,7 +107,7 @@ class MultiStageParser:
 
         # load ontology
         logger.info("Loading ontology...")
-        self.ontology = load_ontology_from_config(self.config)
+        self.ontology = OntologyBase()
         
         # organize information in ontology for quick retrieval by prompter
         self.init_prompt_case_dict(self.ontology)
@@ -145,7 +133,7 @@ class MultiStageParser:
         logger.info(f"Setting keywords metadata extraction method to {md_extract_method}...")
         self.kw_md_extract_method = set_metadata_extraction_type(md_extract_method)
 
-    def init_prompt_case_dict(self, ontology: NotionOntologyBase):
+    def init_prompt_case_dict(self, ontology: OntologyBase):
         # organize information in ontology for quick retrieval by prompter
         prompt_case_dict = EnumDict(PromptCase)
 
@@ -355,30 +343,5 @@ class MultiStageParser:
 
         return result
     
-
-
-    def process_url(self, post_url: str):
-        post: RefPost = scrape_post(post_url)
-        if not post:
-            # TODO fix exception handling to return empty output
-            raise IOError(f"Could not detect social media type of input URL: {post_url}")
-        
-        result = self.process_ref_post(post)
-
-        return result
-    
-
-    def kw_process_post(self, post_url: str):
-        # extract post and run kw extraction model
-        post: RefPost = scrape_post(post_url)
-        if not post:
-            # TODO fix exception handling to return empty output
-            raise IOError(f"Could not detect social media type of input URL: {post_url}")
-        
-        result = self.extract_post_topics_w_metadata(post)
-
-        return result
-
-
 
 

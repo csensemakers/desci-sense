@@ -13,6 +13,7 @@ from langchain.schema import (
 from langchain.output_parsers import PydanticOutputParser
 from pydantic import BaseModel, Field
 
+from desci_sense.configs import environ
 from ..dataloaders.twitter.twitter_utils import scrape_tweet, extract_external_ref_urls
 from ..dataloaders.mastodon.mastodon_utils import scrape_mastodon_post, extract_external_masto_ref_urls
 from ..utils import extract_and_expand_urls, identify_social_media
