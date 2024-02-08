@@ -8,8 +8,8 @@ import { useAccountContext } from '../app/AccountContext';
 import { TweetAnchor } from '../app/TwitterAnchor';
 import { ViewportPage } from '../app/Viewport';
 import { PostEditor } from '../post/PostEditor';
-import { SemanticsEditor } from '../post/SemanticsEditor';
 import { getPostSemantics, postMessage } from '../post/post.utils';
+import { SemanticsEditor } from '../semantics/SemanticsEditor';
 import {
   AppPost,
   AppPostCreate,
@@ -18,7 +18,7 @@ import {
 } from '../shared/types';
 import { AppButton, AppCard, AppHeading } from '../ui-components';
 import { BoxCentered } from '../ui-components/BoxCentered';
-import { Loading, LoadingDiv } from '../ui-components/LoadingDiv';
+import { Loading } from '../ui-components/LoadingDiv';
 import { useThemeContext } from '../ui-components/ThemedApp';
 
 const DEBUG = true;
