@@ -68,7 +68,7 @@ def extract_metadata_by_type(target_url, md_type: MetadataExtractionType, max_su
         raise ValueError(f"Unsupported extraaction type:{md_type.value}")
     
 
-def extract_urls_citoid_metadata(target_urls: List[str]):
+def extract_urls_citoid_metadata(target_urls: List[str], max_summary_length: int):
     """_summary_
 
     Args:
@@ -77,14 +77,15 @@ def extract_urls_citoid_metadata(target_urls: List[str]):
     if len(target_urls) == 0:
         return []
     if len(target_urls) == 1:
-        return [extract_citoid_metadata(target_urls[0])]
+        return [extract_citoid_metadata(target_urls[0], max_summary_length)]
     else:
         # use parallel call
         metadatas_raw = fetch_all_citations(target_urls)
-        return [normalize_citoid_metadata(md) for md in metadatas_raw]
+        return [normalize_citoid_metadata(md, max_summary_length) for md in metadatas_raw]
     
 
-def extract_all_metadata_by_type(target_urls, md_type: MetadataExtractionType) -> List[RefMetadata]:
+def extract_all_metadata_by_type(target_urls, md_type: MetadataExtractionType,
+                                 max_summary_length: int) -> List[RefMetadata]:
     """_summary_
 
     Args:
@@ -97,6 +98,6 @@ def extract_all_metadata_by_type(target_urls, md_type: MetadataExtractionType) -
     if md_type == MetadataExtractionType.NONE:
         return []
     if md_type == MetadataExtractionType.CITOID:
-        return extract_urls_citoid_metadata(target_urls)
+        return extract_urls_citoid_metadata(target_urls, max_summary_length)
     else:
         raise ValueError(f"Unsupported extraction type:{md_type.value}")

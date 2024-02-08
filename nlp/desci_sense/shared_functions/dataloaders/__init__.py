@@ -1,7 +1,7 @@
 from loguru import logger
 
-from ..shared_functions.schema.post import RefPost
-from ..shared_functions.utils import extract_and_expand_urls
+from ..schema.post import RefPost
+from ..utils import extract_and_expand_urls
 
 from ..utils import identify_social_media
 from .twitter.twitter_utils import scrape_tweet

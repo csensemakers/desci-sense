@@ -6,8 +6,8 @@ sys.path.append(str(ROOT))
 import asyncio
 import time 
 from aiohttp.client import ClientSession
-from ..desci_sense.shared_functions.web_extractors.citoid import fetch_citation_async, fetch_all_citations, fetch_citation
-from desci_sense.runners.batch_runner import MastodonBatchRunner
+from desci_sense.shared_functions.web_extractors.citoid import fetch_citation_async, fetch_all_citations, fetch_citation
+
 
 
 def test_fetch_speed():

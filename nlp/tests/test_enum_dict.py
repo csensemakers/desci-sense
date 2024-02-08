@@ -6,7 +6,7 @@ sys.path.append(str(ROOT))
 import pytest
 from enum import Enum
 
-from nlp.desci_sense.shared_functions.enum_dict import EnumDict, EnumDictKey
+from desci_sense.shared_functions.enum_dict import EnumDict, EnumDictKey
 
 
 # ... (EnumDictKey, EnumDict, Color, Size classes here)

@@ -7,6 +7,7 @@ from typing import List
 from langchain.chat_models import ChatOpenAI
 from langchain.prompts import PromptTemplate
 
+from ..init import MAX_SUMMARY_LENGTH
 from ..schema.ontology_base import OntologyBase
 from ..schema.post import RefPost
 from ..schema.helpers import convert_text_to_ref_post
@@ -172,6 +173,10 @@ class FirebaseAPIParser:
         for case_dict in self.prompt_case_dict.values():
             all_template_types += case_dict["type_templates"]
     
+    @property
+    def max_summary_length(self):
+        return self.config["general"].get("max_summary_length", MAX_SUMMARY_LENGTH)
+    
     def process_by_case(self, post: RefPost, case: PromptCase, 
                         metadata_list: List[RefMetadata] = None) -> dict:
         
@@ -220,7 +225,7 @@ class FirebaseAPIParser:
         logger.info(f"Loading keyword model (type={name})...")
         self.kw_model = create_model(name,
                                      model["temperature"],
-                                     self.config["keyword_extraction"]["model"]["temperature"],
+                                     self.config["openai_api"]["openai_api_base"],
                                      self.config["openai_api"]["openai_api_key"],
                                      self.config["openai_api"]["openai_api_referer"])
         
@@ -264,7 +269,9 @@ class FirebaseAPIParser:
     def extract_post_topics_w_metadata(self, post: RefPost) -> List[str]:
         
         md_list = extract_all_metadata_by_type(post.ref_urls, 
-                                               self.kw_md_extract_method)
+                                               self.kw_md_extract_method,
+                                               self.max_summary_length
+                                               )
 
         result = self.extract_post_topics(post, md_list)
 

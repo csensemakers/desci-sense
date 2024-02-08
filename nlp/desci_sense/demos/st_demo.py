@@ -25,16 +25,16 @@ import pandas as pd
 import shortuuid
 from confection import Config
 
-from nlp.desci_sense.shared_functions.schema.post import RefPost
+from desci_sense.shared_functions.schema.post import RefPost
 
-from desci_sense.prompting.post_tags_pydantic import PostTagsDataModel
-from nlp.desci_sense.shared_functions.web_extractors.metadata_extractors import MetadataExtractionType
+from desci_sense.shared_functions.web_extractors.metadata_extractors import MetadataExtractionType
 from desci_sense.semantic_publisher import create_triples_from_prediction
 # from desci_sense.schema.templates import TEMPLATES, LABEL_TEMPLATE_MAP, DEFAULT_PREDICATE_LABEL, DISP_NAME_TEMPLATES_MAP
 
-from desci_sense.schema.notion_ontology_base import NotionOntologyBase
-from desci_sense.dataloaders import scrape_post
-from desci_sense.dataloaders.twitter.twitter_utils import scrape_tweet
+# from desci_sense.schema.notion_ontology_base import NotionOntologyBase
+from desci_sense.shared_functions.schema.ontology_base import OntologyBase
+from desci_sense.shared_functions.dataloaders import scrape_post
+from desci_sense.shared_functions.dataloaders.twitter.twitter_utils import scrape_tweet
 from desci_sense.dataloaders.mastodon.mastodon_utils import scrape_mastodon_post
 from desci_sense.configs import ST_OPENROUTER_REFERRER, environ
 from desci_sense.utils import identify_social_media
@@ -62,7 +62,7 @@ if 'result' not in st.session_state:
 def click_run():
     st.session_state.clicked_run = True
 
-def predicate_data_editor(df: pd.DataFrame, possible_labels: List[str], ontology: NotionOntologyBase):
+def predicate_data_editor(df: pd.DataFrame, possible_labels: List[str], ontology: OntologyBase):
     """Create editable dataframe displaying the prediction results 
 
     Args:
@@ -259,7 +259,7 @@ if __name__ == "__main__":
         ontology = model.ontology
     
     # add set of possible predicate labels available in this run
-    config["prompt"]["tags"] = ontology.get_all_labels()
+    config["ontology"]["tags"] = ontology.get_all_labels()
 
     st.title("LLM Nanopublishing assistant demo")
     

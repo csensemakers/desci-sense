@@ -17,7 +17,7 @@ from ..schema.notion_ontology_base import NotionOntologyBase, load_ontology_from
 from ..shared_functions.schema.post import RefPost
 from ..shared_functions.postprocessing.output_parsers import TagTypeParser, KeywordParser
 from ..dataloaders import convert_text_to_ref_post, scrape_post
-
+from ..shared_functions.prompting.jinja import single_ref_template, zero_ref_template, multi_ref_template
 from ..shared_functions.enum_dict import EnumDict, EnumDictKey
 from ..shared_functions.web_extractors.metadata_extractors import MetadataExtractionType, RefMetadata, extract_metadata_by_type, extract_all_metadata_by_type
 
@@ -72,9 +72,7 @@ def create_model(model_name: str, temperature: float,
 
 class MultiStageParser:
     def __init__(self, 
-                 config: Config,
-                 api_key: Optional[str]=None,
-                 openapi_referer: Optional[str]=None
+                 config: Config
                  ) -> None:
         
         self.config = config
@@ -93,9 +91,11 @@ class MultiStageParser:
 
 
         # if no api key passed as arg, default to environment config
-        openai_api_key = api_key if api_key else environ["OPENROUTER_API_KEY"]
-        
-        openapi_referer = openapi_referer if openapi_referer else environ["OPENROUTER_REFERRER"]
+        openai_api_key = config["openai_api"].get("openai_api_key", environ["OPENROUTER_API_KEY"]) 
+        openapi_referer = config["openai_api"].get("openai_api_referer", environ["OPENROUTER_REFERRER"]) 
+        openai_api_base = config["openai_api"].get("openai_api_base", configs.OPENROUTER_API_BASE) 
+        # 
+        # openapi_referer = openapi_referer if openapi_referer else environ["OPENROUTER_REFERRER"]
 
 
         # basic prompt template that takes a string as input
@@ -108,7 +108,7 @@ class MultiStageParser:
             model=model_name, 
             temperature=self.config["model"]["temperature"],
             openai_api_key=openai_api_key,
-            openai_api_base=configs.OPENROUTER_API_BASE,
+            openai_api_base=openai_api_base,
             headers={"HTTP-Referer": openapi_referer}, 
         )
 
