@@ -19,11 +19,11 @@ def sm_function_post_parser(request):
     parameters = request_json["parameters"]
 
     config: SM_FUNCTION_post_parser_config = {
-        "wandb_project":   "st-demo-sandbox",
+        "wandb_project": "st-demo-sandbox",
         "max_summary_length": 500,
         "openai_api_key": openai_api_key,
         "openai_api_base": "https://openrouter.ai/api/v1",
-        "openai_api_referer": "https://127.0.0.1:3000/"
+        "openai_api_referer": "https://127.0.0.1:3000/",
     }
 
     semantics = SM_FUNCTION_post_parser_imp(content, parameters, config)
