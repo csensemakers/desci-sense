@@ -123,7 +123,7 @@ export const AppPostPage = (props: {}) => {
           {isGettingSemantics ? (
             <LoadingDiv></LoadingDiv>
           ) : semantics ? (
-            semantics.tags.map((tag, ix) => <Text key={ix}>{`#${tag}`}</Text>)
+            semantics.triplets.map((tag, ix) => <Text key={ix}>{`#${tag}`}</Text>)
           ) : (
             <></>
           )}
