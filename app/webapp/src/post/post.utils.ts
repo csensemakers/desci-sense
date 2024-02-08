@@ -32,5 +32,5 @@ export const getPostSemantics = async (
   });
 
   const body = await res.json();
-  return body.post;
+  return body.semantics;
 };

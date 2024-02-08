@@ -63,5 +63,5 @@ export type AppPost = AppPostStore & {
 };
 
 export interface AppPostSemantics {
-  tags: string[];
+  triplets: string[];
 }

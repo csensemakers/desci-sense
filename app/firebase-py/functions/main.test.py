@@ -1,7 +1,7 @@
 from shared_functions.main import SM_FUNCTION_post_parser_imp, SM_FUNCTION_post_parser_config
 from config import openai_api_key
 
-content = 'This is definititely an announcement of https://www.alink.com'
+content = 'This is definititely an announcement of https://www.alink.com and I dont agree with https://anotherlink.io'
 parameters = {}
 
 config: SM_FUNCTION_post_parser_config = {

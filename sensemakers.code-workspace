@@ -1,0 +1,23 @@
+{
+  "folders": [
+    {
+      "path": "app/firebase/functions",
+			"name": "nodejs-server"
+    },
+    {
+      "path": "app/firebase-py/functions",
+			"name": "python-server"
+    },
+    {
+      "path": "app/webapp",
+			"name": "react-webapp"
+    },
+    {
+      "path": "nlp/desci_sense/",
+			"name": "python-dev"
+    }
+  ],
+  "settings": {
+    "solidity.formatter": "prettier"
+  }
+}

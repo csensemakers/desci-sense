@@ -9,6 +9,7 @@ import { TweetAnchor } from '../app/TwitterAnchor';
 import { ViewportPage } from '../app/Viewport';
 import { PostEditor } from '../post/PostEditor';
 import { getPostSemantics, postMessage } from '../post/post.utils';
+import { SemanticsEditor } from '../semantics/SemanticsEditor';
 import {
   AppPost,
   AppPostCreate,
@@ -17,7 +18,7 @@ import {
 } from '../shared/types';
 import { AppButton, AppCard, AppHeading } from '../ui-components';
 import { BoxCentered } from '../ui-components/BoxCentered';
-import { Loading, LoadingDiv } from '../ui-components/LoadingDiv';
+import { Loading } from '../ui-components/LoadingDiv';
 import { useThemeContext } from '../ui-components/ThemedApp';
 
 const DEBUG = true;
@@ -29,7 +30,7 @@ export const AppPostPage = (props: {}) => {
 
   /** postText is the text and is in sync with the PostEditor content */
   const [postText, setPostText] = useState<string>();
-  const [postTextDebounced] = useDebounce(postText, 2500);
+  const [postTextDebounced] = useDebounce(postText, 2000);
 
   /** meta is the metadata of the post */
   const [semantics, setPostSemantics] = useState<AppPostSemantics>();
@@ -120,10 +121,10 @@ export const AppPostPage = (props: {}) => {
           }}></PostEditor>
 
         <Box direction="row" gap="medium" margin={{ bottom: 'medium' }}>
-          {isGettingSemantics ? (
-            <LoadingDiv></LoadingDiv>
-          ) : semantics ? (
-            semantics.tags.map((tag, ix) => <Text key={ix}>{`#${tag}`}</Text>)
+          {isGettingSemantics !== undefined ? (
+            <SemanticsEditor
+              isLoading={isGettingSemantics}
+              semantics={semantics}></SemanticsEditor>
           ) : (
             <></>
           )}
