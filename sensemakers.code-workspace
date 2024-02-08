@@ -2,19 +2,19 @@
   "folders": [
     {
       "path": "app/firebase/functions",
-			"name": "nodejs-server"
+      "name": "nodejs-server"
     },
     {
       "path": "app/firebase-py/functions",
-			"name": "python-server"
+      "name": "python-server"
     },
     {
       "path": "app/webapp",
-			"name": "react-webapp"
+      "name": "react-webapp"
     },
     {
-      "path": "nlp/desci_sense/",
-			"name": "python-dev"
+      "path": "nlp/",
+      "name": "python-dev"
     }
   ],
   "settings": {
