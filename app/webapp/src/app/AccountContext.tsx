@@ -20,7 +20,9 @@ const ORCID_LOGIN_URL = `${ORCID_API_URL}/oauth/authorize?client_id=${ORCID_CLIE
 export type AccountContextType = {
   connectedUser?: AppUserRead;
   isConnected: boolean;
+  isInitializing: boolean;
   isConnecting: boolean;
+  isGettingUser: boolean;
   disconnect: () => void;
   connect: () => void;
   refresh: () => void;
@@ -44,6 +46,10 @@ export const AccountContext = (props: PropsWithChildren) => {
   const [connectedUser, setConnectedUser] = useState<AppUserRead | null>();
   const [token, setToken] = useState<string>();
 
+  const [isInitializing, setIsInitializing] = useState<boolean>(true)
+  const [isConnecting, setIsConnecting] = useState<boolean>(false)
+  const [isGettingUser, setIsGettingUser] = useState<boolean>(false)
+
   // Extract the code from URL
   const [searchParams, setSearchParams] = useSearchParams();
   const code = searchParams.get('code');
@@ -54,17 +60,22 @@ export const AccountContext = (props: PropsWithChildren) => {
     if (token !== null) {
       if (DEBUG) console.log('tokend found in localstorage');
       setToken(token);
+      
     } else {
       setToken(undefined);
       setConnectedUser(null);
+      setIsInitializing(false)
     }
   };
 
   const refresh = () => {
     if (token) {
+      setIsGettingUser(false)
       getLoggedUser(token).then((user) => {
         if (DEBUG) console.log('got connected user', { user });
+        setIsGettingUser(false)
         setConnectedUser(user);
+        setIsInitializing(false)
       });
     }
   };
@@ -84,6 +95,7 @@ export const AccountContext = (props: PropsWithChildren) => {
     if (!codeHandled.current && code) {
       codeHandled.current = true;
       if (DEBUG) console.log('code received', { code });
+      setIsConnecting(true)
 
       postOrcidCode(code).then((token) => {
         if (DEBUG)
@@ -92,6 +104,8 @@ export const AccountContext = (props: PropsWithChildren) => {
         searchParams.delete('code');
         setSearchParams(searchParams);
         localStorage.setItem('token', token);
+
+        setIsConnecting(false)
         checkToken();
       });
     }
@@ -104,6 +118,7 @@ export const AccountContext = (props: PropsWithChildren) => {
   };
 
   const connect = () => {
+    setIsConnecting(true)
     window.location.href = ORCID_LOGIN_URL;
   };
 
@@ -112,7 +127,9 @@ export const AccountContext = (props: PropsWithChildren) => {
       value={{
         connectedUser: connectedUser === null ? undefined : connectedUser,
         isConnected: connectedUser !== undefined && connectedUser !== null,
-        isConnecting: connectedUser === undefined,
+        isInitializing,
+        isConnecting,
+        isGettingUser,
         connect,
         disconnect,
         refresh,

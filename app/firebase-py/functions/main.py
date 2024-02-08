@@ -10,7 +10,7 @@ app = initialize_app()
 
 
 @https_fn.on_request(min_instances=1)
-def sm_function_post_parser(request):
+def SM_FUNCTION_post_parser(request):
     """
     Wrapper on SM_FUNCTION_post_parser_imp
     """
@@ -26,7 +26,8 @@ def sm_function_post_parser(request):
         "openai_api_referer": "https://127.0.0.1:3000/",
     }
 
-    semantics = SM_FUNCTION_post_parser_imp(content, parameters, config)
+    # semantics = SM_FUNCTION_post_parser_imp(content, parameters, config)
+    c
 
     return https_fn.Response(
         json.dumps({"semantics": semantics }),

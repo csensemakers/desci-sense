@@ -19,6 +19,7 @@ const DEBUG = true;
 
 export type TwitterContextType = {
   connect: () => void;
+  isConnecting: boolean;
   needAuthorize?: boolean;
 };
 
@@ -40,6 +41,8 @@ export const TwitterContext = (props: PropsWithChildren) => {
   const oauth_token_param = searchParams.get('oauth_token');
   const oauth_verifier_param = searchParams.get('oauth_verifier');
 
+  const [isConnecting, setIsConnecting] = useState<boolean>(false)
+
   /**
    * only ask authorization if twitter user not found locally nor
    * found in the backend
@@ -48,6 +51,7 @@ export const TwitterContext = (props: PropsWithChildren) => {
 
   const connect = () => {
     if (appAccessToken) {
+      setIsConnecting(true)
       getTwitterAuthLink(appAccessToken).then((authLink) => {
         tokenHandled.current = true;
         window.location.href = authLink;
@@ -71,6 +75,7 @@ export const TwitterContext = (props: PropsWithChildren) => {
     ) {
       verifierHandled.current = true;
 
+      setIsConnecting(true)
       postTwitterVerifierToken(appAccessToken, {
         oauth_verifier: oauth_verifier_param,
         oauth_token: oauth_token_param,
@@ -80,7 +85,7 @@ export const TwitterContext = (props: PropsWithChildren) => {
         searchParams.delete('oauth_token');
         searchParams.delete('oauth_verifier');
         setSearchParams(searchParams);
-
+        setIsConnecting(false)
         refreshConnectedUser();
       });
     }
@@ -96,6 +101,7 @@ export const TwitterContext = (props: PropsWithChildren) => {
     <TwitterContextValue.Provider
       value={{
         connect,
+        isConnecting,
         needAuthorize,
       }}>
       {props.children}
