@@ -47,14 +47,14 @@
     "**/.yalc": true,
     "**/.yarn": true
   },
+  "python.linting.enabled": true,
+  "python.linting.pylintEnabled": true,
+  "python.linting.pylintArgs": [],
+  "python.formatting.provider": "black",
   "editor.formatOnSave": true,
   "[python]": {
-      "editor.defaultFormatter": "ms-python.python",
+      "editor.defaultFormatter": "ms-python.black-formatter",
       "editor.formatOnSave": true
   },
-  "python.formatting.provider": "black",
-  "python.formatting.blackArgs": [
-      "--line-length",
-      "88"
-  ],
+  "python.formatting.blackArgs": ["--line-length", "88"] // Optional, customize Black arguments
 }
