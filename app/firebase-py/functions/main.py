@@ -8,6 +8,8 @@ from config import openai_api_key
 
 app = initialize_app()
 
+
+
 @https_fn.on_request(min_instances=1)
 def SM_FUNCTION_post_parser(request):
     request_json = request.get_json()
@@ -15,7 +17,7 @@ def SM_FUNCTION_post_parser(request):
     parameters =  request_json['parameters'];
     
     config: SM_FUNCTION_post_parser_config = {
-        "wandb_project": "st-demo-sandbox",
+        "wandb_project":   "st-demo-sandbox",
         "max_summary_length": 500,
         "openai_api_key": openai_api_key,
         "openai_api_base": "https://openrouter.ai/api/v1",

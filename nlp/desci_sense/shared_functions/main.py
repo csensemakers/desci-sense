@@ -21,7 +21,15 @@ def SM_FUNCTION_post_parser_imp(content, parameters, config) -> dict:
     logger.info(f"Running parser on {content}...")
     
     result = parser.process_text(content)
+    
+    ref = result["post"].ref_urls[0]
+    
+    def getTriplet(label): 
+        return f"<_:1> <{label}> <{ref}>"
         
-    return {"tags": result["answer"]["multi_tag"] }
+    triplets = result["answer"]["multi_tag"]
+    triplets = list(map(getTriplet, triplets))
+        
+    return {"triplets": triplets }
     
     
