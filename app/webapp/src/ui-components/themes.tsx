@@ -215,6 +215,9 @@ const extension: ExtendedThemeType = {
   anchor: {
     color: constants.colors.links,
     textDecoration: 'underline',
+    extend: css`
+      font-size: ${constants.textFontSizes.small};
+    `,
   },
 };
 

@@ -29,8 +29,9 @@ def SM_FUNCTION_post_parser(request):
     # semantics = SM_FUNCTION_post_parser_imp(content, parameters, config)
     semantics = {
         "triplets": [
+            "<_:1> <has-keyword> <happy>",
             "<_:1> <disagrees> <https://www.alink.com/>",
-            "<_:1> <announce> <https://www.alink.com/>",
+            "<_:1> <announce> <https://www.anotherlink.com/>",
         ]
     }
 
