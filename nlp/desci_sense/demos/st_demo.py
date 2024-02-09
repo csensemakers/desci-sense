@@ -12,42 +12,26 @@ Options:
 """
 
 import sys
-from typing import List
-from docopt import docopt
-from pathlib import Path
-from loguru import logger
-
-sys.path.append(str(Path(__file__).parents[2]))
-
 import streamlit as st
 import wandb
 import pandas as pd
 import shortuuid
+from typing import List
+from docopt import docopt
+from pathlib import Path
 from confection import Config
-
 from desci_sense.shared_functions.schema.post import RefPost
-
 from desci_sense.shared_functions.web_extractors.metadata_extractors import (
     MetadataExtractionType,
 )
-from desci_sense.semantic_publisher import create_triples_from_prediction
-
-# from desci_sense.schema.templates import TEMPLATES, LABEL_TEMPLATE_MAP, DEFAULT_PREDICATE_LABEL, DISP_NAME_TEMPLATES_MAP
-
-# from desci_sense.schema.notion_ontology_base import NotionOntologyBase
 from desci_sense.shared_functions.schema.ontology_base import OntologyBase
 from desci_sense.shared_functions.dataloaders import scrape_post
-from desci_sense.shared_functions.dataloaders.twitter.twitter_utils import scrape_tweet
-from desci_sense.dataloaders.mastodon.mastodon_utils import scrape_mastodon_post
-from desci_sense.configs import ST_OPENROUTER_REFERRER, environ
-from desci_sense.utils import identify_social_media
+from desci_sense.configs import environ
 from desci_sense.runner import init_model, load_config
+from desci_sense.semantic_publisher import create_triples_from_prediction
 
-# from desci_sense.schema.templates import PREDICATE_LABELS
+sys.path.append(str(Path(__file__).parents[2]))
 
-
-# add option for `other` tag for manual labelling
-# OPTIONS = PREDICATE_LABELS + ["other"]
 
 # display name for post for rendering in streamlit
 SUBJ_DISPLAY_NAME_MAP = {"post": "💬 Your post"}
