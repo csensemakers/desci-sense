@@ -4,7 +4,7 @@ from pathlib import Path
 ROOT = Path(__file__).parents[1]
 sys.path.append(str(ROOT))
 
-from desci_sense.dataloaders.twitter.twitter_utils import extract_external_ref_urls, scrape_tweet
+from desci_sense.shared_functions.dataloaders.twitter.twitter_utils import extract_external_ref_urls, scrape_tweet
 
 def test_ext_urls():
     test_urls = [
