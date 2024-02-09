@@ -1,8 +1,11 @@
 import { Box, BoxExtendedProps, Text } from 'grommet';
+import { Close } from 'grommet-icons';
 
 import { useThemeContext } from './ThemedApp';
 
-export const AppLabel = (props: BoxExtendedProps): JSX.Element => {
+export const AppLabel = (
+  props: BoxExtendedProps & { showClose?: boolean }
+): JSX.Element => {
   const { constants } = useThemeContext();
 
   return (
@@ -20,7 +23,16 @@ export const AppLabel = (props: BoxExtendedProps): JSX.Element => {
         ...props.style,
       }}
       justify="center">
-      <Text size="small">{props.children}</Text>
+      <Box direction="row" align="center">
+        <Text size="small">{props.children}</Text>
+        {props.showClose ? (
+          <Box margin={{ left: 'xsmall' }}>
+            <Close size="small"></Close>
+          </Box>
+        ) : (
+          <></>
+        )}
+      </Box>
     </Box>
   );
 };

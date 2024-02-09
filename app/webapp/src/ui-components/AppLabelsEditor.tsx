@@ -81,12 +81,15 @@ export const AppLabelsEditor = (props: {
         style={{ cursor: 'pointer', display: 'block' }}>
         {props.labels.map((keyWord, ix) => {
           return (
-            <AppLabel
-              key={ix}
-              margin={{ right: 'small', bottom: 'small' }}
+            <Box
               style={{ display: 'block', float: 'left', paddingTop: '5.5px' }}>
-              {keyWord}
-            </AppLabel>
+              <AppLabel
+                showClose={adding}
+                key={ix}
+                margin={{ right: 'small', bottom: 'small' }}>
+                {keyWord}
+              </AppLabel>
+            </Box>
           );
         })}
         {adding ? (
