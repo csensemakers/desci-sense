@@ -24,7 +24,7 @@ environ = {
 OPENROUTER_API_BASE = "https://openrouter.ai/api/v1"
 
 # Streamlit App URL
-ST_OPENROUTER_REFERRER = "https://ai-nanopub.streamlit.app/"
+ST_OPENROUTER_REFERRER = "https://sensebot.streamlit.app/"
 
 # project to save data from deployed web app
 WEB_APP_WANDB_PROJ = "st-app-multi-v1"
