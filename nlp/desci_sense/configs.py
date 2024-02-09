@@ -1,6 +1,6 @@
 import os
 from dotenv import load_dotenv
-
+from loguru import logger
 from dataclasses import dataclass
 # import pydantic as pyd
 from confection import Config
@@ -12,7 +12,7 @@ load_dotenv()
 # environment
 environ = {
     "OPENROUTER_API_KEY": os.environ.get("OPENROUTER_API_KEY"),
-    "OPENROUTER_REFERRER": os.environ.get("OPENROUTER_API_KEY"),
+    "OPENROUTER_REFERRER": os.environ.get("OPENROUTER_REFERRER"),
     "WANDB_PROJECT": os.environ.get("WANDB_PROJECT"),
     "MASTO_CLIENT_ID": os.environ.get("MASTO_CLIENT_ID"),
     "MASTO_CLIENT_SECRET": os.environ.get("MASTO_CLIENT_SECRET"),
