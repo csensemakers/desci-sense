@@ -12,7 +12,7 @@ from ..schema.ontology_base import OntologyBase
 from ..schema.post import RefPost
 from ..schema.helpers import convert_text_to_ref_post
 from ..postprocessing.output_parsers import TagTypeParser, KeywordParser
-
+from ..dataloaders import scrape_post
 from ..enum_dict import EnumDict, EnumDictKey
 from ..web_extractors.metadata_extractors import MetadataExtractionType, RefMetadata, extract_metadata_by_type, extract_all_metadata_by_type
 
@@ -321,3 +321,12 @@ class FirebaseAPIParser:
     
 
 
+    def process_url(self, post_url: str):
+        post: RefPost = scrape_post(post_url)
+        if not post:
+            # TODO fix exception handling to return empty output
+            raise IOError(f"Could not detect social media type of input URL: {post_url}")
+        
+        result = self.process_ref_post(post)
+
+        return result

@@ -6,9 +6,9 @@ sys.path.append(str(ROOT))
 from langchain.document_loaders import MastodonTootsLoader
 
 
-from nlp.desci_sense.shared_functions.schema.post import RefPost
-from desci_sense.dataloaders.mastodon.mastodon_loader import MastodonLoader
-from desci_sense.dataloaders.mastodon.mastodon_utils import scrape_mastodon_post
+from desci_sense.shared_functions.schema.post import RefPost
+from desci_sense.shared_functions.dataloaders.mastodon.mastodon_loader import MastodonLoader
+from desci_sense.shared_functions.dataloaders.mastodon.mastodon_utils import scrape_mastodon_post
 
 def test_dup_url_i38():
     post_url = "https://mastodon.social/@ronent/111409960080649156"
