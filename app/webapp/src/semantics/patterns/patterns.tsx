@@ -1,3 +1,4 @@
+import { Box } from 'grommet';
 import React from 'react';
 
 import { AppPostSemantics, ParserResult } from '../../shared/types';
@@ -19,13 +20,17 @@ export const Patterns = (props: {
   semanticsUpdated?: PatternProps['semanticsUpdated'];
 }) => {
   return (
-    <>
-      {patternsLib.map((Pattern, ix) => (
-        <Pattern
-          key={ix}
-          parsed={props.parsed}
-          semanticsUpdated={props.semanticsUpdated}></Pattern>
-      ))}
-    </>
+    <Box gap="large">
+      {patternsLib.map((Pattern, ix) => {
+        return (
+          <Box>
+            <Pattern
+              key={ix}
+              parsed={props.parsed}
+              semanticsUpdated={props.semanticsUpdated}></Pattern>
+          </Box>
+        );
+      })}
+    </Box>
   );
 };

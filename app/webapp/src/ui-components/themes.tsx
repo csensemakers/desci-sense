@@ -28,6 +28,8 @@ export interface StyleConstants {
     backgroundLightDarker: string;
     border: string;
     links: string;
+    tagsBackground: string;
+    tagsText: string;
   };
 }
 
@@ -59,6 +61,8 @@ const constants: StyleConstants = {
     backgroundLight: '#f7f7f7',
     backgroundLightDarker: '#cacaca',
     links: '#004766',
+    tagsBackground: '#c29cda',
+    tagsText: '#ffffff',
   },
 };
 

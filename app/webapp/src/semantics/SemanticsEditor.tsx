@@ -16,7 +16,7 @@ export const SemanticsEditor = (props: {
   }
 
   return (
-    <Box style={{ width: '100%' }}>
+    <Box style={{ width: '100%' }} pad={{ vertical: 'large' }}>
       {props.parsed ? (
         <Patterns
           parsed={props.parsed}

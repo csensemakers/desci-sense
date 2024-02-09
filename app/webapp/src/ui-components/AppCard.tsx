@@ -13,10 +13,8 @@ export interface AppCardProps extends BoxExtendedProps {
 const cardStyle = (constants: StyleConstants): React.CSSProperties => {
   return {
     backgroundColor: constants.colors.backgroundLight,
-    border: 'solid 1px',
-    borderColor: constants.colors.primaryLight,
     padding: '16px 24px',
-    borderRadius: '8px',
+    borderRadius: '6px',
   };
 };
 

@@ -1,11 +1,14 @@
 import { Box, Text } from 'grommet';
 
+import { AppLabel } from '../../../ui-components';
+import { useThemeContext } from '../../../ui-components/ThemedApp';
 import { parseTriplet } from '../../utils';
 import { RefCard } from '../common/RefCard';
 import { PatternProps } from '../patterns';
 import { RefsMap } from './types';
 
 export const RefLabelsComponent = (props: PatternProps) => {
+  const { constants } = useThemeContext();
   const triplets = props.parsed.semantics.triplets.map((t) => parseTriplet(t));
 
   const labeled = triplets.filter((triplet) => triplet[1] !== 'has-keyword');
@@ -28,7 +31,7 @@ export const RefLabelsComponent = (props: PatternProps) => {
     return (
       <Box margin={{ top: 'small' }}>
         <Box style={{ display: 'block' }}>
-          <Box gap="medium">
+          <Box gap="large">
             {Array.from(refs.entries()).map(([ref, semantics], ixref) => {
               const labels = semantics.labels;
 
@@ -37,17 +40,25 @@ export const RefLabelsComponent = (props: PatternProps) => {
                 const isLast = ixlabel === labels.length - 1;
 
                 return (
-                  <Text
+                  <AppLabel
                     key={ixlabel}
                     margin={{
                       right: 'xsmall',
-                    }}>{`${hasMany && isLast ? 'and ' : ''}${label}${hasMany && !isLast ? ',' : ''}`}</Text>
+                    }}>
+                    {`${hasMany && isLast ? 'and ' : ''}${label}${hasMany && !isLast ? ',' : ''}`}
+                  </AppLabel>
                 );
               });
 
               return (
-                <Box key={ixref}>
-                  <Box direction="row">
+                <Box
+                  key={ixref}
+                  style={{
+                    borderLeft: '4px solid',
+                    borderColor: constants.colors.backgroundLightDarker,
+                  }}
+                  pad={{ left: 'medium' }}>
+                  <Box direction="row" margin={{ bottom: 'small' }}>
                     {/* <Text margin={{ right: 'xsmall' }}>This post</Text> */}
                     {labelsElements}
                   </Box>
