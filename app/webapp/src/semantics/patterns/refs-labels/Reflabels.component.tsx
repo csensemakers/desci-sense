@@ -1,12 +1,11 @@
 import { Anchor, Box, Text } from 'grommet';
 
-import { ParserResult } from '../../../shared/types';
 import { parseTriplet } from '../../utils';
-import { Pattern } from '../types';
+import { PatternProps } from '../patterns';
 import { RefsMap } from './types';
 
-export const refLabelsPattern: Pattern = (parsed: ParserResult) => {
-  const triplets = parsed.semantics.triplets.map((t) => parseTriplet(t));
+export const RefLabelsComponent = (props: PatternProps) => {
+  const triplets = props.parsed.semantics.triplets.map((t) => parseTriplet(t));
 
   const labeled = triplets.filter((triplet) => triplet[1] !== 'has-keyword');
 
@@ -25,7 +24,7 @@ export const refLabelsPattern: Pattern = (parsed: ParserResult) => {
   }
 
   const getRefTitle = (ref: string) => {
-    const title = parsed?.support.refs.metadata[ref].title;
+    const title = props.parsed.support.refs.metadata[ref].title;
     return title;
   };
 
