@@ -1,0 +1,23 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "firebase functions test",
+      "type": "node",
+      "request": "launch",
+      "skipFiles": ["<node_internals>/**"],
+      "runtimeExecutable": "${workspaceFolder}/firebase/functions/node_modules/.bin/mocha",
+      "args": [
+        "--config",
+        "./.mocharc.e2e.js",
+        "src/__e2e_tests__/**/*.test.ts"
+      ],
+      "env": {
+        "NODE_ENV": "local",
+        "FIRESTORE_EMULATOR_HOST": "localhost:8080"
+      },
+      "cwd": "${workspaceFolder}/firebase/functions",
+      "console": "integratedTerminal"
+    }
+  ]
+}
