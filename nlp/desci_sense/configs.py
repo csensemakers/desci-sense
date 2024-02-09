@@ -5,6 +5,8 @@ from dataclasses import dataclass
 # import pydantic as pyd
 from confection import Config
 
+from .shared_functions.init import ParserInitConfig, init_multi_stage_parser_config
+
 load_dotenv() 
 
 # environment
@@ -67,6 +69,22 @@ def init_config(model_name: str = "mistralai/mistral-7b-instruct",
                     
                     )
     return config
+
+
+def default_init_parser_config():
+    params = {
+        "wandb_project": environ["WANDB_PROJECT"],
+        "openai_api_key": environ["OPENROUTER_API_KEY"],
+        "openai_api_base": OPENROUTER_API_BASE,
+        "openai_api_referer": environ["OPENROUTER_REFERRER"]
+
+    }
+    config = ParserInitConfig(**params)
+
+    full_config = init_multi_stage_parser_config(config)
+    return full_config
+
+
 
 def init_crawler_config(
         

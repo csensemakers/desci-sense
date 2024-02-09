@@ -4,9 +4,8 @@ from pathlib import Path
 ROOT = Path(__file__).parents[1]
 sys.path.append(str(ROOT))
 
-from desci_sense.dataloaders import scrape_post
 from desci_sense.parsers.multi_stage_parser import MultiStageParser, PromptCase
-from desci_sense.configs import init_multi_stage_parser_config
+from desci_sense.shared_functions.init import init_multi_stage_parser_config
 
 
 def test_parse_masto():

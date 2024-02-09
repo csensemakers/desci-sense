@@ -6,9 +6,9 @@ import re
 import requests
 from datetime import datetime
 
-from ...shared_functions.utils import extract_and_expand_urls, normalize_url
-from ...shared_functions.schema.post import RefPost
-from ...utils import extract_twitter_status_id
+from ...utils import extract_and_expand_urls, normalize_url, extract_twitter_status_id
+from ...schema.post import RefPost
+# from ...utils import extract_twitter_status_id
 
 
 def convert_twitter_time_to_datetime(date_str):

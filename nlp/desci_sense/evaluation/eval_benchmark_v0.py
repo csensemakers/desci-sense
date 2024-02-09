@@ -122,15 +122,21 @@ def create_custom_confusion_matrix(y_true, y_pred, labels):
     return pd.DataFrame(matrix, index=labels, columns=labels)
 
 #Log chart of metrics per label
-def score_chart_by_label(labels,precision,recall,f1_score):
+def score_chart_by_label(labels,y_pred,y_true):
+    precision,recall,f1_score,support,accuracy = calculate_scores(y_pred=y_pred,y_true=y_true)
     df = pd.DataFrame({'Labels':labels,
                        'Precision':precision,
                        'Recall':recall,
-                       'F1 score':f1_score})
+                       'F1 score':f1_score,
+                       'True label Count':sum(y_true)
+                       })
     avg_row = pd.DataFrame({'Labels': 'Average',
                             'Precision': pd.Series(precision).mean(),
                             'Recall': pd.Series(recall).mean(),
-                            'F1 score': pd.Series(f1_score).mean()}, index=[0])
+                            'F1 score': pd.Series(f1_score).mean(),
+                            'True label Count': sum(sum(y_true))},
+                            index=[0]
+                            )
     df = df._append(avg_row, ignore_index=True)
     return df
     
@@ -160,7 +166,7 @@ if __name__=='__main__':
         dataset_artifact_id = 'common-sense-makers/evaluation_benchmark/dataset_for_eval:latest'
 
     #set artifact as input artifact
-    dataset_artifact = run.use_artifact(dataset_artifact_id)
+    dataset_artifact = run.use_artifact(dataset_artifact_id) 
 
     # initialize table path
     #add the option to call table_path =  arguments.get('--dataset')
@@ -203,7 +209,9 @@ if __name__=='__main__':
     artifact.add(table, "prediction_evaluation")
 
     #Log score chart per label
-    score_chart = score_chart_by_label(labels,precision,recall,f1_score)
+    score_chart = score_chart_by_label(labels=labels,y_pred=y_pred,y_true=y_true)
+
+    print(score_chart)
 
     wandb.log({'Label Score Chart':wandb.Table(dataframe=score_chart)})
 

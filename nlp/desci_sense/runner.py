@@ -1,10 +1,11 @@
 from confection import Config
 
-from desci_sense.configs import ST_OPENROUTER_REFERRER, environ, init_multi_stage_parser_config
-from desci_sense.parsers.multi_stage_parser import MultiStageParser
-from desci_sense.schema.templates import PREDICATE_LABELS
+from desci_sense.configs import ST_OPENROUTER_REFERRER, environ, default_init_parser_config
+from desci_sense.shared_functions.parsers.firebase_api_parser import FirebaseAPIParser
+# from desci_sense.parsers.multi_stage_parser import MultiStageParser
 
-load_dotenv() 
+
+# load_dotenv() 
 
 def load_config(config_path: str = None) -> Config:
     """
@@ -16,9 +17,8 @@ def load_config(config_path: str = None) -> Config:
         config = Config().from_disk(config_path)
     else:
         # use a default config - this is the config loaded in the streamlit demo app
-        config = init_multi_stage_parser_config(
-                         model_name="fireworks/mixtral-8x7b-fw-chat"
-                        )
+        config = default_init_parser_config()
+        config["model"]["model_name"] = "mistralai/mistral-7b-instruct"
         if "WANDB_PROJECT" in environ:
             wandb_proj = environ["WANDB_PROJECT"]
             config["wandb"]["project"] = wandb_proj
@@ -30,14 +30,14 @@ def load_config(config_path: str = None) -> Config:
 def init_model(config: Config):
 
     # if fail to get from environment config, default to streamlit referrer
-    openrouter_referrer = environ["OPENROUTER_REFERRER"] | ST_OPENROUTER_REFERRER
-    api_key = environ["OPENROUTER_API_KEY"]
+    # openrouter_referrer = environ["OPENROUTER_REFERRER"] | ST_OPENROUTER_REFERRER
+    # api_key = environ["OPENROUTER_API_KEY"]
 
     # create parser
     # if config["general"]["parser_type"] == "base":
     #     parser = BaseParser(config=config, api_key=api_key, openapi_referer=openrouter_referrer)
     if config["general"]["parser_type"] == "multi_stage":
-        parser = MultiStageParser(config=config, api_key=api_key, openapi_referer=openrouter_referrer)
+        parser = FirebaseAPIParser(config=config)
     else:
         raise ValueError(f"Unknown parser type: {config['parser_type']}")
     

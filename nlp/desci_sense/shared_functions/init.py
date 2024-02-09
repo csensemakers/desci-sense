@@ -1,7 +1,10 @@
-from typing import List, TypedDict, Any
+from typing import List, TypedDict, Any, Optional
 
 from confection import Config
 from loguru import logger
+
+MAX_SUMMARY_LENGTH = 500
+
 
 class ParserInitConfig(TypedDict, total=True):
     wandb_project: str
@@ -32,14 +35,15 @@ class ParserInitConfigOptional(TypedDict, total=False):
     keyword_extraction_model: str    
     
 
-def init_multi_stage_parser_config(config: ParserInitConfig, optional: ParserInitConfigOptional):
+def init_multi_stage_parser_config(config: ParserInitConfig, optional: Optional[ParserInitConfigOptional] = None):
     defaults = {
         "model_name": "mistralai/mistral-7b-instruct",
         "parser_type": "multi_stage",
+        "max_summary_length": MAX_SUMMARY_LENGTH,
         "temperature": 0.6,
         "versions": None,
         "wandb_entity": "common-sense-makers",
-        "ref_metadata_method": "citoid",
+        "ref_metadata_method": "none",
         "notion_db_id": None,
         "enable_keywords": True,
         "kw_template": "keywords_extraction.j2",
@@ -55,7 +59,7 @@ def init_multi_stage_parser_config(config: ParserInitConfig, optional: ParserIni
     
     logger.info(f"config {{}}", config)
 
-    paserConfig = Config(
+    parser_config = Config(
                     {
                     "general": {
                         "parser_type": config["parser_type"],
@@ -99,4 +103,6 @@ def init_multi_stage_parser_config(config: ParserInitConfig, optional: ParserIni
                     
                     
                     )
-    return paserConfig
+    return parser_config
+
+
