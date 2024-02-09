@@ -33,16 +33,23 @@ export const AppLabelsEditor = (props: {
     }
   }, [adding, keyInput]);
 
-  useEffect(() => {
+  const refreshHeight = () => {
     if (keyBox.current) {
       setHeight(keyBox.current.offsetHeight);
     }
-  }, []);
+  };
+
+  useEffect(() => {
+    refreshHeight();
+  }, [props.labels, adding]);
 
   const reset = () => {
-    setAdding(false);
+    if (DEBUG) console.log('reset');
     setNewLabel('');
+    setAdding(false);
   };
+
+  if (DEBUG) console.log({ adding });
 
   useOutsideClick(keyBox, () => {
     if (DEBUG) console.log('useOutsideClick', { adding });
@@ -63,44 +70,46 @@ export const AppLabelsEditor = (props: {
       ref={keyBox}
       width="100%"
       style={{
-        cursor: 'pointer',
-        display: 'block',
         paddingTop: '12px',
         backgroundColor: adding
           ? constants.colors.backgroundLight
           : 'transparent',
         position: 'relative',
-      }}
-      onClick={() => setAdding(true)}>
-      {props.labels.map((keyWord, ix) => {
-        return (
-          <AppLabel
-            key={ix}
-            margin={{ right: 'small', bottom: 'small' }}
-            style={{ display: 'block', float: 'left', paddingTop: '5.5px' }}>
-            {keyWord}
-          </AppLabel>
-        );
-      })}
-      {adding ? (
-        <Box style={{ display: 'block', float: 'left' }}>
-          <AppInput
-            plain
-            ref={keyInput}
-            value={newLabel}
-            onChange={(event) => setNewLabel(event.target.value)}></AppInput>
-        </Box>
-      ) : (
-        <Box style={{ display: 'block', float: 'left' }}>
-          <AppButton
-            plain
-            color={constants.colors.backgroundLightDarker}
-            style={{ height: '36px', textTransform: 'none' }}
-            justify="center">
-            <Text>{t('add')}...</Text>
-          </AppButton>
-        </Box>
-      )}
+      }}>
+      <Box
+        onClick={() => setAdding(true)}
+        style={{ cursor: 'pointer', display: 'block' }}>
+        {props.labels.map((keyWord, ix) => {
+          return (
+            <AppLabel
+              key={ix}
+              margin={{ right: 'small', bottom: 'small' }}
+              style={{ display: 'block', float: 'left', paddingTop: '5.5px' }}>
+              {keyWord}
+            </AppLabel>
+          );
+        })}
+        {adding ? (
+          <Box style={{ display: 'block', float: 'left' }}>
+            <AppInput
+              plain
+              ref={keyInput}
+              value={newLabel}
+              onChange={(event) => setNewLabel(event.target.value)}></AppInput>
+          </Box>
+        ) : (
+          <Box style={{ display: 'block', float: 'left' }}>
+            <AppButton
+              plain
+              color={constants.colors.backgroundLightDarker}
+              style={{ height: '36px', textTransform: 'none' }}
+              justify="center">
+              <Text>{t('add')}...</Text>
+            </AppButton>
+          </Box>
+        )}
+      </Box>
+
       {newLabel ? (
         <Box
           style={{
