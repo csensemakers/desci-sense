@@ -4,6 +4,7 @@ from firebase_functions import https_fn
 from firebase_admin import initialize_app
 
 from shared_functions.main import SM_FUNCTION_post_parser_config, SM_FUNCTION_post_parser_imp
+from shared_functions.schema.ontology import ontology
 from config import openai_api_key
 
 app = initialize_app()
@@ -35,8 +36,26 @@ def SM_FUNCTION_post_parser(request):
         ]
     }
 
+    support = {
+        "refs": {
+            "ontology": ontology,
+            "metadata": {
+                "https://www.alink.com/": {
+                    "title": "A link",
+                    "description": "Citoid is a citation tool integrated in VisualEditor's visual and wikitext modes. The newest version supports URLs, DOIs, ISBNs and PMC/PMIDs, and can search by title or full citation for books and journal articles in the Crossref and WorldCat databases. It will attempt to generate a full, template-supported citation after an editor pastes either of these identifiers into the VisualEditor citation tool. The Editing Team would like feedback on this iteration of Citoid, especially from experienced editors familiar with Wikipedia's citation standards.",
+                    "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b5/Citoid_logo.svg/270px-Citoid_logo.svg.png",
+                },
+                "https://www.anotherlink.com/": {
+                    "title": "Another link",
+                    "description": "Another description.",
+                    "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b5/Citoid_logo.svg/270px-Citoid_logo.svg.png",
+                },
+            },
+        }
+    }
+
     return https_fn.Response(
-        json.dumps({"semantics": semantics }),
+        json.dumps({"semantics": semantics, "support": support}),
         status=200,
-        headers={"Content-Type": "application/json"}
+        headers={"Content-Type": "application/json"},
     )

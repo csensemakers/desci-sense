@@ -10,8 +10,10 @@ export const postPost = async (userId: string, post: AppPostCreate) => {
   let tweet: TweetRead | undefined = undefined;
 
   if (post.platforms.includes(PLATFORM.X)) {
-    const append = post.semantics?.tags
-      ? '\n\n' + post.semantics.tags.map((tag: string) => `#${tag}`).join(' ')
+    if (!post.parsed) throw new Error('Unexpected for now parsed undefined');
+
+    const append = post.parsed.semantics.triplets
+      ? '\n\n' + post.parsed.semantics.triplets.map((tag: string) => `#${tag}`).join(' ')
       : '';
     const newContent = post.content + append;
 
@@ -37,8 +39,7 @@ export const getPostSemantics = async (content: string) => {
 
   const body = await response.json();
 
-  const semantics = body.semantics;
-  logger.debug('getPostSemantics', semantics);
+  logger.debug('getPostSemantics', body);
 
-  return semantics;
+  return body;
 };

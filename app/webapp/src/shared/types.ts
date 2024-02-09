@@ -43,7 +43,7 @@ export enum PLATFORM {
 
 export interface AppPostCreate {
   content: string;
-  semantics: any;
+  parsed?: ParserResult;
   platforms: [PLATFORM];
 }
 
@@ -64,4 +64,22 @@ export type AppPost = AppPostStore & {
 
 export interface AppPostSemantics {
   triplets: string[];
+}
+
+export type Triplet = Array<string>;
+
+/** for one ref, store its labels */
+export interface RefSemantics {
+  labels: string[];
+}
+export type RefsMap = Map<string, RefSemantics>;
+
+export interface PostSemanticsStructured {
+  keywords: string[];
+  refs: RefsMap;
+}
+
+export interface ParserResult {
+  semantics: AppPostSemantics;
+  support: any;
 }

@@ -9,3 +9,8 @@ export const postsValidationScheme = object({
 export const getPostSemanticsValidationScheme = object({
   content: string().required(),
 }).noUnknown(true);
+
+export const getUrlMetadataValidationScheme = object({
+  url: string().required(),
+}).noUnknown(true);
+

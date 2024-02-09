@@ -11,13 +11,7 @@
     {
       "path": "app/webapp",
       "name": "react-webapp"
-    },
-    {
-      "path": "nlp/",
-      "name": "python-dev"
     }
   ],
-  "settings": {
-    "solidity.formatter": "prettier"
-  }
+  "settings": {}
 }

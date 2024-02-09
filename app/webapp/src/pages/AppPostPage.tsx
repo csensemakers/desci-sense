@@ -15,6 +15,7 @@ import {
   AppPostCreate,
   AppPostSemantics,
   PLATFORM,
+  ParserResult,
 } from '../shared/types';
 import { AppButton, AppCard, AppHeading } from '../ui-components';
 import { BoxCentered } from '../ui-components/BoxCentered';
@@ -32,8 +33,8 @@ export const AppPostPage = (props: {}) => {
   const [postText, setPostText] = useState<string>();
   const [postTextDebounced] = useDebounce(postText, 2000);
 
-  /** meta is the metadata of the post */
-  const [semantics, setPostSemantics] = useState<AppPostSemantics>();
+  /** parsed is the parsed semantics as computed by the service */
+  const [parsed, setParsed] = useState<ParserResult>();
 
   const [isSending, setIsSending] = useState<boolean>();
   const [isGettingSemantics, setIsGettingSemantics] = useState<boolean>();
@@ -48,7 +49,7 @@ export const AppPostPage = (props: {}) => {
       setIsSending(true);
       const postCreate: AppPostCreate = {
         content: postText,
-        semantics: semantics,
+        parsed: parsed,
         platforms: [PLATFORM.X],
       };
       if (DEBUG) console.log('postMessage', { postCreate });
@@ -68,9 +69,9 @@ export const AppPostPage = (props: {}) => {
     if (postText && appAccessToken) {
       if (DEBUG) console.log('getPostMeta', { postText });
       setIsGettingSemantics(true);
-      getPostSemantics(postText, appAccessToken).then((semantics) => {
-        if (DEBUG) console.log({ semantics });
-        setPostSemantics(semantics);
+      getPostSemantics(postText, appAccessToken).then((result) => {
+        if (DEBUG) console.log({ result });
+        setParsed(result);
         setIsGettingSemantics(false);
       });
     }
@@ -85,7 +86,7 @@ export const AppPostPage = (props: {}) => {
 
   const newPost = () => {
     setPost(undefined);
-    setPostSemantics(undefined);
+    setParsed(undefined);
   };
 
   const content = (() => {
@@ -124,7 +125,7 @@ export const AppPostPage = (props: {}) => {
           {isGettingSemantics !== undefined ? (
             <SemanticsEditor
               isLoading={isGettingSemantics}
-              semantics={semantics}></SemanticsEditor>
+              parsed={parsed}></SemanticsEditor>
           ) : (
             <></>
           )}

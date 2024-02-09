@@ -1,5 +1,5 @@
 import { FUNCTIONS_BASE } from '../app/config';
-import { AppPostCreate } from '../shared/types';
+import { AppPostCreate, ParserResult } from '../shared/types';
 
 export const postMessage = async (
   post: AppPostCreate,
@@ -21,7 +21,7 @@ export const postMessage = async (
 export const getPostSemantics = async (
   content: string,
   appAccessToken: string
-) => {
+): Promise<ParserResult> => {
   const res = await fetch(FUNCTIONS_BASE + '/posts/getSemantics', {
     method: 'post',
     headers: {
@@ -32,5 +32,5 @@ export const getPostSemantics = async (
   });
 
   const body = await res.json();
-  return body.semantics;
+  return body.result;
 };

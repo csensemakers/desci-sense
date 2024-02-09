@@ -1,55 +1,51 @@
 import { Anchor, Box, Text } from 'grommet';
-import { useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { AppPostSemantics } from '../shared/types';
+import { ParserResult, PostSemanticsStructured } from '../shared/types';
 import { LoadingDiv } from '../ui-components/LoadingDiv';
+import { parseTriplets } from './utils';
 
 const DEBUG = true;
 
 export const SemanticsEditor = (props: {
   isLoading: boolean;
-  semantics?: AppPostSemantics;
+  parsed?: ParserResult;
 }) => {
   const { t } = useTranslation();
 
-  const triplets = useMemo(() => {
-    if (!props.semantics) {
-      return [];
+  const semantics = useMemo<PostSemanticsStructured | undefined>(() => {
+    if (!props.parsed || !props.parsed.semantics) {
+      return undefined;
     }
 
-    const regex = /<([^>]+)>/g;
+    return parseTriplets(props.parsed.semantics.triplets);
+  }, [props.parsed]);
 
-    return props.semantics.triplets.map((triplet) => {
-      const parts = triplet.match(regex);
-      if (!parts) throw new Error(`Unexpected triplet ${triplet}`);
+  const getRefTitle = useCallback(
+    (ref: string) => {
+      const title = props.parsed?.support.refs.metadata[ref].title;
+      return title;
+    },
+    [props.parsed]
+  );
 
-      return parts.map((part) => part.slice(1, -1));
-    });
-  }, [props.semantics]);
+  if (DEBUG) console.log({ parsed: props.parsed, semantics });
 
-  const keywords = triplets.filter((triplet) => triplet[1] === 'has-keyword');
-  const refLabels = triplets.filter((triplet) => triplet[1] !== 'has-keyword');
-  const ref = refLabels.length ? refLabels[0][2] : undefined;
-
-  if (props.isLoading || !props.semantics) {
+  if (props.isLoading || !props.parsed) {
     return <LoadingDiv></LoadingDiv>;
   }
 
-  if (DEBUG) {
-    console.log({ semantics: props.semantics, triplets, keywords });
-  }
-
   return (
-    <Box>
-      {keywords.length ? (
+    <Box style={{ width: '100%' }}>
+      {semantics && semantics.keywords ? (
         <Box>
           <Box style={{ display: 'block' }}>
-            {keywords.map((keyWord, ix) => {
+            {semantics.keywords.map((keyWord, ix) => {
               return (
                 <Text
                   style={{ fontWeight: 'bold' }}
-                  key={ix}>{`#${keyWord[2]}`}</Text>
+                  key={ix}>{`#${keyWord}`}</Text>
               );
             })}
           </Box>
@@ -57,24 +53,37 @@ export const SemanticsEditor = (props: {
       ) : (
         <></>
       )}
-      {ref ? (
+      {semantics && semantics.refs.size > 0 ? (
         <Box margin={{ top: 'small' }}>
           <Box style={{ display: 'block' }}>
-            <Box direction="row">
-              <Text>{`This post`}</Text>
-              {refLabels.map((label, ix) => {
+            <Box>
+              {Array.from(semantics.refs.entries()).map(([ref, semantics]) => {
+                const labels = semantics.labels;
+
+                const labelsElements = labels.map((label, ixlabel) => {
+                  const hasMany = labels.length > 1;
+                  const isLast = ixlabel === labels.length - 1;
+
+                  return (
+                    <Text
+                      key={ixlabel}
+                      margin={{
+                        right: 'xsmall',
+                      }}>{`${hasMany && isLast ? 'and ' : ''}${label}${hasMany && !isLast ? ',' : ''}`}</Text>
+                  );
+                });
+
                 return (
-                  <Text
-                    key={ix}
-                    margin={{
-                      left: 'xsmall',
-                    }}>{`${refLabels.length > 0 && ix === refLabels.length - 1 ? 'and ' : ''} ${label[1]}${ix < refLabels.length && refLabels.length > 1 ? `,` : ''}`}</Text>
+                  <Box>
+                    <Box direction="row">{labelsElements}</Box>
+                    <Anchor href={ref} target="_blank">
+                      {getRefTitle(ref)}
+                    </Anchor>
+                  </Box>
                 );
               })}
             </Box>
-            <Box>
-              <Anchor href={ref} target="_blank">{`this ref`}</Anchor>
-            </Box>
+            <Box></Box>
           </Box>
         </Box>
       ) : (
