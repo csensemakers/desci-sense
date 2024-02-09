@@ -27,7 +27,7 @@ OPENROUTER_API_BASE = "https://openrouter.ai/api/v1"
 ST_OPENROUTER_REFERRER = "https://sensebot.streamlit.app/"
 
 # project to save data from deployed web app
-WEB_APP_WANDB_PROJ = "st-app-multi-v1"
+WEB_APP_WANDB_PROJ = "st-app-multi-v2"
 
 # sandbox project
 WANDB_SANDBOX_PROJ = "st-demo-sandbox"
