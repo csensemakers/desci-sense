@@ -1,6 +1,7 @@
-import { Anchor, Box, Text } from 'grommet';
+import { Box, Text } from 'grommet';
 
 import { parseTriplet } from '../../utils';
+import { RefCard } from '../common/RefCard';
 import { PatternProps } from '../patterns';
 import { RefsMap } from './types';
 
@@ -23,16 +24,11 @@ export const RefLabelsComponent = (props: PatternProps) => {
     );
   }
 
-  const getRefTitle = (ref: string) => {
-    const title = props.parsed.support.refs.metadata[ref].title;
-    return title;
-  };
-
   if (labeled.length > 0) {
     return (
       <Box margin={{ top: 'small' }}>
         <Box style={{ display: 'block' }}>
-          <Box>
+          <Box gap="medium">
             {Array.from(refs.entries()).map(([ref, semantics], ixref) => {
               const labels = semantics.labels;
 
@@ -51,10 +47,13 @@ export const RefLabelsComponent = (props: PatternProps) => {
 
               return (
                 <Box key={ixref}>
-                  <Box direction="row">{labelsElements}</Box>
-                  <Anchor href={ref} target="_blank">
-                    {getRefTitle(ref)}
-                  </Anchor>
+                  <Box direction="row">
+                    {/* <Text margin={{ right: 'xsmall' }}>This post</Text> */}
+                    {labelsElements}
+                  </Box>
+                  <RefCard
+                    reference={ref}
+                    support={props.parsed.support}></RefCard>
                 </Box>
               );
             })}

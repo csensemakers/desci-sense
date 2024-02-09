@@ -1,6 +1,6 @@
 import { Box } from 'grommet';
 
-import { AppPostSemantics, ParserResult } from '../shared/types';
+import { ParserResult } from '../shared/types';
 import { LoadingDiv } from '../ui-components/LoadingDiv';
 import { PatternProps, Patterns } from './patterns/patterns';
 

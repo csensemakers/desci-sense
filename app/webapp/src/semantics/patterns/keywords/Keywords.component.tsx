@@ -52,8 +52,8 @@ export const KeywordsComponent = (props: PatternProps) => {
     .map((t) => t[2]);
 
   return (
-    <Box>
-      <Box direction="row" align="center">
+    <Box direction="row">
+      <Box style={{ flexGrow: 1 }} direction="row">
         {keywords.map((keyWord, ix) => {
           return (
             <Box margin={{ right: 'medium' }}>
@@ -63,35 +63,35 @@ export const KeywordsComponent = (props: PatternProps) => {
             </Box>
           );
         })}
-        <Box margin={{ left: 'medium' }}>
-          {addingKeyword ? (
-            <Box ref={keyBox} direction="row" align="center">
-              <AppInput
-                ref={keyInput}
-                value={keyword}
-                onChange={(event) => setKeyword(event.target.value)}
-                style={{ padding: '0px 18px' }}></AppInput>
+      </Box>
+      <Box style={{ flexShrink: 0 }}>
+        {addingKeyword ? (
+          <Box ref={keyBox} direction="row" align="center">
+            <AppInput
+              ref={keyInput}
+              value={keyword}
+              onChange={(event) => setKeyword(event.target.value)}
+              style={{ padding: '0px 18px' }}></AppInput>
 
-              <AppButton
-                onClick={() => addKeyword()}
-                margin={{ left: 'small' }}
-                pad="small"
-                label={t('add')}></AppButton>
-            </Box>
-          ) : (
             <AppButton
-              plain
-              style={{ textTransform: 'none' }}
-              onClick={() => setAddingKeyword(true)}>
-              <Box direction="row" align="center">
-                <Text style={{ fontWeight: 'bold' }} margin={{ right: '4px' }}>
-                  {t('addKeyword')}
-                </Text>
-                <Add color={constants.colors.primary}></Add>
-              </Box>
-            </AppButton>
-          )}
-        </Box>
+              onClick={() => addKeyword()}
+              margin={{ left: 'small' }}
+              pad="small"
+              label={t('add')}></AppButton>
+          </Box>
+        ) : (
+          <AppButton
+            plain
+            style={{ textTransform: 'none' }}
+            onClick={() => setAddingKeyword(true)}>
+            <Box direction="row" align="center">
+              <Text style={{ fontWeight: 'bold' }} margin={{ right: '4px' }}>
+                {t('addKeyword')}
+              </Text>
+              <Add color={constants.colors.primary}></Add>
+            </Box>
+          </AppButton>
+        )}
       </Box>
     </Box>
   );
