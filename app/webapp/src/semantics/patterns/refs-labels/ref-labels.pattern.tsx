@@ -34,7 +34,7 @@ export const refLabelsPattern: Pattern = (parsed: ParserResult) => {
       <Box margin={{ top: 'small' }}>
         <Box style={{ display: 'block' }}>
           <Box>
-            {Array.from(refs.entries()).map(([ref, semantics]) => {
+            {Array.from(refs.entries()).map(([ref, semantics], ixref) => {
               const labels = semantics.labels;
 
               const labelsElements = labels.map((label, ixlabel) => {
@@ -51,7 +51,7 @@ export const refLabelsPattern: Pattern = (parsed: ParserResult) => {
               });
 
               return (
-                <Box>
+                <Box key={ixref}>
                   <Box direction="row">{labelsElements}</Box>
                   <Anchor href={ref} target="_blank">
                     {getRefTitle(ref)}
@@ -60,7 +60,6 @@ export const refLabelsPattern: Pattern = (parsed: ParserResult) => {
               );
             })}
           </Box>
-          <Box></Box>
         </Box>
       </Box>
     );

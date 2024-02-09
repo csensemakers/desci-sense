@@ -22,7 +22,7 @@ import { BoxCentered } from '../ui-components/BoxCentered';
 import { Loading } from '../ui-components/LoadingDiv';
 import { useThemeContext } from '../ui-components/ThemedApp';
 
-const DEBUG = true;
+const DEBUG = false;
 
 export const AppPostPage = (props: {}) => {
   const { t } = useTranslation();
@@ -121,7 +121,11 @@ export const AppPostPage = (props: {}) => {
             setPostText(text);
           }}></PostEditor>
 
-        <Box direction="row" gap="medium" margin={{ bottom: 'medium' }}>
+        <Box
+          direction="row"
+          gap="medium"
+          margin={{ bottom: 'medium' }}
+          pad={{ horizontal: 'medium' }}>
           {isGettingSemantics !== undefined ? (
             <SemanticsEditor
               isLoading={isGettingSemantics}
