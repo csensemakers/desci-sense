@@ -12,11 +12,7 @@ class MastodonBatchRunner:
         self.filter = SimpleCitoidSciFilter()
         # self.model = BaseParser()
 
-
-
-    def process_account(self, mastodon_account: str, 
-                        max_posts: int = 5):
-        
+    def process_account(self, mastodon_account: str, max_posts: int = 5):
         # TODO check if chrono order
         logger.info(f"Loading Mastodon profiles (max={max_posts})...")
         posts = self.loader.load_profiles([mastodon_account], number_toots=max_posts)
@@ -28,9 +24,5 @@ class MastodonBatchRunner:
             logger.debug(f"passed filter: {res} | Post: {post}")
             if res:
                 passed.append(post)
-        
+
         return posts, passed
-
-
-        
-

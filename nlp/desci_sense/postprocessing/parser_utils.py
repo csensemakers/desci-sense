@@ -1,5 +1,6 @@
 import re
 
+
 # with GPT-4
 def fix_json_string_with_backslashes(json_str):
     """
@@ -9,6 +10,6 @@ def fix_json_string_with_backslashes(json_str):
     invalid_escape_regex = r'\\(?!["\\/bfnrtu])'
 
     # Replace invalid escape sequences with their unescaped versions
-    fixed_json_str = re.sub(invalid_escape_regex, '', json_str)
+    fixed_json_str = re.sub(invalid_escape_regex, "", json_str)
 
     return fixed_json_str

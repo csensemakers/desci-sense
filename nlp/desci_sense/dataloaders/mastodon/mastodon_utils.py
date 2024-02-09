@@ -1,4 +1,3 @@
-
 import requests
 import re
 
@@ -23,7 +22,7 @@ def convert_mastodon_time_to_datetime(date_str):
     datetime: A datetime object representing the given date and time.
     """
     # Define the format string corresponding to the '2023-11-13T16:15:47.094Z' format
-    format_str = '%Y-%m-%dT%H:%M:%S.%fZ'
+    format_str = "%Y-%m-%dT%H:%M:%S.%fZ"
 
     # Convert the string to a datetime object
     try:
@@ -56,7 +55,7 @@ def extract_external_masto_ref_urls(post: dict, add_qrt_url: bool = True):
 
 def extract_instance_and_status(url):
     # Define the regex pattern to extract instance and status ID
-    pattern = re.compile(r'https://([^/]+)/@([^/]+)/(\d+)')
+    pattern = re.compile(r"https://([^/]+)/@([^/]+)/(\d+)")
 
     # Use the pattern to find matches in the URL
     match = pattern.match(url)
@@ -85,26 +84,27 @@ def convert_post_json_to_ref_post(post_json: dict) -> RefPost:
     post_json["plain_content"] = text
     url = post_json["url"]
     created_at = convert_mastodon_time_to_datetime(post_json["created_at"])
-    
+
     # extract external reference urls from post
     ext_ref_urls = extract_external_masto_ref_urls(post_json)
 
-    
-
-    post = RefPost(author=author,
-                content=text,
-                url=url,
-                created_at=created_at,
-                source_network="mastodon",
-                metadata=post_json,
-                ref_urls=ext_ref_urls)
-
-
+    post = RefPost(
+        author=author,
+        content=text,
+        url=url,
+        created_at=created_at,
+        source_network="mastodon",
+        metadata=post_json,
+        ref_urls=ext_ref_urls,
+    )
 
     return post
 
+
 # based on chat gpt
-def get_mastodon_post_by_instance(instance_url, status_id, access_token=None) -> RefPost:
+def get_mastodon_post_by_instance(
+    instance_url, status_id, access_token=None
+) -> RefPost:
     """
     Get a single Mastodon post given its status ID.
 
@@ -129,13 +129,11 @@ def get_mastodon_post_by_instance(instance_url, status_id, access_token=None) ->
         print(f"Failed to get Mastodon post. Status code: {response.status_code}")
         return None
 
-def scrape_mastodon_post(post_url: str) -> RefPost:
 
+def scrape_mastodon_post(post_url: str) -> RefPost:
     # get instance url and status ID
     instance_url, status_id = extract_instance_and_status(post_url)
 
     post = get_mastodon_post_by_instance(instance_url, status_id)
 
     return post
-
-

@@ -1,5 +1,7 @@
 from enum import Enum
+
 # GPT 4 based on https://stackoverflow.com/questions/70146417/python-dictionary-with-enum-as-key
+
 
 class EnumDictKey(Enum):
     @classmethod
@@ -7,6 +9,7 @@ class EnumDictKey(Enum):
         if isinstance(value, cls):
             value = value.value
         return value in cls.__members__
+
 
 class EnumDict(dict):
     def __init__(self, enum_type):

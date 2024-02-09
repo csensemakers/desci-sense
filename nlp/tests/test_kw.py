@@ -1,4 +1,3 @@
-
 import sys
 from pathlib import Path
 from confection import Config
@@ -40,7 +39,9 @@ from desci_sense.parsers.multi_stage_parser import MultiStageParser
 if __name__ == "__main__":
     config_path = ROOT / "tests/etc/configs/notion_dev.cfg"
     config = load_config()
-    config["keyword_extraction"]["model"]["model_name"] = "mistralai/mistral-7b-instruct"
+    config["keyword_extraction"]["model"][
+        "model_name"
+    ] = "mistralai/mistral-7b-instruct"
     url = "https://mastodon.social/@natematias@social.coop/111410981466531543"
     parser = MultiStageParser(config=config)
     result = parser.kw_process_post(url)

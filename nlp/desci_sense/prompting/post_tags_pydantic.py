@@ -1,6 +1,7 @@
 from pydantic import BaseModel, Field
 from typing import List
 
+
 # Define a new Pydantic model
 class PostTagsDataModel(BaseModel):
     is_announce_tag: bool = Field(
@@ -34,11 +35,22 @@ class PostTagsDataModel(BaseModel):
         description="Set to True if this post is raising a question or questions about some content it's referring to. The content could be a research paper or other media like a podcast, video or blog post. False otherwise."
     )
 
-
     @classmethod
     def tags(cls):
-        return ["announce", "reading", "event", "review", "recommendation", "listening", "job", "quote", "discussion", "watching", "question"]
-    
+        return [
+            "announce",
+            "reading",
+            "event",
+            "review",
+            "recommendation",
+            "listening",
+            "job",
+            "quote",
+            "discussion",
+            "watching",
+            "question",
+        ]
+
     def get_selected_tags(self):
         result = set()
         if self.is_announce_tag:
@@ -62,8 +74,7 @@ class PostTagsDataModel(BaseModel):
         if self.is_question_tag:
             result.add("question")
         return result
-    
+
     def get_selected_tags_str(self):
         res_list = sorted(list(self.get_selected_tags()))
         return ", ".join(res_list)
-

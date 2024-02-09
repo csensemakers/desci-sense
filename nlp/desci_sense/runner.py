@@ -1,11 +1,17 @@
 from confection import Config
 
-from desci_sense.configs import ST_OPENROUTER_REFERRER, environ, default_init_parser_config
+from desci_sense.configs import (
+    ST_OPENROUTER_REFERRER,
+    environ,
+    default_init_parser_config,
+)
 from desci_sense.shared_functions.parsers.firebase_api_parser import FirebaseAPIParser
+
 # from desci_sense.parsers.multi_stage_parser import MultiStageParser
 
 
-# load_dotenv() 
+# load_dotenv()
+
 
 def load_config(config_path: str = None) -> Config:
     """
@@ -26,9 +32,7 @@ def load_config(config_path: str = None) -> Config:
     return config
 
 
-
 def init_model(config: Config):
-
     # if fail to get from environment config, default to streamlit referrer
     # openrouter_referrer = environ["OPENROUTER_REFERRER"] | ST_OPENROUTER_REFERRER
     # api_key = environ["OPENROUTER_API_KEY"]
@@ -40,6 +44,5 @@ def init_model(config: Config):
         parser = FirebaseAPIParser(config=config)
     else:
         raise ValueError(f"Unknown parser type: {config['parser_type']}")
-    
 
     return parser

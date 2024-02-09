@@ -4,9 +4,11 @@ from dataclasses import dataclass
 
 from .citoid import fetch_citation, fetch_all_citations
 
+
 class MetadataExtractionType(Enum):
     NONE = "none"
     CITOID = "citoid"
+
 
 @dataclass
 class RefMetadata:
@@ -25,32 +27,33 @@ class RefMetadata:
                 value = value or "None"  # Convert None or empty strings to "None"
                 result.append(f"{attr}: {value}")
         return "\n".join(result)
-        
 
 
 def normalize_citoid_metadata(metadata_list: List[dict], max_summary_length):
     results = []
     for metadata in metadata_list:
-        results.append(RefMetadata(**
-            {
-                "url": metadata.get("url", None),
-                "item_type": metadata.get("itemType", None),
-                "title": metadata.get("title", ""),
-                "summary": metadata.get("abstractNote", "")[:max_summary_length]
-             })
+        results.append(
+            RefMetadata(
+                **{
+                    "url": metadata.get("url", None),
+                    "item_type": metadata.get("itemType", None),
+                    "title": metadata.get("title", ""),
+                    "summary": metadata.get("abstractNote", "")[:max_summary_length],
+                }
+            )
         )
     return results
 
 
 def extract_citoid_metadata(target_url, max_summary_length):
-    
     citoid_metadata = [fetch_citation(target_url)]
     assert len(citoid_metadata) == 1
     return normalize_citoid_metadata(citoid_metadata, max_summary_length)[0]
 
 
-
-def extract_metadata_by_type(target_url, md_type: MetadataExtractionType, max_summary_length) -> List[RefMetadata]:
+def extract_metadata_by_type(
+    target_url, md_type: MetadataExtractionType, max_summary_length
+) -> List[RefMetadata]:
     """_summary_
 
     Args:
@@ -66,7 +69,7 @@ def extract_metadata_by_type(target_url, md_type: MetadataExtractionType, max_su
         return [extract_citoid_metadata(target_url, max_summary_length)]
     else:
         raise ValueError(f"Unsupported extraaction type:{md_type.value}")
-    
+
 
 def extract_urls_citoid_metadata(target_urls: List[str], max_summary_length: int):
     """_summary_
@@ -81,11 +84,14 @@ def extract_urls_citoid_metadata(target_urls: List[str], max_summary_length: int
     else:
         # use parallel call
         metadatas_raw = fetch_all_citations(target_urls)
-        return [normalize_citoid_metadata(md, max_summary_length) for md in metadatas_raw]
-    
+        return [
+            normalize_citoid_metadata(md, max_summary_length) for md in metadatas_raw
+        ]
 
-def extract_all_metadata_by_type(target_urls, md_type: MetadataExtractionType,
-                                 max_summary_length: int) -> List[RefMetadata]:
+
+def extract_all_metadata_by_type(
+    target_urls, md_type: MetadataExtractionType, max_summary_length: int
+) -> List[RefMetadata]:
     """_summary_
 
     Args:

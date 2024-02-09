@@ -1,6 +1,7 @@
 from jinja2 import Template
 
-single_ref_template = Template("""
+single_ref_template = Template(
+    """
     You are an expert annotator tasked with converting social media posts about scientific research to a structured semantic format. The input post contains a reference to an external URL. Your job is to select the tags best characterizing the relation of the post to the external reference, from a predefined set of tags. {% if metadata_list|length > 0 %}  Details about the external reference will be provided alongside the input post under "Reference Metadata". {% endif %}
 
     The available tag types are:
@@ -29,4 +30,5 @@ single_ref_template = Template("""
     {% endif %}
 
     # Output:
-    """)
+    """
+)

@@ -6,8 +6,9 @@ from urllib.parse import urlparse
 
 from url_normalize import url_normalize
 
+
 def extract_twitter_status_id(url):
-    pattern = r'twitter\.com\/\w+\/status\/(\d+)'
+    pattern = r"twitter\.com\/\w+\/status\/(\d+)"
     match = re.search(pattern, url)
     if match:
         return match.group(1)
@@ -20,7 +21,6 @@ def convert_html_to_plain_text(html_content):
     converter.ignore_links = True
     plain_text = converter.handle(html_content)
     return plain_text.strip()
-
 
 
 def convert_masto_to_canonical_format(url):
@@ -47,7 +47,7 @@ def convert_masto_to_canonical_format(url):
         - threre are non mastodon urls that might match this pattern
     """
     # Define the regex pattern to extract relevant parts
-    pattern = re.compile(r'https://([^/]+)/@([^/]+)/(\d+)')
+    pattern = re.compile(r"https://([^/]+)/@([^/]+)/(\d+)")
 
     # Use the pattern to find matches in the URL
     match = pattern.match(url)
@@ -58,11 +58,13 @@ def convert_masto_to_canonical_format(url):
         status_id = match.group(3)
 
         # Construct the canonical format
-        canonical_url = f"https://mastodon.social/@{username}@{instance_url}/{status_id}"
+        canonical_url = (
+            f"https://mastodon.social/@{username}@{instance_url}/{status_id}"
+        )
         return canonical_url
     else:
         return None
-    
+
 
 def identify_social_media(url):
     """
@@ -82,13 +84,14 @@ def identify_social_media(url):
 
     if any(twitter_domain in domain for twitter_domain in twitter_domains):
         return "twitter"
-    
+
     else:
         converted_masto = convert_masto_to_canonical_format(url)
         if converted_masto:
             return "mastodon"
         else:
             return "Unknown"
+
 
 def unshorten_url(url):
     try:
@@ -98,12 +101,13 @@ def unshorten_url(url):
         # return original url in case of errors
         return url
 
+
 # based on ChatGPT and https://stackoverflow.com/a/6041965
 def extract_urls(text):
-    """ takes a string text as input and uses the regular expression pattern to find all 
+    """takes a string text as input and uses the regular expression pattern to find all
     occurrences of URLs in the text. returns a list of all non-overlapping matches of the regular expression pattern in the string.
     """
-    url_regex = r'((http|ftp|https):\/\/([\w_-]+(?:(?:\.[\w_-]+)+))([\w.,@?^=%&:\/~+#-]*[\w@?^=%&\/~+#-]))'
+    url_regex = r"((http|ftp|https):\/\/([\w_-]+(?:(?:\.[\w_-]+)+))([\w.,@?^=%&:\/~+#-]*[\w@?^=%&\/~+#-]))"
     res = re.findall(url_regex, text)
     final_res = [r[0] for r in res]
     return final_res
@@ -124,6 +128,7 @@ def normalize_url(url):
 
     return res
 
+
 def extract_and_expand_urls(text):
     """_summary_
 
@@ -133,4 +138,3 @@ def extract_and_expand_urls(text):
 
     expanded_urls = [normalize_url(url) for url in extract_urls(text)]
     return expanded_urls
-        

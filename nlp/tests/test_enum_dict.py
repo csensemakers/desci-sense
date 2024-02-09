@@ -1,5 +1,6 @@
 import sys
 from pathlib import Path
+
 ROOT = Path(__file__).parents[1]
 sys.path.append(str(ROOT))
 
@@ -15,6 +16,7 @@ class Color(EnumDictKey):
     GREEN = "GREEN"
     BLUE = "BLUE"
 
+
 class Size(EnumDictKey):
     SMALL = "SMALL"
     MEDIUM = "MEDIUM"
@@ -26,6 +28,7 @@ class PromptCase(EnumDictKey):
     SINGLE_REF = "SINGLE_REF"
     MULTI_REF = "MULTI_REF"
 
+
 def test_init_with_valid_enum():
     """Test initialization with a valid EnumDictKey subclass."""
     try:
@@ -33,11 +36,13 @@ def test_init_with_valid_enum():
         assert isinstance(color_dict, EnumDict)
     except ValueError:
         pytest.fail("EnumDict initialization failed with a valid EnumDictKey subclass.")
-        
+
+
 def test_init_with_invalid_enum():
     """Test initialization with an invalid type (not a subclass of EnumDictKey)."""
     with pytest.raises(ValueError):
         invalid_dict = EnumDict(Enum)
+
 
 def test_set_get_item():
     """Test setting and getting items."""
@@ -47,22 +52,24 @@ def test_set_get_item():
     assert color_dict[Color.RED] == 123
     assert color_dict["GREEN"] == 456
 
+
 def test_set_invalid_key():
     """Test setting an item with an invalid key."""
     color_dict = EnumDict(Color)
     with pytest.raises(KeyError):
         color_dict["INVALID_COLOR"] = 999
 
+
 def test_multiple_enum_types():
     """Test that the dictionary works with different EnumDictKey subclasses."""
     color_dict = EnumDict(Color)
     size_dict = EnumDict(Size)
-    
-    color_dict[Color.RED] = 'red'
-    size_dict[Size.SMALL] = 'small'
-    
-    assert color_dict[Color.RED] == 'red'
-    assert size_dict[Size.SMALL] == 'small'
+
+    color_dict[Color.RED] = "red"
+    size_dict[Size.SMALL] = "small"
+
+    assert color_dict[Color.RED] == "red"
+    assert size_dict[Size.SMALL] == "small"
 
 
 def test_prompt_case_enum_types():

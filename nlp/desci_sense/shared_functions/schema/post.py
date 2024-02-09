@@ -36,22 +36,18 @@ class Post(Serializable):
     def is_lc_serializable(cls) -> bool:
         """Return whether this class is serializable."""
         return True
-    
 
 
 class RefPost(Post):
     """
     Post that contains a reference to at least one other URL external to the post.
     """
+
     ref_urls: List[str] = Field(default_factory=list)
     """
     List of URLs referenced by the post
     """
     type: Literal["ReferencePost"] = "ReferencePost"
 
-
     def has_refs(self):
         return len(self.ref_urls) > 0
-    
-
-

@@ -1,6 +1,7 @@
 from jinja2 import Template
 
-zero_ref_template = Template("""
+zero_ref_template = Template(
+    """
   You are an expert annotator tasked with converting social media posts about scientific research to a structured semantic format. For an input post, your job is to select the tags most suitable to that post, from a predefined set of tags. 
 
   The available tag types are:
@@ -21,4 +22,5 @@ zero_ref_template = Template("""
   Content: {{ content }}
 
   Output:
-  """)
+  """
+)
