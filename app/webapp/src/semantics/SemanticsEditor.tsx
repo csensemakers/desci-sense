@@ -1,14 +1,15 @@
 import { Box } from 'grommet';
 
-import { ParserResult } from '../shared/types';
+import { AppPostSemantics, ParserResult } from '../shared/types';
 import { LoadingDiv } from '../ui-components/LoadingDiv';
-import { Patterns } from './patterns/patterns';
+import { PatternProps, Patterns } from './patterns/patterns';
 
 const DEBUG = false;
 
 export const SemanticsEditor = (props: {
   isLoading: boolean;
   parsed?: ParserResult;
+  semanticsUpdated?: PatternProps['semanticsUpdated'];
 }) => {
   if (props.isLoading || !props.parsed) {
     return <LoadingDiv></LoadingDiv>;
@@ -16,7 +17,13 @@ export const SemanticsEditor = (props: {
 
   return (
     <Box style={{ width: '100%' }}>
-      {props.parsed ? <Patterns parsed={props.parsed}></Patterns> : <></>}
+      {props.parsed ? (
+        <Patterns
+          parsed={props.parsed}
+          semanticsUpdated={props.semanticsUpdated}></Patterns>
+      ) : (
+        <></>
+      )}
     </Box>
   );
 };

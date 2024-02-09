@@ -9,7 +9,10 @@ import useOutsideClick from '../../../ui-components/hooks/OutsideClickHook';
 import { parseTriplet } from '../../utils';
 import { PatternProps } from '../patterns';
 
+const HAS_KEYWORD_PREDICATE = 'has-keyword';
+
 export const KeywordsComponent = (props: PatternProps) => {
+  const keyBox = useRef<HTMLInputElement>(null);
   const keyInput = useRef<HTMLInputElement>(null);
   const { constants } = useThemeContext();
 
@@ -18,7 +21,7 @@ export const KeywordsComponent = (props: PatternProps) => {
   const [keyword, setKeyword] = useState<string>('');
   const [addingKeyword, setAddingKeyword] = useState<boolean>(false);
 
-  useOutsideClick(keyInput, () => {
+  useOutsideClick(keyBox, () => {
     if (addingKeyword) {
       setAddingKeyword(false);
     }
@@ -26,18 +29,26 @@ export const KeywordsComponent = (props: PatternProps) => {
 
   const triplets = props.parsed.semantics.triplets.map((t) => parseTriplet(t));
 
-  const addKeyword = () => {
-    setAddingKeyword(true);
-  };
-
   useEffect(() => {
     if (keyInput.current) {
       keyInput.current.focus();
     }
   }, [addingKeyword]);
 
+  const addKeyword = () => {
+    if (props.semanticsUpdated) {
+      setAddingKeyword(false);
+      setKeyword('');
+      props.semanticsUpdated({
+        triplets: props.parsed.semantics.triplets.concat([
+          `<_:1> <${HAS_KEYWORD_PREDICATE}> <${keyword}>`,
+        ]),
+      });
+    }
+  };
+
   const keywords = triplets
-    .filter((t) => t[1] === 'has-keyword')
+    .filter((t) => t[1] === HAS_KEYWORD_PREDICATE)
     .map((t) => t[2]);
 
   return (
@@ -45,7 +56,7 @@ export const KeywordsComponent = (props: PatternProps) => {
       <Box direction="row" align="center">
         {keywords.map((keyWord, ix) => {
           return (
-            <Box>
+            <Box margin={{ right: 'medium' }}>
               <Text
                 style={{ fontWeight: 'bold' }}
                 key={ix}>{`#${keyWord}`}</Text>
@@ -54,7 +65,7 @@ export const KeywordsComponent = (props: PatternProps) => {
         })}
         <Box margin={{ left: 'medium' }}>
           {addingKeyword ? (
-            <Box direction="row" align="center">
+            <Box ref={keyBox} direction="row" align="center">
               <AppInput
                 ref={keyInput}
                 value={keyword}
@@ -71,7 +82,7 @@ export const KeywordsComponent = (props: PatternProps) => {
             <AppButton
               plain
               style={{ textTransform: 'none' }}
-              onClick={() => addKeyword()}>
+              onClick={() => setAddingKeyword(true)}>
               <Box direction="row" align="center">
                 <Text style={{ fontWeight: 'bold' }} margin={{ right: '4px' }}>
                   {t('addKeyword')}

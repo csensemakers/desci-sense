@@ -10,10 +10,10 @@ import { ViewportPage } from '../app/Viewport';
 import { PostEditor } from '../post/PostEditor';
 import { getPostSemantics, postMessage } from '../post/post.utils';
 import { SemanticsEditor } from '../semantics/SemanticsEditor';
+import { PatternProps } from '../semantics/patterns/patterns';
 import {
   AppPost,
   AppPostCreate,
-  AppPostSemantics,
   PLATFORM,
   ParserResult,
 } from '../shared/types';
@@ -35,6 +35,7 @@ export const AppPostPage = (props: {}) => {
 
   /** parsed is the parsed semantics as computed by the service */
   const [parsed, setParsed] = useState<ParserResult>();
+  const [parsedModified, setParsedModified] = useState<ParserResult>();
 
   const [isSending, setIsSending] = useState<boolean>();
   const [isGettingSemantics, setIsGettingSemantics] = useState<boolean>();
@@ -66,7 +67,7 @@ export const AppPostPage = (props: {}) => {
   };
 
   const getSemantics = () => {
-    if (postText && appAccessToken) {
+    if (postText && appAccessToken && !parsedModified) {
       if (DEBUG) console.log('getPostMeta', { postText });
       setIsGettingSemantics(true);
       getPostSemantics(postText, appAccessToken).then((result) => {
@@ -74,6 +75,12 @@ export const AppPostPage = (props: {}) => {
         setParsed(result);
         setIsGettingSemantics(false);
       });
+    }
+  };
+
+  const semanticsUpdated: PatternProps['semanticsUpdated'] = (newSemantics) => {
+    if (parsed) {
+      setParsedModified({ ...parsed, semantics: newSemantics });
     }
   };
 
@@ -129,7 +136,8 @@ export const AppPostPage = (props: {}) => {
           {isGettingSemantics !== undefined ? (
             <SemanticsEditor
               isLoading={isGettingSemantics}
-              parsed={parsed}></SemanticsEditor>
+              parsed={parsedModified || parsed}
+              semanticsUpdated={semanticsUpdated}></SemanticsEditor>
           ) : (
             <></>
           )}
