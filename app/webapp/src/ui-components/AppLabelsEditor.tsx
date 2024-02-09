@@ -1,0 +1,126 @@
+import { Box, DropButton, Text } from 'grommet';
+import { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+
+import { AppButton } from './AppButton';
+import { AppInput } from './AppInput';
+import { AppLabel } from './AppLabel';
+import { useThemeContext } from './ThemedApp';
+import useOutsideClick from './hooks/OutsideClickHook';
+
+const DEBUG = true;
+
+export const AppLabelsEditor = (props: {
+  labels: string[];
+  addLabel?: (label: string) => void;
+  removeLabel?: (label: string) => void;
+}) => {
+  const { constants } = useThemeContext();
+  const { t } = useTranslation();
+
+  const keyBox = useRef<HTMLInputElement>(null);
+  const keyInput = useRef<HTMLInputElement>(null);
+
+  const [height, setHeight] = useState<number>();
+
+  const [newLabel, setNewLabel] = useState<string>('');
+  const [adding, setAdding] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (DEBUG) console.log('autofocusing input', { adding });
+    if (adding && keyInput.current) {
+      keyInput.current.focus();
+    }
+  }, [adding, keyInput]);
+
+  useEffect(() => {
+    if (keyBox.current) {
+      setHeight(keyBox.current.offsetHeight);
+    }
+  }, []);
+
+  const reset = () => {
+    setAdding(false);
+    setNewLabel('');
+  };
+
+  useOutsideClick(keyBox, () => {
+    if (DEBUG) console.log('useOutsideClick', { adding });
+    if (adding) {
+      reset();
+    }
+  });
+
+  const addLabel = () => {
+    if (props.addLabel) {
+      props.addLabel(newLabel);
+      reset();
+    }
+  };
+
+  return (
+    <Box
+      ref={keyBox}
+      width="100%"
+      style={{
+        cursor: 'pointer',
+        display: 'block',
+        paddingTop: '12px',
+        backgroundColor: adding
+          ? constants.colors.backgroundLight
+          : 'transparent',
+        position: 'relative',
+      }}
+      onClick={() => setAdding(true)}>
+      {props.labels.map((keyWord, ix) => {
+        return (
+          <AppLabel
+            key={ix}
+            margin={{ right: 'small', bottom: 'small' }}
+            style={{ display: 'block', float: 'left', paddingTop: '5.5px' }}>
+            {keyWord}
+          </AppLabel>
+        );
+      })}
+      {adding ? (
+        <Box style={{ display: 'block', float: 'left' }}>
+          <AppInput
+            plain
+            ref={keyInput}
+            value={newLabel}
+            onChange={(event) => setNewLabel(event.target.value)}></AppInput>
+        </Box>
+      ) : (
+        <Box style={{ display: 'block', float: 'left' }}>
+          <AppButton
+            plain
+            color={constants.colors.backgroundLightDarker}
+            style={{ height: '36px', textTransform: 'none' }}
+            justify="center">
+            <Text>{t('add')}...</Text>
+          </AppButton>
+        </Box>
+      )}
+      {newLabel ? (
+        <Box
+          style={{
+            position: 'absolute',
+            backgroundColor: constants.colors.backgroundLightShade,
+            width: '100%',
+            padding: '12px 12px 12px 12px',
+            top: `${height}px`,
+          }}
+          direction="row"
+          align="center"
+          justify="center"
+          gap="small"
+          onClick={() => addLabel()}>
+          <Text color={'black'}>Create:</Text>
+          <AppLabel>{newLabel}</AppLabel>
+        </Box>
+      ) : (
+        <></>
+      )}
+    </Box>
+  );
+};

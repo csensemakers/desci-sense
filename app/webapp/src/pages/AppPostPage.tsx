@@ -128,11 +128,7 @@ export const AppPostPage = (props: {}) => {
             setPostText(text);
           }}></PostEditor>
 
-        <Box
-          direction="row"
-          gap="medium"
-          margin={{ bottom: 'medium' }}
-          pad={{ horizontal: 'medium' }}>
+        <Box direction="row" gap="medium" margin={{ bottom: 'medium' }}>
           {isGettingSemantics !== undefined ? (
             <SemanticsEditor
               isLoading={isGettingSemantics}

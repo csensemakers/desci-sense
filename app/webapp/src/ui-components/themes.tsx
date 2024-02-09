@@ -25,6 +25,7 @@ export interface StyleConstants {
     textOnPrimary: string;
     headings: string;
     backgroundLight: string;
+    backgroundLightShade: string;
     backgroundLightDarker: string;
     border: string;
     links: string;
@@ -59,6 +60,7 @@ const constants: StyleConstants = {
     border: '#333333',
     headings: '#1a1a1a',
     backgroundLight: '#f7f7f7',
+    backgroundLightShade: '#ececec',
     backgroundLightDarker: '#cacaca',
     links: '#004766',
     tagsBackground: '#88a8de',
@@ -93,6 +95,12 @@ const extension: ExtendedThemeType = {
         value: 1400,
       },
       large: {},
+    },
+    focus: {
+      border: {
+        color: 'transparent', // Makes the border transparent
+      },
+      shadow: 'none',
     },
   },
   heading: {
