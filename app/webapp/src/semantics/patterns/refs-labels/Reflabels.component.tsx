@@ -57,7 +57,7 @@ export const RefLabelsComponent = (props: PatternProps) => {
                     borderLeft: '4px solid',
                     borderColor: constants.colors.backgroundLightDarker,
                   }}
-                  pad={{ left: 'medium' }}>
+                  pad={{ left: 'medium', vertical: 'small' }}>
                   <Box direction="row" margin={{ bottom: 'small' }}>
                     {/* <Text margin={{ right: 'xsmall' }}>This post</Text> */}
                     {labelsElements}

@@ -61,7 +61,7 @@ const constants: StyleConstants = {
     backgroundLight: '#f7f7f7',
     backgroundLightDarker: '#cacaca',
     links: '#004766',
-    tagsBackground: '#c29cda',
+    tagsBackground: '#88a8de',
     tagsText: '#ffffff',
   },
 };

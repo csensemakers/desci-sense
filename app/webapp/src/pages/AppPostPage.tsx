@@ -142,13 +142,6 @@ export const AppPostPage = (props: {}) => {
             <></>
           )}
         </Box>
-
-        <AppButton
-          margin={{ vertical: 'small' }}
-          reverse
-          icon={<Send color={constants.colors.primary}></Send>}
-          label={t('post')}
-          onClick={() => send()}></AppButton>
       </Box>
     );
   })();
@@ -156,6 +149,16 @@ export const AppPostPage = (props: {}) => {
   return (
     <ViewportPage
       content={<BoxCentered>{content}</BoxCentered>}
-      nav={<></>}></ViewportPage>
+      nav={
+        <>
+          {' '}
+          <AppButton
+            margin={{ vertical: 'small' }}
+            reverse
+            icon={<Send color={constants.colors.primary}></Send>}
+            label={t('post')}
+            onClick={() => send()}></AppButton>
+        </>
+      }></ViewportPage>
   );
 };
