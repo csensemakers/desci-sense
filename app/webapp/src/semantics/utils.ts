@@ -1,40 +1,4 @@
-import { PostSemanticsStructured, RefsMap, Triplet } from '../shared/types';
-
-export const sortTriplets = (triplets: Triplet[]): PostSemanticsStructured => {
-  /** extract keywords */
-  const keywords = triplets
-    .filter((t) => t[1] === 'has-keyword')
-    .map((t) => t[2]);
-
-  /** extract refs labels */
-  const refs: RefsMap = new Map();
-
-  const labelTriplets = triplets.filter(
-    (triplet) => triplet[1] !== 'has-keyword'
-  );
-
-  /** fill the refs map with all the labels of each ref */
-  for (const triplet of labelTriplets) {
-    const label = triplet[1];
-    const ref = triplet[2];
-    const current = refs.get(ref);
-    refs.set(
-      ref,
-      current
-        ? { ...current, labels: current.labels.concat(label) }
-        : { labels: [label] }
-    );
-  }
-
-  return {
-    keywords,
-    refs,
-  };
-};
-
-export const parseTriplets = (triplets: string[]): PostSemanticsStructured => {
-  return sortTriplets(triplets.map((t) => parseTriplet(t)));
-};
+import { Triplet } from '../shared/types';
 
 export const parseTriplet = (triplet: string): Triplet => {
   const regex = /<([^>]+)>/g;
