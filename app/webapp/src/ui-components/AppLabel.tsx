@@ -10,7 +10,7 @@ export const AppLabel = (
 
   return (
     <Box
-      pad={{ horizontal: 'medium' }}
+      pad={{ left: 'medium', right: props.showClose ? 'small' : 'medium' }}
       {...props}
       style={{
         width: 'fit-content',
@@ -27,7 +27,7 @@ export const AppLabel = (
         <Text size="small">{props.children}</Text>
         {props.showClose ? (
           <Box margin={{ left: 'xsmall' }}>
-            <Close size="small"></Close>
+            <Close color={constants.colors.tagsText} size="small"></Close>
           </Box>
         ) : (
           <></>

@@ -86,7 +86,7 @@ export const AppLabelsEditor = (props: {
               <AppLabel
                 showClose={adding}
                 key={ix}
-                margin={{ right: 'small', bottom: 'small' }}>
+                margin={{ right: 'small', bottom: 'xsmall' }}>
                 {keyWord}
               </AppLabel>
             </Box>
