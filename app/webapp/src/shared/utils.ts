@@ -1,4 +1,4 @@
-import { Triplet } from '../shared/types';
+import { Triplet } from './types';
 
 export const parseTriplet = (triplet: string): Triplet => {
   const regex = /<([^>]+)>/g;

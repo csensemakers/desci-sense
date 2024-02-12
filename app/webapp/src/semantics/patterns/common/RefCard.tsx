@@ -1,12 +1,12 @@
-import { Box, Image, Paragraph } from 'grommet';
+import { Box, Image } from 'grommet';
 
 import { AppCard, AppHeading, FixedHeightPar } from '../../../ui-components';
 
-export const RefCard = (props: { reference: string; support: any }) => {
-  const title = props.support.refs.metadata[props.reference].title;
-  const description = props.support.refs.metadata[props.reference].description;
-  const image = props.support.refs.metadata[props.reference].image;
-
+export const RefCard = (props: {
+  title?: string;
+  description?: string;
+  image?: string;
+}) => {
   return (
     <AppCard
       direction="row"
@@ -14,11 +14,11 @@ export const RefCard = (props: { reference: string; support: any }) => {
       style={{ padding: '18px 12px' }}
       gap="medium">
       <Box width="30%" style={{ flexShrink: 0 }}>
-        <Image src={image}></Image>
+        {props.image ? <Image src={props.image}></Image> : <></>}
       </Box>
       <Box>
-        <AppHeading level="4">{title}</AppHeading>
-        <FixedHeightPar _content={description}></FixedHeightPar>
+        <AppHeading level="4">{props.title}</AppHeading>
+        <FixedHeightPar _content={<>{props.description}</>}></FixedHeightPar>
       </Box>
     </AppCard>
   );

@@ -1,5 +1,6 @@
 import { FUNCTIONS_BASE } from '../app/config';
-import { AppPostCreate, ParserResult } from '../shared/types';
+import { ParserResult } from '../shared/parser.types';
+import { AppPostCreate } from '../shared/types';
 
 export const postMessage = async (
   post: AppPostCreate,

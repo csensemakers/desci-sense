@@ -1,4 +1,4 @@
-import { Box, DropButton, Text } from 'grommet';
+import { Box, Text } from 'grommet';
 import { KeyboardEventHandler, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -8,7 +8,7 @@ import { AppLabel } from './AppLabel';
 import { useThemeContext } from './ThemedApp';
 import useOutsideClick from './hooks/OutsideClickHook';
 
-const DEBUG = true;
+const DEBUG = false;
 
 export const AppLabelsEditor = (props: {
   labels: string[];
@@ -100,6 +100,7 @@ export const AppLabelsEditor = (props: {
         {props.labels.map((keyWord, ix) => {
           return (
             <Box
+              key={ix}
               style={{ display: 'block', float: 'left', paddingTop: '5.5px' }}>
               <AppLabel
                 showClose={adding}

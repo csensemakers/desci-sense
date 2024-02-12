@@ -11,13 +11,8 @@ import { PostEditor } from '../post/PostEditor';
 import { getPostSemantics, postMessage } from '../post/post.utils';
 import { SemanticsEditor } from '../semantics/SemanticsEditor';
 import { PatternProps } from '../semantics/patterns/patterns';
-import {
-  AppPost,
-  AppPostCreate,
-  AppPostSemantics,
-  PLATFORM,
-  ParserResult,
-} from '../shared/types';
+import { AppPostSemantics, ParserResult } from '../shared/parser.types';
+import { AppPost, AppPostCreate, PLATFORM } from '../shared/types';
 import { AppButton, AppCard, AppHeading } from '../ui-components';
 import { BoxCentered } from '../ui-components/BoxCentered';
 import { Loading } from '../ui-components/LoadingDiv';
@@ -49,12 +44,12 @@ export const AppPostPage = (props: {}) => {
   const [post, setPost] = useState<AppPost>();
 
   const send = () => {
-    if (postText && appAccessToken) {
+    if (postText && appAccessToken && parsed) {
       setIsSending(true);
       const postCreate: AppPostCreate = {
         content: postText,
-        parsed: parsed,
-        editedSemantics: semantics,
+        originalParsed: parsed,
+        semantics: semantics,
         platforms: [PLATFORM.X],
       };
       if (DEBUG) console.log('postMessage', { postCreate });

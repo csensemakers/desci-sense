@@ -4,20 +4,15 @@ import { AppPostCreate, PLATFORM, TweetRead } from '../@shared/types';
 import { FUNCTIONS_PY_URL } from '../config/config';
 import { createPost } from '../db/posts.repo';
 import { postMessageTwitter } from '../twitter/twitter.utils';
+import { constructTweet } from '../twitter/construct.tweet';
 import { TAG_OPTIONS } from './TAG_OPTIONS';
 
-export const postPost = async (userId: string, post: AppPostCreate) => {
+export const publishPost = async (userId: string, post: AppPostCreate) => {
   let tweet: TweetRead | undefined = undefined;
 
   if (post.platforms.includes(PLATFORM.X)) {
-    if (!post.parsed) throw new Error('Unexpected for now parsed undefined');
-
-    const append = post.parsed.semantics.triplets
-      ? '\n\n' + post.parsed.semantics.triplets.map((tag: string) => `#${tag}`).join(' ')
-      : '';
-    const newContent = post.content + append;
-
-    tweet = await postMessageTwitter(userId, newContent);
+    const tweetContent = constructTweet(post);
+    tweet = await postMessageTwitter(userId, tweetContent);
   }
 
   const createdPost = await createPost({ ...post, author: userId, tweet });

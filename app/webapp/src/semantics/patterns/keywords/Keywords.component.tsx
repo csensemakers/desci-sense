@@ -1,9 +1,9 @@
 import { Box } from 'grommet';
 import { useMemo } from 'react';
 
+import { parseTriplet } from '../../../shared/utils';
 import { AppLabelsEditor } from '../../../ui-components/AppLabelsEditor';
 import { useThemeContext } from '../../../ui-components/ThemedApp';
-import { parseTriplet } from '../../utils';
 import { PatternProps } from '../patterns';
 
 const HAS_KEYWORD_PREDICATE = 'has-keyword';
@@ -27,6 +27,12 @@ export const KeywordsComponent = (props: PatternProps) => {
   const triplets = useMemo(
     () => (semantics ? semantics.triplets.map((t) => parseTriplet(t)) : []),
     [semantics]
+  );
+
+  const keywords = useMemo(
+    () =>
+      triplets.filter((t) => t[1] === HAS_KEYWORD_PREDICATE).map((t) => t[2]),
+    [triplets]
   );
 
   const addKeyword = (keyword: string) => {
@@ -63,10 +69,6 @@ export const KeywordsComponent = (props: PatternProps) => {
       props.semanticsUpdated({ triplets: newTriplets });
     }
   };
-
-  const keywords = triplets
-    .filter((t) => t[1] === HAS_KEYWORD_PREDICATE)
-    .map((t) => t[2]);
 
   return (
     <Box

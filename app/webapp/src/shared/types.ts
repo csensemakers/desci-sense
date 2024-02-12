@@ -1,5 +1,7 @@
 import { TweetV2PostTweetResult } from 'twitter-api-v2';
 
+import { AppPostSemantics, ParserResult } from './parser.types';
+
 export interface AppUser {
   userId: string;
   orcid?: {
@@ -43,8 +45,8 @@ export enum PLATFORM {
 
 export interface AppPostCreate {
   content: string;
-  parsed?: ParserResult;
-  editedSemantics?: AppPostSemantics;
+  originalParsed: ParserResult;
+  semantics?: AppPostSemantics;
   platforms: [PLATFORM];
 }
 
@@ -63,13 +65,4 @@ export type AppPost = AppPostStore & {
   id: string;
 };
 
-export interface AppPostSemantics {
-  triplets: string[];
-}
-
 export type Triplet = Array<string>;
-
-export interface ParserResult {
-  semantics: AppPostSemantics;
-  support: any;
-}
