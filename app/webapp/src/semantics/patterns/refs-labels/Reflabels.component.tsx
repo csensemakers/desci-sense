@@ -50,9 +50,6 @@ export const RefLabelsComponent = (props: PatternProps) => {
             {Array.from(refs.values()).map((refData, ixref) => {
               const labelsElements = refData.labelsUris.map(
                 (labelUri, ixlabel) => {
-                  const hasMany = refData.labelsUris.length > 1;
-                  const isLast = ixlabel === refData.labelsUris.length - 1;
-
                   const label_ontology = (
                     props.originalParsed as ParserResult
                   ).support.refLabels.labelsOntology.find(
@@ -70,7 +67,7 @@ export const RefLabelsComponent = (props: PatternProps) => {
                       margin={{
                         right: 'xsmall',
                       }}>
-                      {`${hasMany && isLast ? 'and ' : ''}${label_ontology.display_name}${hasMany && !isLast ? ',' : ''}`}
+                      {label_ontology.display_name}
                     </AppLabel>
                   );
                 }
