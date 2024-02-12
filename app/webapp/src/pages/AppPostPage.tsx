@@ -43,6 +43,15 @@ export const AppPostPage = (props: {}) => {
   /** the published post */
   const [post, setPost] = useState<AppPost>();
 
+  const reset = () => {
+    setPost(undefined);
+    setPostText(undefined);
+    setParsed(undefined);
+    setSemantics(undefined);
+    setIsSending(false);
+    setIsGettingSemantics(undefined);
+  };
+
   const send = () => {
     if (postText && appAccessToken && parsed) {
       setIsSending(true);
@@ -55,7 +64,6 @@ export const AppPostPage = (props: {}) => {
       if (DEBUG) console.log('postMessage', { postCreate });
       postMessage(postCreate, appAccessToken).then((post) => {
         if (post) {
-          setPostText(undefined);
           setPost(post);
           setIsSending(false);
         } else {
@@ -91,8 +99,7 @@ export const AppPostPage = (props: {}) => {
   }, [postTextDebounced]);
 
   const newPost = () => {
-    setPost(undefined);
-    setParsed(undefined);
+    reset();
   };
 
   const content = (() => {
@@ -117,8 +124,6 @@ export const AppPostPage = (props: {}) => {
         </Box>
       );
     }
-
-    console.log('page', { semantics });
 
     return (
       <Box width="100%" pad="medium">

@@ -6,8 +6,6 @@ import { AppLabelsEditor } from '../../../ui-components/AppLabelsEditor';
 import { useThemeContext } from '../../../ui-components/ThemedApp';
 import { PatternProps } from '../patterns';
 
-const HAS_KEYWORD_PREDICATE = 'has-keyword';
-
 export const KeywordsComponent = (props: PatternProps) => {
   const { constants } = useThemeContext();
 
@@ -21,7 +19,8 @@ export const KeywordsComponent = (props: PatternProps) => {
     }
   }, [props.originalParsed, props.semantics]);
 
-  console.log({ semantics });
+  const HAS_KEYWORD_PREDICATE =
+    props.originalParsed?.support.keywords.keyWordsOntology.URI;
 
   /** conversion to triplets */
   const triplets = useMemo(

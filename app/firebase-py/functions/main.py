@@ -5,7 +5,7 @@ from firebase_admin import initialize_app
 
 from shared_functions.main import SM_FUNCTION_post_parser_config, SM_FUNCTION_post_parser_imp
 from shared_functions.interface import ParserResult
-from shared_functions.schema.ontology import ontology
+from shared_functions.schema.ontology import keyWordsOntology, refLabelsOntoloty
 from config import openai_api_key
 
 app = initialize_app()
@@ -31,15 +31,16 @@ def SM_FUNCTION_post_parser(request):
     # semantics = SM_FUNCTION_post_parser_imp(content, parameters, config)
     semantics = {
         "triplets": [
-            "<_:1> <has-keyword> <happy>",
+            "<_:1> <https://sparontologies.github.io/cito/current/cito.html#d4e441> <happy>",
             "<_:1> <https://sparontologies.github.io/cito/current/cito.html#d4e449> <https://www.alink.com/>",
             "<_:1> <https://sparontologies.github.io/cito/current/cito.html#d4e100> <https://www.anotherlink.com/>",
         ]
     }
 
     support = {
+        "keywords": {"keyWordsOntology": keyWordsOntology},
         "refLabels": {
-            "labelsOntology": ontology,
+            "labelsOntology": refLabelsOntoloty,
             "refsMeta": {
                 "https://www.alink.com/": {
                     "title": "A link",
@@ -52,7 +53,7 @@ def SM_FUNCTION_post_parser(request):
                     "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b5/Citoid_logo.svg/270px-Citoid_logo.svg.png",
                 },
             },
-        }
+        },
     }
 
     parser_result: ParserResult = {"semantics": semantics, "support": support}

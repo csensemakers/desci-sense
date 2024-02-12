@@ -21,8 +21,8 @@ export const Patterns = (props: PatternProps) => {
     <Box gap="large">
       {patternsLib.map((Pattern, ix) => {
         return (
-          <Box>
-            <Pattern key={ix} {...props}></Pattern>
+          <Box key={ix}>
+            <Pattern {...props}></Pattern>
           </Box>
         );
       })}
