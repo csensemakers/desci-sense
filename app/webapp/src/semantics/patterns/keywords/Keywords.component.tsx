@@ -1,4 +1,5 @@
 import { Box } from 'grommet';
+import { useMemo } from 'react';
 
 import { AppLabelsEditor } from '../../../ui-components/AppLabelsEditor';
 import { useThemeContext } from '../../../ui-components/ThemedApp';
@@ -10,21 +11,45 @@ const HAS_KEYWORD_PREDICATE = 'has-keyword';
 export const KeywordsComponent = (props: PatternProps) => {
   const { constants } = useThemeContext();
 
-  const triplets = props.parsed.semantics.triplets.map((t) => parseTriplet(t));
+  /** actual semantics */
+  const semantics = useMemo(() => {
+    if (props.semantics) {
+      return props.semantics;
+    }
+    if (props.originalParsed) {
+      return props.originalParsed.semantics;
+    }
+  }, [props.originalParsed, props.semantics]);
+
+  console.log({ semantics });
+
+  /** conversion to triplets */
+  const triplets = useMemo(
+    () => (semantics ? semantics.triplets.map((t) => parseTriplet(t)) : []),
+    [semantics]
+  );
 
   const addKeyword = (keyword: string) => {
-    if (props.semanticsUpdated) {
-      props.semanticsUpdated({
-        triplets: props.parsed.semantics.triplets.concat([
-          `<_:1> <${HAS_KEYWORD_PREDICATE}> <${keyword}>`,
-        ]),
-      });
+    if (props.semanticsUpdated && semantics) {
+      if (
+        /** prevent duplicates */
+        triplets.find(
+          (triplet) =>
+            triplet[1] === HAS_KEYWORD_PREDICATE && triplet[2] === keyword
+        ) === undefined
+      ) {
+        props.semanticsUpdated({
+          triplets: semantics.triplets.concat([
+            `<_:1> <${HAS_KEYWORD_PREDICATE}> <${keyword}>`,
+          ]),
+        });
+      }
     }
   };
 
   const removeKeyword = (keyword: string) => {
-    if (props.semanticsUpdated) {
-      const newTriplets = [...props.parsed.semantics.triplets];
+    if (props.semanticsUpdated && semantics) {
+      const newTriplets = [...semantics.triplets];
       const ix = newTriplets.findIndex((triplet) => {
         const parts = parseTriplet(triplet);
         return parts[1] === HAS_KEYWORD_PREDICATE && parts[2] === keyword;

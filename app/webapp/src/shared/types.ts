@@ -44,6 +44,7 @@ export enum PLATFORM {
 export interface AppPostCreate {
   content: string;
   parsed?: ParserResult;
+  editedSemantics?: AppPostSemantics;
   platforms: [PLATFORM];
 }
 

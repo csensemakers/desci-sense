@@ -23,6 +23,7 @@ export interface StyleConstants {
     primaryLight: string;
     text: string;
     textOnPrimary: string;
+    lightTextOnLight: string;
     headings: string;
     backgroundLight: string;
     backgroundLightShade: string;
@@ -54,9 +55,10 @@ const constants: StyleConstants = {
   },
   colors: {
     primary: '#506fa3',
-    primaryLight: '#365a97',
+    primaryLight: '#606060',
     text: '#20365f',
     textOnPrimary: '#ffffff',
+    lightTextOnLight: '#949494',
     border: '#333333',
     headings: '#1a1a1a',
     backgroundLight: '#f7f7f7',

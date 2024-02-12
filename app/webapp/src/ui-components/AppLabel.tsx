@@ -36,7 +36,7 @@ export const AppLabel = (
         {props.showClose ? (
           <AppButton plain onClick={() => remove()}>
             <Box
-              pad={{ left: 'xsmall', right: 'small' }}
+              pad={{ left: 'small', right: 'medium' }}
               style={{ height: '36px' }}
               justify="center">
               <Close color={constants.colors.tagsText} size="small"></Close>

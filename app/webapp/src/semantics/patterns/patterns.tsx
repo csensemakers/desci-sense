@@ -6,7 +6,8 @@ import { KeywordsComponent } from './keywords/Keywords.component';
 import { RefLabelsComponent } from './refs-labels/Reflabels.component';
 
 export interface PatternProps {
-  parsed: ParserResult;
+  originalParsed?: ParserResult;
+  semantics?: AppPostSemantics;
   semanticsUpdated?: (semantics: AppPostSemantics) => void;
 }
 
@@ -15,19 +16,13 @@ export const patternsLib: React.ComponentType<PatternProps>[] = [
   RefLabelsComponent,
 ];
 
-export const Patterns = (props: {
-  parsed: ParserResult;
-  semanticsUpdated?: PatternProps['semanticsUpdated'];
-}) => {
+export const Patterns = (props: PatternProps) => {
   return (
     <Box gap="large">
       {patternsLib.map((Pattern, ix) => {
         return (
           <Box>
-            <Pattern
-              key={ix}
-              parsed={props.parsed}
-              semanticsUpdated={props.semanticsUpdated}></Pattern>
+            <Pattern key={ix} {...props}></Pattern>
           </Box>
         );
       })}

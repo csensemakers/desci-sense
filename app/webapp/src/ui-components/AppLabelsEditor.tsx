@@ -1,5 +1,5 @@
 import { Box, DropButton, Text } from 'grommet';
-import { useEffect, useRef, useState } from 'react';
+import { KeyboardEventHandler, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { AppButton } from './AppButton';
@@ -64,10 +64,25 @@ export const AppLabelsEditor = (props: {
     }
   };
 
+  const keydown: KeyboardEventHandler = (event) => {
+    if (event.key === 'Enter') {
+      addLabel();
+    }
+  };
+
+  const validate = (label: string) => {
+    if (props.labels.includes(label)) {
+      return false;
+    }
+    return true;
+  };
+
   const addLabel = () => {
     if (props.addLabel) {
-      props.addLabel(newLabel);
-      reset();
+      if (validate(newLabel)) {
+        props.addLabel(newLabel);
+        reset();
+      }
     }
   };
 
@@ -103,9 +118,8 @@ export const AppLabelsEditor = (props: {
                 plain
                 ref={keyInput}
                 value={newLabel}
-                onChange={(event) =>
-                  setNewLabel(event.target.value)
-                }></AppInput>
+                onChange={(event) => setNewLabel(event.target.value)}
+                onKeyDown={keydown}></AppInput>
             </Box>
           ) : (
             <Box
@@ -133,13 +147,15 @@ export const AppLabelsEditor = (props: {
             width: '100%',
             padding: '12px 12px 12px 12px',
             top: `${height}px`,
+            borderBottomLeftRadius: '6px',
+            borderBottomRightRadius: '6px',
           }}
           direction="row"
           align="center"
           justify="center"
           gap="small"
           onClick={() => addLabel()}>
-          <Text color={'black'}>Create:</Text>
+          <Text color={constants.colors.lightTextOnLight}>{t('create')}:</Text>
           <AppLabel>{newLabel}</AppLabel>
         </Box>
       ) : (

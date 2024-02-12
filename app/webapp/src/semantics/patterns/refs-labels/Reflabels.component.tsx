@@ -1,5 +1,7 @@
-import { Box, Text } from 'grommet';
+import { Box } from 'grommet';
+import { useMemo } from 'react';
 
+import { ParserResult } from '../../../shared/types';
 import { AppLabel } from '../../../ui-components';
 import { useThemeContext } from '../../../ui-components/ThemedApp';
 import { parseTriplet } from '../../utils';
@@ -9,9 +11,37 @@ import { RefsMap } from './types';
 
 export const RefLabelsComponent = (props: PatternProps) => {
   const { constants } = useThemeContext();
-  const triplets = props.parsed.semantics.triplets.map((t) => parseTriplet(t));
 
-  const labeled = triplets.filter((triplet) => triplet[1] !== 'has-keyword');
+  /** actual semantics */
+  const semantics = useMemo(() => {
+    if (props.semantics) {
+      return props.semantics;
+    }
+    if (props.originalParsed) {
+      return props.originalParsed.semantics;
+    }
+  }, [props.originalParsed, props.semantics]);
+
+  /** parsed triplets */
+  const triplets = useMemo(
+    () => (semantics ? semantics.triplets.map((t) => parseTriplet(t)) : []),
+    [semantics]
+  );
+
+  /** ref labels
+   * TODO: For now anything that is not a keyword is a ref label
+   */
+  const labeled = useMemo(
+    () =>
+      triplets
+        ? triplets.filter((triplet) => triplet[1] !== 'has-keyword')
+        : [],
+    [triplets]
+  );
+
+  if (!props.originalParsed) {
+    return <></>;
+  }
 
   const refs: RefsMap = new Map();
 
@@ -64,7 +94,9 @@ export const RefLabelsComponent = (props: PatternProps) => {
                   </Box>
                   <RefCard
                     reference={ref}
-                    support={props.parsed.support}></RefCard>
+                    support={
+                      (props.originalParsed as ParserResult).support
+                    }></RefCard>
                 </Box>
               );
             })}

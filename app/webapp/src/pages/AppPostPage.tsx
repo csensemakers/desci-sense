@@ -14,6 +14,7 @@ import { PatternProps } from '../semantics/patterns/patterns';
 import {
   AppPost,
   AppPostCreate,
+  AppPostSemantics,
   PLATFORM,
   ParserResult,
 } from '../shared/types';
@@ -35,7 +36,9 @@ export const AppPostPage = (props: {}) => {
 
   /** parsed is the parsed semantics as computed by the service */
   const [parsed, setParsed] = useState<ParserResult>();
-  const [parsedModified, setParsedModified] = useState<ParserResult>();
+
+  /** parsedModified is the semantics after the user edited them */
+  const [semantics, setSemantics] = useState<AppPostSemantics>();
 
   const [isSending, setIsSending] = useState<boolean>();
   const [isGettingSemantics, setIsGettingSemantics] = useState<boolean>();
@@ -51,6 +54,7 @@ export const AppPostPage = (props: {}) => {
       const postCreate: AppPostCreate = {
         content: postText,
         parsed: parsed,
+        editedSemantics: semantics,
         platforms: [PLATFORM.X],
       };
       if (DEBUG) console.log('postMessage', { postCreate });
@@ -67,7 +71,7 @@ export const AppPostPage = (props: {}) => {
   };
 
   const getSemantics = () => {
-    if (postText && appAccessToken && !parsedModified) {
+    if (postText && appAccessToken && !semantics) {
       if (DEBUG) console.log('getPostMeta', { postText });
       setIsGettingSemantics(true);
       getPostSemantics(postText, appAccessToken).then((result) => {
@@ -80,7 +84,7 @@ export const AppPostPage = (props: {}) => {
 
   const semanticsUpdated: PatternProps['semanticsUpdated'] = (newSemantics) => {
     if (parsed) {
-      setParsedModified({ ...parsed, semantics: newSemantics });
+      setSemantics(newSemantics);
     }
   };
 
@@ -119,6 +123,8 @@ export const AppPostPage = (props: {}) => {
       );
     }
 
+    console.log('page', { semantics });
+
     return (
       <Box width="100%" pad="medium">
         <PostEditor
@@ -132,7 +138,8 @@ export const AppPostPage = (props: {}) => {
           {isGettingSemantics !== undefined ? (
             <SemanticsEditor
               isLoading={isGettingSemantics}
-              parsed={parsedModified || parsed}
+              semantics={semantics}
+              originalParsed={parsed}
               semanticsUpdated={semanticsUpdated}></SemanticsEditor>
           ) : (
             <></>
