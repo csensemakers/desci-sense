@@ -58,6 +58,12 @@ export const AppLabelsEditor = (props: {
     }
   });
 
+  const removeLabel = (label: string) => {
+    if (props.removeLabel) {
+      props.removeLabel(label);
+    }
+  };
+
   const addLabel = () => {
     if (props.addLabel) {
       props.addLabel(newLabel);
@@ -70,21 +76,19 @@ export const AppLabelsEditor = (props: {
       ref={keyBox}
       width="100%"
       style={{
-        paddingTop: '12px',
         backgroundColor: adding
           ? constants.colors.backgroundLight
           : 'transparent',
         position: 'relative',
       }}>
-      <Box
-        onClick={() => setAdding(true)}
-        style={{ cursor: 'pointer', display: 'block' }}>
+      <Box style={{ display: 'block' }}>
         {props.labels.map((keyWord, ix) => {
           return (
             <Box
               style={{ display: 'block', float: 'left', paddingTop: '5.5px' }}>
               <AppLabel
                 showClose={adding}
+                remove={() => removeLabel(keyWord)}
                 key={ix}
                 margin={{ right: 'small', bottom: 'xsmall' }}>
                 {keyWord}
@@ -92,25 +96,33 @@ export const AppLabelsEditor = (props: {
             </Box>
           );
         })}
-        {adding ? (
-          <Box style={{ display: 'block', float: 'left' }}>
-            <AppInput
-              plain
-              ref={keyInput}
-              value={newLabel}
-              onChange={(event) => setNewLabel(event.target.value)}></AppInput>
-          </Box>
-        ) : (
-          <Box style={{ display: 'block', float: 'left' }}>
-            <AppButton
-              plain
-              color={constants.colors.backgroundLightDarker}
-              style={{ height: '36px', textTransform: 'none' }}
-              justify="center">
-              <Text>{t('add')}...</Text>
-            </AppButton>
-          </Box>
-        )}
+        <Box style={{ display: 'block', float: 'left', paddingTop: '5px' }}>
+          {adding ? (
+            <Box>
+              <AppInput
+                plain
+                ref={keyInput}
+                value={newLabel}
+                onChange={(event) =>
+                  setNewLabel(event.target.value)
+                }></AppInput>
+            </Box>
+          ) : (
+            <Box
+              style={{
+                width: '120px',
+              }}
+              onClick={() => setAdding(true)}>
+              <AppButton
+                plain
+                color={constants.colors.backgroundLightDarker}
+                style={{ height: '36px', textTransform: 'none' }}
+                justify="center">
+                <Text>{t('add/remove')}...</Text>
+              </AppButton>
+            </Box>
+          )}
+        </Box>
       </Box>
 
       {newLabel ? (

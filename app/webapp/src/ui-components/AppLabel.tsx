@@ -1,16 +1,23 @@
 import { Box, BoxExtendedProps, Text } from 'grommet';
 import { Close } from 'grommet-icons';
 
+import { AppButton } from './AppButton';
 import { useThemeContext } from './ThemedApp';
 
 export const AppLabel = (
-  props: BoxExtendedProps & { showClose?: boolean }
+  props: BoxExtendedProps & { showClose?: boolean; remove?: () => void }
 ): JSX.Element => {
   const { constants } = useThemeContext();
 
+  const remove = () => {
+    if (props.remove) {
+      props.remove();
+    }
+  };
+
   return (
     <Box
-      pad={{ left: 'medium', right: props.showClose ? 'small' : 'medium' }}
+      pad={{ left: 'medium', right: props.showClose ? '0' : 'medium' }}
       {...props}
       style={{
         width: 'fit-content',
@@ -22,13 +29,19 @@ export const AppLabel = (
         height: '36px',
         ...props.style,
       }}
-      justify="center">
+      direction="row"
+      align="center">
       <Box direction="row" align="center">
         <Text size="small">{props.children}</Text>
         {props.showClose ? (
-          <Box margin={{ left: 'xsmall' }}>
-            <Close color={constants.colors.tagsText} size="small"></Close>
-          </Box>
+          <AppButton plain onClick={() => remove()}>
+            <Box
+              pad={{ left: 'xsmall', right: 'small' }}
+              style={{ height: '36px' }}
+              justify="center">
+              <Close color={constants.colors.tagsText} size="small"></Close>
+            </Box>
+          </AppButton>
         ) : (
           <></>
         )}

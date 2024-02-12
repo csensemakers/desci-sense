@@ -25,13 +25,17 @@ export const KeywordsComponent = (props: PatternProps) => {
   const removeKeyword = (keyword: string) => {
     if (props.semanticsUpdated) {
       const newTriplets = [...props.parsed.semantics.triplets];
-      const ix = newTriplets.findIndex((k) => k === keyword);
-
-      props.semanticsUpdated({
-        triplets: props.parsed.semantics.triplets.concat([
-          `<_:1> <${HAS_KEYWORD_PREDICATE}> <${keyword}>`,
-        ]),
+      const ix = newTriplets.findIndex((triplet) => {
+        const parts = parseTriplet(triplet);
+        return parts[1] === HAS_KEYWORD_PREDICATE && parts[2] === keyword;
       });
+
+      if (ix === -1) {
+        throw new Error(`Unexpected keyword ${keyword} not found`);
+      }
+
+      newTriplets.splice(ix, 1);
+      props.semanticsUpdated({ triplets: newTriplets });
     }
   };
 
