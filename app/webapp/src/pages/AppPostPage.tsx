@@ -18,7 +18,7 @@ import { BoxCentered } from '../ui-components/BoxCentered';
 import { Loading } from '../ui-components/LoadingDiv';
 import { useThemeContext } from '../ui-components/ThemedApp';
 
-const DEBUG = false;
+const DEBUG = true;
 
 export const AppPostPage = (props: {}) => {
   const { t } = useTranslation();
@@ -87,6 +87,7 @@ export const AppPostPage = (props: {}) => {
 
   const semanticsUpdated: PatternProps['semanticsUpdated'] = (newSemantics) => {
     if (parsed) {
+      if (DEBUG) console.log('semanticsUpdated', { newSemantics });
       setSemantics(newSemantics);
     }
   };

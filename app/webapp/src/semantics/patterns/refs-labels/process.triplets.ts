@@ -1,7 +1,11 @@
 import { RefMeta, ReflabelsSupport } from '../../../shared/parser.types';
 import { Triplet } from '../../../shared/types';
 
-export type RefsMap = Map<string, { labelsUris: string[]; meta?: RefMeta }>;
+export interface RefData {
+  labelsUris: string[];
+  meta?: RefMeta;
+}
+export type RefsMap = Map<string, RefData>;
 
 export const processTriplets = (
   triplets: Triplet[],

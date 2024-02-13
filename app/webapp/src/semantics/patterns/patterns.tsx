@@ -3,7 +3,7 @@ import React from 'react';
 
 import { AppPostSemantics, ParserResult } from '../../shared/parser.types';
 import { KeywordsComponent } from './keywords/Keywords.component';
-import { RefLabelsComponent } from './refs-labels/Reflabels.component';
+import { RefLabelsComponent } from './refs-labels/RefsLabels.component';
 
 export interface PatternProps {
   originalParsed?: ParserResult;

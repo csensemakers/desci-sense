@@ -1,5 +1,6 @@
-import { Box, Text } from 'grommet';
-import { KeyboardEventHandler, useEffect, useRef, useState } from 'react';
+import { Box, Keyboard, Text } from 'grommet';
+import { Add } from 'grommet-icons';
+import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { AppButton } from './AppButton';
@@ -8,10 +9,11 @@ import { AppLabel } from './AppLabel';
 import { useThemeContext } from './ThemedApp';
 import useOutsideClick from './hooks/OutsideClickHook';
 
-const DEBUG = false;
+const DEBUG = true;
 
 export const AppLabelsEditor = (props: {
   labels: string[];
+  options?: string[];
   addLabel?: (label: string) => void;
   removeLabel?: (label: string) => void;
 }) => {
@@ -25,6 +27,12 @@ export const AppLabelsEditor = (props: {
 
   const [newLabel, setNewLabel] = useState<string>('');
   const [adding, setAdding] = useState<boolean>(false);
+
+  const allOptions = props.options;
+
+  const onlyOptions = props.options !== undefined;
+
+  const addWidth = '120px';
 
   useEffect(() => {
     if (DEBUG) console.log('autofocusing input', { adding });
@@ -64,27 +72,72 @@ export const AppLabelsEditor = (props: {
     }
   };
 
-  const keydown: KeyboardEventHandler = (event) => {
-    if (event.key === 'Enter') {
-      addLabel();
-    }
-  };
-
-  const validate = (label: string) => {
-    if (props.labels.includes(label)) {
-      return false;
-    }
-    return true;
-  };
-
-  const addLabel = () => {
+  const addLabel = (_label?: string) => {
     if (props.addLabel) {
-      if (validate(newLabel)) {
-        props.addLabel(newLabel);
-        reset();
-      }
+      if (DEBUG) console.log('addLabel', { _label });
+      const label = _label || newLabel;
+
+      props.addLabel(label);
+      if (!onlyOptions) reset();
+      else setNewLabel('');
     }
   };
+
+  const inputChanged = (input: string) => {
+    setNewLabel(input);
+  };
+
+  const showCreator = !onlyOptions && newLabel;
+  const showOptions = onlyOptions && adding;
+
+  const showSelector = showCreator || (onlyOptions && adding);
+  const selector = (() => {
+    if (showCreator) {
+      return (
+        <Box direction="row">
+          <AppLabel margin={{ right: 'medium' }}>{newLabel}</AppLabel>
+          <AppButton
+            plain
+            reverse
+            icon={
+              <Add size="14px" color={constants.colors.lightTextOnLight}></Add>
+            }
+            label={<Text>{t('create')}</Text>}
+            color={constants.colors.lightTextOnLight}
+            style={{ textTransform: 'none' }}
+            onClick={() => addLabel()}></AppButton>
+        </Box>
+      );
+    }
+
+    if (showOptions && allOptions) {
+      return (
+        <Box style={{ display: 'block' }}>
+          {allOptions.map((option, ix) => {
+            const optionElement = (() => {
+              return (
+                <Box
+                  style={{ display: 'block', float: 'left' }}
+                  margin={{ right: 'small', bottom: 'xsmall' }}>
+                  <AppLabel>{option}</AppLabel>
+                </Box>
+              );
+            })();
+
+            return (
+              <AppButton
+                plain
+                key={ix}
+                style={{ textTransform: 'none' }}
+                onClick={() => addLabel(option)}>
+                {optionElement}
+              </AppButton>
+            );
+          })}
+        </Box>
+      );
+    }
+  })();
 
   return (
     <Box
@@ -97,35 +150,45 @@ export const AppLabelsEditor = (props: {
         position: 'relative',
       }}>
       <Box style={{ display: 'block' }}>
-        {props.labels.map((keyWord, ix) => {
+        {props.labels.map((label, ix) => {
+          const marginRight = ix < props.labels.length - 1 ? 'small' : '0';
           return (
             <Box
               key={ix}
               style={{ display: 'block', float: 'left', paddingTop: '5.5px' }}>
               <AppLabel
                 showClose={adding}
-                remove={() => removeLabel(keyWord)}
+                remove={() => removeLabel(label)}
                 key={ix}
-                margin={{ right: 'small', bottom: 'xsmall' }}>
-                {keyWord}
+                margin={{ right: marginRight, bottom: 'xsmall' }}>
+                {label}
               </AppLabel>
             </Box>
           );
         })}
         <Box style={{ display: 'block', float: 'left', paddingTop: '5px' }}>
           {adding ? (
-            <Box>
-              <AppInput
-                plain
-                ref={keyInput}
-                value={newLabel}
-                onChange={(event) => setNewLabel(event.target.value)}
-                onKeyDown={keydown}></AppInput>
-            </Box>
+            <Keyboard onEnter={() => addLabel()} onEsc={() => setAdding(false)}>
+              <Box>
+                <AppInput
+                  style={{
+                    width: addWidth,
+                    padding: '0px 0px 0px 12px',
+                    color: constants.colors.text,
+                  }}
+                  plain
+                  ref={keyInput}
+                  value={newLabel}
+                  onChange={(event) =>
+                    inputChanged(event.target.value)
+                  }></AppInput>
+              </Box>
+            </Keyboard>
           ) : (
             <Box
+              margin={{ left: 'small' }}
               style={{
-                width: '120px',
+                width: addWidth,
               }}
               onClick={() => setAdding(true)}>
               <AppButton
@@ -140,7 +203,7 @@ export const AppLabelsEditor = (props: {
         </Box>
       </Box>
 
-      {newLabel ? (
+      {showSelector ? (
         <Box
           style={{
             position: 'absolute',
@@ -150,14 +213,13 @@ export const AppLabelsEditor = (props: {
             top: `${height}px`,
             borderBottomLeftRadius: '6px',
             borderBottomRightRadius: '6px',
+            zIndex: 1,
           }}
           direction="row"
           align="center"
           justify="center"
-          gap="small"
-          onClick={() => addLabel()}>
-          <Text color={constants.colors.lightTextOnLight}>{t('create')}:</Text>
-          <AppLabel>{newLabel}</AppLabel>
+          gap="small">
+          {selector}
         </Box>
       ) : (
         <></>

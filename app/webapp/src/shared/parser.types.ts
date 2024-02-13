@@ -4,8 +4,8 @@ export interface AppPostSemantics {
 
 export interface OntologyItem {
   URI: string;
+  display_name: string;
   Name?: string;
-  display_name?: string;
   label?: string;
   prompt?: string;
   notes?: string;
