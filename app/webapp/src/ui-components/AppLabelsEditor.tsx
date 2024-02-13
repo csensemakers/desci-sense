@@ -94,19 +94,15 @@ export const AppLabelsEditor = (props: {
   const selector = (() => {
     if (showCreator) {
       return (
-        <Box direction="row">
-          <AppLabel margin={{ right: 'medium' }}>{newLabel}</AppLabel>
-          <AppButton
-            plain
-            reverse
-            icon={
-              <Add size="14px" color={constants.colors.lightTextOnLight}></Add>
-            }
-            label={<Text>{t('create')}</Text>}
-            color={constants.colors.lightTextOnLight}
-            style={{ textTransform: 'none' }}
-            onClick={() => addLabel()}></AppButton>
-        </Box>
+        <AppButton
+          plain
+          onClick={() => addLabel()}
+          style={{ textTransform: 'none' }}>
+          <Box direction="row" align="center">
+            <AppLabel margin={{ right: 'small' }}>{newLabel}</AppLabel>
+            <Text color={constants.colors.lightTextOnLight}>{t('create')}</Text>
+          </Box>
+        </AppButton>
       );
     }
 
