@@ -7,7 +7,6 @@ from .init import init_multi_stage_parser_config
 from .interface import ParserResult
 
 
-
 class SM_FUNCTION_post_parser_config(TypedDict, total=True):
     wandb_project: str
     openai_api_base: str
