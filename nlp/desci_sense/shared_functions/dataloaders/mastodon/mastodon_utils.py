@@ -81,7 +81,12 @@ def convert_post_json_to_ref_post(post_json: dict) -> RefPost:
     text = convert_html_to_plain_text(post_json["content"])
     post_json["plain_content"] = text
     url = post_json["url"]
-    created_at = convert_mastodon_time_to_datetime(post_json["created_at"])
+    
+    # convert time to datetime format if necessary
+    if type(post_json["created_at"]) == datetime:
+        created_at = post_json["created_at"]
+    else:
+        created_at = convert_mastodon_time_to_datetime(post_json["created_at"])
 
     # extract external reference urls from post
     ext_ref_urls = extract_external_masto_ref_urls(post_json)

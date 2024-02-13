@@ -20,12 +20,18 @@ def test_dup_url_i38():
     post_url = "https://mastodon.social/@ronent/111409960080649156"
     post = scrape_mastodon_post(post_url)
     assert post.ref_urls == ["https://csensemakers.com/"]
+    
+def test_loader():
+    mloader = MastodonLoader()
+    accts = ["@ronent@mastodon.social"]
+    posts = mloader.load_profiles(mastodon_accounts=accts, number_toots=5)
+    assert len(posts) == 5
 
 
 if __name__ == "__main__":
     mloader = MastodonLoader()
     accts = ["@ronent@mastodon.social"]
-    posts = mloader.load_profiles(mastodon_accounts=accts)
+    posts = mloader.load_profiles(mastodon_accounts=accts, number_toots=5)
 
     # langchain_loader = MastodonTootsLoader(
     # mastodon_accounts=accts,
