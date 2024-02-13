@@ -20,6 +20,9 @@ from typing import List
 from docopt import docopt
 from pathlib import Path
 from confection import Config
+
+sys.path.append(str(Path(__file__).parents[2]))
+
 from desci_sense.shared_functions.schema.post import RefPost
 from desci_sense.shared_functions.web_extractors.metadata_extractors import (
     MetadataExtractionType,
@@ -29,8 +32,6 @@ from desci_sense.shared_functions.dataloaders import scrape_post
 from desci_sense.configs import environ
 from desci_sense.runner import init_model, load_config
 from desci_sense.semantic_publisher import create_triples_from_prediction
-
-sys.path.append(str(Path(__file__).parents[2]))
 
 
 # display name for post for rendering in streamlit
