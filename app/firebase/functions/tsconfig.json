@@ -9,6 +9,10 @@
     "target": "es2017",
     "esModuleInterop": true,
     "preserveSymlinks": true,
+    "baseUrl": "./",
+    "paths": {
+      "*": ["*", "node_modules/*"]
+    },
     "typeRoots": ["./src/types", "node_modules/@types"],
   },
   "compileOnSave": true,

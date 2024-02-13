@@ -19,9 +19,9 @@ export const getPostSemanticsController: RequestHandler = async (
       request.body
     )) as AppPostGetSemantics;
 
-    const semantics = await getPostSemantics(payload.content);
+    const result = await getPostSemantics(payload.content);
 
-    response.status(200).send({ success: true, semantics });
+    response.status(200).send({ success: true, result });
   } catch (error: any) {
     logger.error('error', error);
     response.status(500).send({ success: false, error: error.message });

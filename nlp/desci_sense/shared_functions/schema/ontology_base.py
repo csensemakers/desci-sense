@@ -1,7 +1,10 @@
 from typing import List, Dict
 import pandas as pd
 
-from .ontology import ontology
+from .ontology import refLabelsOntoloty
+
+ontology = refLabelsOntoloty
+
 
 
 def load_ontology_from_dict(ont_dict):

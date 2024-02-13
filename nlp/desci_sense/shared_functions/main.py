@@ -4,6 +4,8 @@ from loguru import logger
 
 from .parsers.firebase_api_parser import FirebaseAPIParser
 from .init import init_multi_stage_parser_config
+from .interface import ParserResult
+
 
 
 class SM_FUNCTION_post_parser_config(TypedDict, total=True):
