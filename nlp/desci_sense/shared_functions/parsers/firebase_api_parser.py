@@ -321,7 +321,10 @@ class FirebaseAPIParser:
 
         return result
 
-    def process_ref_post(self, post: RefPost):
+    def process_ref_post(self, post: RefPost) -> ParserResult:
+        """
+        TODO
+        """
         md_list = []
 
         # check how many external references post mentions
@@ -354,6 +357,9 @@ class FirebaseAPIParser:
     def process_text(
         self, text: str, author: str = "default_author", source: str = "default_source"
     ) -> ParserResult:
+        """
+        Process text
+        """
         # TODO fix results
 
         # convert text to RefPost

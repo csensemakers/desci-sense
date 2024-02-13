@@ -3,8 +3,8 @@ from typing import Optional, List, Dict, TypedDict
 
 class OntologyItem(TypedDict):
     URI: str
+    display_name: str
     Name: Optional[str]
-    display_name: Optional[str]
     label: Optional[str]
     prompt: Optional[str]
     notes: Optional[str]
