@@ -33,7 +33,7 @@ def SM_FUNCTION_post_parser(request):
         "triplets": [
             "<_:1> <https://sparontologies.github.io/cito/current/cito.html#d4e441> <happy>",
             "<_:1> <https://sparontologies.github.io/cito/current/cito.html#d4e449> <https://www.alink.com/>",
-            "<_:1> <https://sparontologies.github.io/cito/current/cito.html#d4e100> <https://www.anotherlink.com/>",
+            "<_:1> <https://sparontologies.github.io/cito/current/cito.html#d4e1001> <https://www.anotherlink.com/>",
         ]
     }
 

@@ -10,7 +10,7 @@ export type RefsMap = Map<string, RefData>;
 export const processTriplets = (
   triplets: Triplet[],
   support: ReflabelsSupport
-) => {
+): RefsMap => {
   const possibleUris = support.labelsOntology.map((item) => item.URI);
 
   /** get refLabels triplets */
