@@ -15,7 +15,7 @@ class SM_FUNCTION_post_parser_config(TypedDict, total=True):
     openai_api_referer: int
 
 
-def SM_FUNCTION_post_parser_imp(content, parameters, config) -> dict:
+def SM_FUNCTION_post_parser_imp(content, parameters, config) -> ParserResult:
     paserConfig = init_multi_stage_parser_config(config, {})
 
     parser = FirebaseAPIParser(paserConfig)
@@ -24,12 +24,4 @@ def SM_FUNCTION_post_parser_imp(content, parameters, config) -> dict:
 
     result = parser.process_text(content)
 
-    ref = result["post"].ref_urls[0]
-
-    def getTriplet(label):
-        return f"<_:1> <{label}> <{ref}>"
-
-    triplets = result["answer"]["multi_tag"]
-    triplets = list(map(getTriplet, triplets))
-
-    return {"triplets": triplets}
+    return result

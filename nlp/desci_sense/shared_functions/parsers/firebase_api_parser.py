@@ -6,6 +6,8 @@ from typing import List
 from langchain.chat_models import ChatOpenAI
 from langchain.prompts import PromptTemplate
 
+from shared_functions.interface import ParserResult
+
 from ..init import MAX_SUMMARY_LENGTH
 from ..schema.ontology_base import OntologyBase
 from ..schema.post import RefPost
@@ -351,7 +353,7 @@ class FirebaseAPIParser:
 
     def process_text(
         self, text: str, author: str = "default_author", source: str = "default_source"
-    ):
+    ) -> ParserResult:
         # TODO fix results
 
         # convert text to RefPost
