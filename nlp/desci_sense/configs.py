@@ -15,6 +15,7 @@ environ = {
     "OPENROUTER_API_KEY": os.environ.get("OPENROUTER_API_KEY"),
     "OPENROUTER_REFERRER": os.environ.get("OPENROUTER_REFERRER"),
     "WANDB_PROJECT": os.environ.get("WANDB_PROJECT"),
+    "MASTODON_ACCESS_TOKEN": os.environ.get("MASTODON_ACCESS_TOKEN"),
     "MASTO_CLIENT_ID": os.environ.get("MASTO_CLIENT_ID"),
     "MASTO_CLIENT_SECRET": os.environ.get("MASTO_CLIENT_SECRET"),
     "NOTION_SENSEBOT_DB": os.environ.get("NOTION_SENSEBOT_DB"),
