@@ -3,6 +3,7 @@ import { logger } from 'firebase-functions/v1';
 
 import * as mockResult from '../../../sample.result.json';
 import { AppPostGetSemantics } from '../../@shared/types';
+import { MOCK_SEMANTICS } from '../../config/config';
 import { getPostSemantics } from '../posts.service';
 import { getPostSemanticsValidationScheme } from './posts.schemas';
 
