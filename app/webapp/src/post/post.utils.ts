@@ -2,12 +2,12 @@ import axios from 'axios';
 
 import { FUNCTIONS_BASE } from '../app/config';
 import { ParserResult } from '../shared/parser.types';
-import { AppPostCreate } from '../shared/types';
+import { AppPost, AppPostCreate } from '../shared/types';
 
 export const postMessage = async (
   post: AppPostCreate,
   appAccessToken: string
-) => {
+): Promise<AppPost> => {
   const res = await axios.post(FUNCTIONS_BASE + '/posts/post', post, {
     headers: {
       Authorization: `Bearer ${appAccessToken}`,

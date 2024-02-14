@@ -1,9 +1,21 @@
-import { getPostSemantics } from '../src/post/post.utils';
+import { getPostSemantics, postMessage } from '../src/post/post.utils';
+import { PLATFORM } from '../src/shared/types';
 
 describe('test', () => {
+  const userId = 'dummyuser';
   it('works', async () => {
     const content = 'This is a post';
-    const result = await getPostSemantics(content, 'dummyuser');
-    console.log({ result });
+    const parsed = await getPostSemantics(content, userId);
+
+    const post = await postMessage(
+      {
+        content,
+        originalParsed: parsed,
+        platforms: [PLATFORM.X],
+      },
+      userId
+    );
+
+    console.log({ post, parsed });
   });
 });

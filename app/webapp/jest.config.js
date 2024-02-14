@@ -4,4 +4,5 @@ module.exports = {
   testEnvironment: 'node',
   roots: ['<rootDir>/test'],
   testMatch: ['**/?(*.)+(spec|test).ts'],
+  testTimeout: 180000,
 };

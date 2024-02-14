@@ -1,7 +1,7 @@
 import { logger } from 'firebase-functions/v1';
 
 import { AppPostCreate, PLATFORM, TweetRead } from '../@shared/types';
-import { FUNCTIONS_PY_URL } from '../config/config';
+import { FUNCTIONS_PY_URL, IS_TEST } from '../config/config';
 import { createPost } from '../db/posts.repo';
 import { postMessageTwitter } from '../twitter/twitter.utils';
 import { constructTweet } from '../twitter/construct.tweet';
@@ -12,7 +12,12 @@ export const publishPost = async (userId: string, post: AppPostCreate) => {
 
   if (post.platforms.includes(PLATFORM.X)) {
     const tweetContent = constructTweet(post);
-    tweet = await postMessageTwitter(userId, tweetContent);
+    if (IS_TEST) {
+      tweet = {id: 'dummyurl', text: tweetContent}
+      logger.debug('skipping publish', {tweet})
+    } else {
+      tweet = await postMessageTwitter(userId, tweetContent);
+    }
   }
 
   const createdPost = await createPost({ ...post, author: userId, tweet });

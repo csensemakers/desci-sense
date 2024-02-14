@@ -6,7 +6,8 @@
     "start": "craco start",
     "build": "craco build --config craco.config.prod.js",
     "test": "craco test",
-    "eject": "craco eject"
+    "eject": "craco eject",
+    "test-functions": "FUNCTIONS_BASE=http://127.0.0.1:5001/sensenets-9ef26/us-central1 jest"
   },
   "dependencies": {
     "@nytimes/react-prosemirror": "^0.5.0",
