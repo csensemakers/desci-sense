@@ -6,7 +6,7 @@ class OntologyItem(TypedDict):
     display_name: str
     Name: Optional[str]
     label: Optional[str]
-    prompt: Optional[str]
+    prompt: str
     notes: Optional[str]
     valid_subject_types: Optional[str]
     valid_object_types: Optional[str]
