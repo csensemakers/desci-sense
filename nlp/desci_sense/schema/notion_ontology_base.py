@@ -1,23 +1,34 @@
 from typing import List, Dict
 import pandas as pd
+import json
 from notion_client import Client
+from pydantic import Field
+
 
 from ..configs import environ
+from ..shared_functions.schema.ontology_base import NotionOntologyConfig
 
 
-def load_ontology_from_config(config):
+def load_ontology_from_config(config: NotionOntologyConfig):
     # use keys if passed in config or otherwise take from environment settings.
-    db_id = config["ontology"].get("notion_db_id", None)
-    if not db_id:
-        db_id = environ["NOTION_SENSEBOT_DB"]
-    if not db_id:
-        raise IOError(
-            "missing notion_db_id - must be set either in config or environment settings"
-        )
-    ontology = NotionOntologyBase(
-        versions=config["ontology"]["versions"], notion_db_id=db_id
-    )
+    if not config.notion_api_token:
+        config.notion_api_token = environ["NOTION_SENSEBOT_TOKEN"]
+    if not config.db_id:
+        config.db_id = environ["NOTION_SENSEBOT_DB"]
+
+    # create ontology from config
+    ontology = NotionOntologyBase(config)
+
     return ontology
+
+
+def load_notion_config_json(config_json_path: str):
+    with open(config_json_path) as f:
+        file_contents = f.read()
+        parsed_json = json.loads(file_contents)
+
+    config = NotionOntologyConfig.model_validate_json(parsed_json)
+    return config
 
 
 def create_df_from_notion_db(raw_notion_db) -> pd.DataFrame:
@@ -61,7 +72,7 @@ def create_df_from_notion_db(raw_notion_db) -> pd.DataFrame:
     df = pd.DataFrame(data)
 
     # Set 'Name' as the index of the DataFrame
-    df.set_index("Name", inplace=True)
+    df.set_index("Name", inplace=True, drop=False)
 
     return df
 
@@ -99,19 +110,16 @@ def get_notion_db_name(notion_client, database_id: str) -> str:
 
 
 class NotionOntologyBase:
-    def __init__(
-        self,
-        versions: List[str] = None,
-        notion_sensebot_api_key=None,
-        notion_db_id=None,
-    ) -> None:
+    def __init__(self, config: NotionOntologyConfig) -> None:
+        self.config = config
+
         # use keys if passed as args or otherwise take from environment settings.
         sensebot_key = (
-            notion_sensebot_api_key
-            if notion_sensebot_api_key
+            config.notion_api_token
+            if config.notion_api_token
             else environ["NOTION_SENSEBOT_TOKEN"]
         )
-        self.db_id = notion_db_id if notion_db_id else environ["NOTION_SENSEBOT_DB"]
+        self.db_id = config.db_id if config.db_id else environ["NOTION_SENSEBOT_DB"]
 
         # create Notion client
         notion = Client(auth=sensebot_key)
@@ -126,7 +134,9 @@ class NotionOntologyBase:
         ont_df = create_df_from_notion_db(results)
 
         # filter by chosen versions
-        self.ont_df = filter_ontology_by_version(ont_df, allowed_versions=versions)
+        self.ont_df = filter_ontology_by_version(
+            ont_df, allowed_versions=config.versions
+        )
 
         # set dict versions with alternate keys for fast lookup
         self._label_map = self.ont_df.set_index("label")
@@ -176,3 +186,21 @@ class NotionOntologyBase:
 
     def get_all_display_names(self) -> List[str]:
         return self.ont_df.display_name.to_list()
+
+
+def write_ontology_to_json(ontology: NotionOntologyBase, outpath: str):
+    # Convert the dataframe to a dictionary in the specified format
+    df = ontology.ont_df
+    records = df.to_dict(orient="records")
+    json_records = {r["Name"]: r for r in records}
+    json_final = {
+        "ontology": json_records,
+        "notion_config": ontology.config.model_dump(),
+    }
+
+    # Convert the dictionary to JSON format
+    json_data = json.dumps(json_final, indent=4, ensure_ascii=False)
+
+    # Save the JSON data to a file
+    with open(outpath, "w") as file:
+        file.write(json_data)

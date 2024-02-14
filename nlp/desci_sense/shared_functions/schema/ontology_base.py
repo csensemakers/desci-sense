@@ -1,7 +1,29 @@
 from typing import List, Dict
 import pandas as pd
+from pydantic import Field
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 from .ontology import ontology
+
+
+# TODO fix using alias for env var default loading
+class NotionOntologyConfig(BaseSettings):
+    model_config = SettingsConfigDict(populate_by_name=True)
+    db_id: str = Field(
+        default=None,
+        description="Database ID of Notion ontology",
+        validate_default=False,
+    )
+    notion_api_token: str = Field(
+        default=None,
+        description="Notion integration API key",
+        validate_default=False,
+        exclude=True,
+    )
+    versions: List[str] = Field(
+        default_factory=lambda: ["v0"],
+        description="Versions for which to take rows from ontology",
+    )
 
 
 def load_ontology_from_dict(ont_dict):
