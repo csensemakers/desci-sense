@@ -5,7 +5,7 @@ from dataclasses import dataclass
 from .citoid import fetch_citation, fetch_all_citations
 
 
-class MetadataExtractionType(Enum):
+class MetadataExtractionType(str, Enum):
     NONE = "none"
     CITOID = "citoid"
 
@@ -29,16 +29,26 @@ class RefMetadata:
         return "\n".join(result)
 
 
+def get_trunc_str(input_str: str, max_len: int) -> str:
+    """
+    Get truncated string of up to length max_len, unless max_len
+    < 0 in which case return full length string.
+    """
+    max_len = max_len if max_len > 0 else len(input_str)
+    return input_str[:max_len]
+
+
 def normalize_citoid_metadata(metadata_list: List[dict], max_summary_length):
     results = []
     for metadata in metadata_list:
+        summary = metadata.get("abstractNote", "")
         results.append(
             RefMetadata(
                 **{
                     "url": metadata.get("url", None),
                     "item_type": metadata.get("itemType", None),
                     "title": metadata.get("title", ""),
-                    "summary": metadata.get("abstractNote", "")[:max_summary_length],
+                    "summary": get_trunc_str(summary, max_summary_length),
                 }
             )
         )
