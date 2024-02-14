@@ -8,6 +8,7 @@ sys.path.append(str(ROOT))
 
 # Adjust the import path according to the project structure
 from scripts.load_ontology import load_config, write_outputs
+from desci_sense.schema.notion_ontology_base import load_ontology_from_config
 
 
 # Test loading default configuration
@@ -54,3 +55,17 @@ def test_write_outputs(mock_file_ops):
     mock_write_py.assert_called_once()
     assert mock_write_json.call_args[0][1].endswith("test_output/ontology.json")
     assert mock_write_py.call_args[0][1].endswith("test_output/ontology_test.py")
+
+def test_load_content():
+    custom_config_path = ROOT / "tests/etc/configs/notion_test_config.json"
+    config = load_config(custom_config_path)
+    notion_ontology = load_ontology_from_config(config)
+    ontology = notion_ontology.ontology_interface
+    assert ontology.semantic_predicates[0].name == 'test_ann'
+
+
+if __name__ == "__main__":
+    custom_config_path = "etc/configs/notion_test_config.json"
+    config = load_config(custom_config_path)
+    notion_ontology = load_ontology_from_config(config)
+    ontology = notion_ontology.ontology_interface
