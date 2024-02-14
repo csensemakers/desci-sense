@@ -70,19 +70,4 @@ if __name__ == "__main__":
 
     write_outputs(notion_ontology, out_dir)
 
-    # prepare output dir
-    # out_dir.mkdir(parents=True, exist_ok=True)
-    # out_path = ROOT / out_dir / "ontology.json"
-    # out_py_path = ROOT / out_dir / "ontology_test.py"
-
-    # # write output
-    # logger.info(f"Writing output json to {out_path.absolute()}...")
-    # write_ontology_to_json(ontology, str(out_path))
-
-    # logger.info(f"Writing output py to {out_py_path.absolute()}...")
-    # write_ontology_to_py(
-    #     ontology,
-    #     str(out_py_path),
-    # )
-
     logger.info("Done!")
