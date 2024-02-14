@@ -13,6 +13,8 @@ export const publishPost = async (userId: string, post: AppPostCreate) => {
   let nanopub;
   if (post.platforms.includes(PLATFORM.Nanopubs)) {
     nanopub = await constructNanopub(post);
+    signed = nanopub.sign()
+    await publishNanopub(nanopub);
   }
   
   let tweet: TweetRead | undefined = undefined;
