@@ -14,7 +14,8 @@ export const TWITTER_API_SECRET_KEY = env.TWITTER_API_SECRET_KEY as string;
 
 logger.debug('NODE_ENV', process.env.NODE_ENV);
 
-export const IS_TEST = process.env.IS_TEST === 'true'
+export const IS_TEST = process.env.IS_TEST === 'true';
+export const MOCK_SEMANTICS = process.env.MOCK_SEMANTICS === 'true';
 
 export const APP_URL =
   process.env.NODE_ENV !== 'production'

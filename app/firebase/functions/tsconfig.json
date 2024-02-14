@@ -10,10 +10,11 @@
     "esModuleInterop": true,
     "preserveSymlinks": true,
     "baseUrl": "./",
+    "resolveJsonModule": true,
     "paths": {
-      "*": ["*", "node_modules/*"]
+      "*": ["*", "node_modules/*"],
     },
-    "typeRoots": ["./src/types", "node_modules/@types"],
+    "typeRoots": ["./src/types", "node_modules/@types", "./src/custom.d.ts"],
   },
   "compileOnSave": true,
   "include": ["src/index.ts"],

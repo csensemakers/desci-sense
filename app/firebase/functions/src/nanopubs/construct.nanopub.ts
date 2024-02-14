@@ -1,7 +1,11 @@
 import { Nanopub } from '@nanopub/sign';
+
 import { AppPostCreate, AppUserRead } from '../@shared/types';
 
-export const constructNanopub = (postCreateData: AppPostCreate, user: AppUserRead): Promise<Nanopub> => {
+export const constructNanopub = async (
+  postCreateData: AppPostCreate,
+  user: AppUserRead
+): Promise<Nanopub> => {
   const rdfStr = `@prefix this: <http://purl.org/np/RAHtkscyyyJDLvWRuINckQrn5rbHzQKvwakNVC3fmRzGX> .
   @prefix sub: <http://purl.org/np/RAHtkscyyyJDLvWRuINckQrn5rbHzQKvwakNVC3fmRzGX#> .
   @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
@@ -23,7 +27,8 @@ export const constructNanopub = (postCreateData: AppPostCreate, user: AppUserRea
     sub:assertion prov:generatedAtTime "2023-02-21T11:15:07.732162"^^xsd:dateTime ;
       prov:wasAttributedTo orcid:0000-0002-1501-1082 .
   }
-  `
-  
-  return Nanopub(rdfStr);
-}
+  `;
+
+  const np = new Nanopub(rdfStr);
+  return np;
+};

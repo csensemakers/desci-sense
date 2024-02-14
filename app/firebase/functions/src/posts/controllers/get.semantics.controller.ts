@@ -1,6 +1,7 @@
 import { RequestHandler } from 'express';
 import { logger } from 'firebase-functions/v1';
 
+import * as mockResult from '../../../sample.result.json';
 import { AppPostGetSemantics } from '../../@shared/types';
 import { getPostSemantics } from '../posts.service';
 import { getPostSemanticsValidationScheme } from './posts.schemas';
@@ -19,7 +20,9 @@ export const getPostSemanticsController: RequestHandler = async (
       request.body
     )) as AppPostGetSemantics;
 
-    const result = await getPostSemantics(payload.content);
+    const result = !MOCK_SEMANTICS
+      ? await getPostSemantics(payload.content)
+      : mockResult;
 
     response.status(200).send({ success: true, result });
   } catch (error: any) {

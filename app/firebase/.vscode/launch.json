@@ -2,18 +2,24 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "functions debug",
+      "name": "functions-debug",
       "type": "node",
       "request": "launch",
       "skipFiles": ["<node_internals>/**"],
-      "runtimeExecutable": "${workspaceFolder}/node_modules/.bin/firebase",
-      "args": ["emulators:start"],
+      "cwd": "${workspaceFolder}/functions",
       "env": {
         "NODE_ENV": "local",
         "IS_TEST": "true",
+        "MOCK_SEMANTICS": "true",
         "FIRESTORE_EMULATOR_HOST": "localhost:8080"
       },
-      "cwd": "${workspaceFolder}",
+      "runtimeExecutable": "${workspaceFolder}/functions/node_modules/.bin/mocha",
+      "args": [
+        "--config",
+        "./.mocharc.e2e.js",
+        "src/__e2e_tests__/**/*.test.ts"
+      ],
+      "outputCapture": "std",
       "console": "integratedTerminal"
     }
   ]

@@ -5,7 +5,7 @@ import { RUNTIME_OPTIONS } from '../config/RUNTIME_OPTIONS';
 import { REGION } from '../config/config';
 import { app } from '../instances/app';
 import { getPostSemanticsController } from './controllers/get.semantics.controller';
-import { publishPostController } from './controllers/pulish.post.controller';
+import { publishPostController } from './controllers/publish.post.controller';
 
 const postsRouter = express.Router();
 
