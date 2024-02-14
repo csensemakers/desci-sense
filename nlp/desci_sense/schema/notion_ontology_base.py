@@ -6,7 +6,11 @@ from pydantic import Field
 
 
 from ..configs import environ
-from ..shared_functions.schema.ontology_base import NotionOntologyConfig
+from ..shared_functions.schema.ontology_base import (
+    NotionOntologyConfig,
+    OntologyInterface,
+    get_llm_predicate_defs_from_df,
+)
 
 
 def load_ontology_from_config(config: NotionOntologyConfig):
@@ -25,9 +29,8 @@ def load_ontology_from_config(config: NotionOntologyConfig):
 def load_notion_config_json(config_json_path: str):
     with open(config_json_path) as f:
         file_contents = f.read()
-        parsed_json = json.loads(file_contents)
 
-    config = NotionOntologyConfig.model_validate_json(parsed_json)
+    config = NotionOntologyConfig.model_validate_json(file_contents)
     return config
 
 
@@ -36,15 +39,15 @@ def create_df_from_notion_db(raw_notion_db) -> pd.DataFrame:
     data = []
     for row in raw_notion_db:
         data_row = {
-            "Name": row["properties"]["Name"]["title"][0]["plain_text"]
-            if row["properties"]["Name"]["title"]
+            "name": row["properties"]["name"]["title"][0]["plain_text"]
+            if row["properties"]["name"]["title"]
             else None,
             "display_name": row["properties"]["display_name"]["rich_text"][0][
                 "plain_text"
             ]
             if row["properties"]["display_name"]["rich_text"]
             else None,
-            "URI": row["properties"]["URI"]["url"],
+            "uri": row["properties"]["URI"]["url"],
             "label": row["properties"]["label"]["rich_text"][0]["plain_text"]
             if row["properties"]["label"]["rich_text"]
             else None,
@@ -71,8 +74,8 @@ def create_df_from_notion_db(raw_notion_db) -> pd.DataFrame:
     # Create a DataFrame
     df = pd.DataFrame(data)
 
-    # Set 'Name' as the index of the DataFrame
-    df.set_index("Name", inplace=True, drop=False)
+    # Set 'name' as the index of the DataFrame
+    df.set_index("name", inplace=True, drop=False)
 
     return df
 
@@ -138,6 +141,13 @@ class NotionOntologyBase:
             ont_df, allowed_versions=config.versions
         )
 
+        # create OntologyInterface object
+        semantic_predicates = get_llm_predicate_defs_from_df(self.ont_df)
+        self.ontology_interface = OntologyInterface(
+            semantic_predicates=semantic_predicates,
+            ontology_config=self.config,
+        )
+
         # set dict versions with alternate keys for fast lookup
         self._label_map = self.ont_df.set_index("label")
         self._display_map = self.ont_df.set_index("display_name")
@@ -192,7 +202,7 @@ def write_ontology_to_json(ontology: NotionOntologyBase, outpath: str):
     # Convert the dataframe to a dictionary in the specified format
     df = ontology.ont_df
     records = df.to_dict(orient="records")
-    json_records = {r["Name"]: r for r in records}
+    json_records = {r["name"]: r for r in records}
     json_final = {
         "ontology": json_records,
         "notion_config": ontology.config.model_dump(),

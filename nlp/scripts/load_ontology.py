@@ -26,8 +26,34 @@ from desci_sense.schema.notion_ontology_base import (
     NotionOntologyConfig,
     load_notion_config_json,
     load_ontology_from_config,
-    write_ontology_to_json,
 )
+from desci_sense.shared_functions.schema.ontology_base import (
+    write_ontology_to_json,
+    write_ontology_to_py,
+)
+
+
+def load_config(config_path):
+    if config_path:
+        return load_notion_config_json(config_path)
+    else:
+        return NotionOntologyConfig()
+
+
+def write_outputs(notion_ontology, out_dir):
+    ontology = notion_ontology.ontology_interface
+    out_dir_path = Path(out_dir)
+    out_dir_path.mkdir(parents=True, exist_ok=True)
+
+    out_path = ROOT / out_dir_path / "ontology.json"
+    out_py_path = ROOT / out_dir_path / "ontology_test.py"
+
+    logger.info(f"Writing output json to {out_path.absolute()}...")
+    write_ontology_to_json(ontology, str(out_path))
+
+    logger.info(f"Writing output py to {out_py_path.absolute()}...")
+    write_ontology_to_py(ontology, str(out_py_path))
+
 
 if __name__ == "__main__":
     arguments = docopt(__doc__)
@@ -37,21 +63,26 @@ if __name__ == "__main__":
     config_path = arguments.get("--config")
 
     # initialize config
-    if config_path:
-        # load config
-        config = load_notion_config_json(config_path)
-    else:
-        # create default config
-        config = NotionOntologyConfig()
+    config = load_config(config_path)
 
-    ontology = load_ontology_from_config(config)
+    notion_ontology = load_ontology_from_config(config)
+    ontology = notion_ontology.ontology_interface
+
+    write_outputs(notion_ontology, out_dir)
 
     # prepare output dir
-    out_dir.mkdir(parents=True, exist_ok=True)
-    out_path = ROOT / out_dir / "ontology.json"
-    logger.info(f"Writing output to {out_path.absolute()}...")
+    # out_dir.mkdir(parents=True, exist_ok=True)
+    # out_path = ROOT / out_dir / "ontology.json"
+    # out_py_path = ROOT / out_dir / "ontology_test.py"
 
-    # write output
-    write_ontology_to_json(ontology, str(out_path))
+    # # write output
+    # logger.info(f"Writing output json to {out_path.absolute()}...")
+    # write_ontology_to_json(ontology, str(out_path))
+
+    # logger.info(f"Writing output py to {out_py_path.absolute()}...")
+    # write_ontology_to_py(
+    #     ontology,
+    #     str(out_py_path),
+    # )
 
     logger.info("Done!")

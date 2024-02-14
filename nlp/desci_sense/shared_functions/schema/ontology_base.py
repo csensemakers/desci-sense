@@ -1,9 +1,11 @@
-from typing import List, Dict
+from typing import List, Dict, Union
 import pandas as pd
-from pydantic import Field
+import json
+from pydantic import Field, BaseModel
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 from .ontology import ontology
+from ..utils import render_to_py_dict
 
 
 # TODO fix using alias for env var default loading
@@ -26,10 +28,70 @@ class NotionOntologyConfig(BaseSettings):
     )
 
 
+class OntologyPredicateDefinition(BaseModel):
+    name: str = Field(description="Predicate name.")
+    uri: Union[str, None] = Field(description="Linked data URI for this predicate.")
+    versions: List[str] = Field(
+        description="Which ontology versions is this item included in."
+    )
+
+
+class KeywordPredicateDefinition(OntologyPredicateDefinition):
+    """
+    Special OntologyPredicateDefinition class intialized to represent
+    a keyword concept.
+    """
+
+    name: str = Field("hasKeyword", description="Predicate name.")
+    uri: str = Field(
+        "https://pcp-on-web.de/ontology/0.2/index-en.html#hasKeyword",
+        description="Linked data URI for this predicate.",
+    )
+    versions: List[str] = Field(
+        ["v0"], description="Which ontology versions is this item included in."
+    )
+
+
+class LLMOntologyPredicateDefinition(OntologyPredicateDefinition):
+    label: str = Field(description="Output label model should use for this predicate")
+    display_name: str = Field(description="Name to display in app front-ends.")
+    prompt: str = Field(description="Description to use in prompt for this predicate")
+    valid_subject_types: List[str] = Field(
+        description="List of valid subject entity types for this predicate"
+    )
+    valid_object_types: List[str] = Field(
+        description="List of valid object entity types for this predicate"
+    )
+
+
+class OntologyInterface(BaseModel):
+    semantic_predicates: List[LLMOntologyPredicateDefinition]
+    keyword_predicate: KeywordPredicateDefinition = Field(
+        default_factory=KeywordPredicateDefinition
+    )
+    ontology_config: NotionOntologyConfig = Field(default_factory=NotionOntologyConfig)
+
+
+# TODO fix for updated OntologyInterface schema
 def load_ontology_from_dict(ont_dict):
+    """_summary_
+
+    Args:
+        ont_dict (_type_): _description_
+
+    Returns:
+        _type_: _description_
+    """
     loaded_df = pd.DataFrame(ont_dict)
-    loaded_df.set_index("Name", inplace=True)
+    loaded_df.set_index("name", inplace=True, drop=False)
     return loaded_df
+
+
+def get_llm_predicate_defs_from_df(
+    df: pd.DataFrame,
+) -> List[LLMOntologyPredicateDefinition]:
+    records = df.to_dict(orient="records")
+    return [LLMOntologyPredicateDefinition(**r) for r in records]
 
 
 def filter_ontology_by_version(
@@ -50,6 +112,26 @@ def filter_ontology_by_version(
     ]
 
     return filtered_df
+
+
+def write_ontology_to_py(ontology: OntologyInterface, outpath: str):
+    # convert to dict format
+    ont_dict = ontology.model_dump()
+
+    # write to py file
+    render_to_py_dict(ont_dict, obj_name="ontology", out_path=outpath)
+
+
+def write_ontology_to_json(ontology: OntologyInterface, outpath: str):
+    # convert to dict format
+    ont_dict = ontology.model_dump()
+
+    # Convert the dictionary to JSON format
+    json_data = json.dumps(ont_dict, indent=4, ensure_ascii=False)
+
+    # Save the JSON data to a file
+    with open(outpath, "w") as file:
+        file.write(json_data)
 
 
 class OntologyBase:

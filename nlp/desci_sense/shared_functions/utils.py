@@ -1,5 +1,6 @@
 import re
 import requests
+from jinja2 import Environment, BaseLoader
 from enum import Enum
 import html2text
 from urllib.parse import urlparse
@@ -138,3 +139,42 @@ def extract_and_expand_urls(text):
 
     expanded_urls = [normalize_url(url) for url in extract_urls(text)]
     return expanded_urls
+
+
+def render_to_py_dict(obj_dict, obj_name: str = "object", out_path: str = "output.py"):
+    template_str = """{{ obj_name }} = {
+    {% for key, value in obj_dict.items() -%}
+    '{{ key }}': {{ value|to_py }},
+    {% endfor -%}
+    }"""
+
+    def to_py_filter(value):
+        """Custom Jinja2 filter to convert Python objects to string representations, including nested dictionaries."""
+        if isinstance(value, str):
+            return '"' + value.replace('"', '\\"') + '"'
+        elif value is None:
+            return "None"
+        elif isinstance(value, list):
+            return "[" + ", ".join(to_py_filter(v) for v in value) + "]"
+        elif isinstance(value, dict):
+            # Handle nested dictionaries
+            dict_items = ", ".join(
+                f"'{k}': {to_py_filter(v)}" for k, v in value.items()
+            )
+            return "{" + dict_items + "}"
+        elif isinstance(value, (int, float)):
+            return str(value)
+        else:
+            raise TypeError(f"Unsupported type: {type(value)}")
+
+    env = Environment(loader=BaseLoader())
+    env.filters["to_py"] = to_py_filter
+
+    template = env.from_string(template_str)
+    rendered_content = template.render(
+        obj_dict=obj_dict,
+        obj_name=obj_name,
+    )
+
+    with open(out_path, "w") as file:
+        file.write(rendered_content)
