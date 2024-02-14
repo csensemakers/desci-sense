@@ -2,15 +2,16 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "functions tests",
+      "name": "functions debug",
       "type": "node",
       "request": "launch",
       "skipFiles": ["<node_internals>/**"],
-      "runtimeExecutable": "${workspaceFolder}/node_modules/.bin/jest",
-      "args": [],
+      "runtimeExecutable": "${workspaceFolder}/node_modules/.bin/firebase",
+      "args": ["emulators:start"],
       "env": {
-        "NODE_ENV": "test",
-        "FUNCTIONS_BASE": "http://127.0.0.1:5001/sensenets-9ef26/us-central1"
+        "NODE_ENV": "local",
+        "IS_TEST": "true",
+        "FIRESTORE_EMULATOR_HOST": "localhost:8080"
       },
       "cwd": "${workspaceFolder}",
       "console": "integratedTerminal"

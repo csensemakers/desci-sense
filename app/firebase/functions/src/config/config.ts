@@ -14,8 +14,10 @@ export const TWITTER_API_SECRET_KEY = env.TWITTER_API_SECRET_KEY as string;
 
 logger.debug('NODE_ENV', process.env.NODE_ENV);
 
+export const IS_TEST = process.env.IS_TEST === 'true'
+
 export const APP_URL =
-  process.env.NODE_ENV === 'local'
+  process.env.NODE_ENV !== 'production'
     ? 'http://127.0.0.1:3000/'
     : 'https://split--sensemakers.netlify.app/';
 
@@ -23,7 +25,7 @@ export const TWITTER_CALLBACK_URL = APP_URL;
 
 export const SENSENET_DOMAIN = 'http://127.0.0.1:3000/';
 export const FUNCTIONS_PY_URL =
-  process.env.NODE_ENV === 'local'
+  process.env.NODE_ENV !== 'production'
     ? 'http://127.0.0.1:5002/sensenets-9ef26/us-central1'
     : 'https://sm-function-post-parser-eeshylf4jq-uc.a.run.app/';
 
