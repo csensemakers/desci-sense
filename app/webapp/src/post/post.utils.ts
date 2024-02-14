@@ -1,3 +1,5 @@
+import axios from 'axios';
+
 import { FUNCTIONS_BASE } from '../app/config';
 import { ParserResult } from '../shared/parser.types';
 import { AppPostCreate } from '../shared/types';
@@ -6,32 +8,28 @@ export const postMessage = async (
   post: AppPostCreate,
   appAccessToken: string
 ) => {
-  const res = await fetch(FUNCTIONS_BASE + '/posts/post', {
-    method: 'post',
+  const res = await axios.post(FUNCTIONS_BASE + '/posts/post', post, {
     headers: {
-      'Content-Type': 'application/json',
-      authorization: `Bearer ${appAccessToken}`,
+      Authorization: `Bearer ${appAccessToken}`,
     },
-    body: JSON.stringify(post),
   });
 
-  const body = await res.json();
-  return body.post;
+  return res.data.post;
 };
 
 export const getPostSemantics = async (
   content: string,
   appAccessToken: string
 ): Promise<ParserResult> => {
-  const res = await fetch(FUNCTIONS_BASE + '/posts/getSemantics', {
-    method: 'post',
-    headers: {
-      'Content-Type': 'application/json',
-      authorization: `Bearer ${appAccessToken}`,
-    },
-    body: JSON.stringify({ content }),
-  });
+  const res = await axios.post(
+    FUNCTIONS_BASE + '/posts/getSemantics',
+    { content },
+    {
+      headers: {
+        Authorization: `Bearer ${appAccessToken}`,
+      },
+    }
+  );
 
-  const body = await res.json();
-  return body.result;
+  return res.data.result;
 };

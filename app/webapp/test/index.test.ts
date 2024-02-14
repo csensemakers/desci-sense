@@ -1,7 +1,9 @@
-import { describe, it } from '@jest/globals';
+import { getPostSemantics } from '../src/post/post.utils';
 
 describe('test', () => {
-  it('works', () => {
-    console.log('works');
+  it('works', async () => {
+    const content = 'This is a post';
+    const result = await getPostSemantics(content, '');
+    console.log({ result });
   });
 });
