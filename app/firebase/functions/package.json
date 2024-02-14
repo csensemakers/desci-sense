@@ -15,6 +15,7 @@
   },
   "main": "lib/index.js",
   "dependencies": {
+    "@nanopub/sign": "^0.0.18",
     "cors": "^2.8.5",
     "crypto-js": "^4.2.0",
     "express": "^4.18.2",

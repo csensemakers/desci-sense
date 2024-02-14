@@ -5,11 +5,17 @@ import { FUNCTIONS_PY_URL, IS_TEST } from '../config/config';
 import { createPost } from '../db/posts.repo';
 import { postMessageTwitter } from '../twitter/twitter.utils';
 import { constructTweet } from '../twitter/construct.tweet';
+import { constructNanopub } from '../nanopubs/construct.nanopub';
+
 import { TAG_OPTIONS } from './TAG_OPTIONS';
 
 export const publishPost = async (userId: string, post: AppPostCreate) => {
+  let nanopub;
+  if (post.platforms.includes(PLATFORM.Nanopubs)) {
+    nanopub = await constructNanopub(post);
+  }
+  
   let tweet: TweetRead | undefined = undefined;
-
   if (post.platforms.includes(PLATFORM.X)) {
     const tweetContent = constructTweet(post);
     if (IS_TEST) {
