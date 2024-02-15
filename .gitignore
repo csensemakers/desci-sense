@@ -13,3 +13,6 @@ app/firebase/functions/node_modules/*
 app/firebase/node_modules/*
 app/webapp/node_modules/*
 app/firebase/functions/src/config/env.ts
+.env
+
+*.log

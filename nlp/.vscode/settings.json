@@ -47,13 +47,9 @@
     "**/.yalc": true,
     "**/.yarn": true
   },
-  "eslint.workingDirectories": ["./app/firebase/functions"],
   "editor.formatOnSave": true,
   "editor.formatOnSaveMode": "file",
-  "editor.defaultFormatter": "esbenp.prettier-vscode",
-  "[javascript]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
-  },
-  "solidity.formatter": "prettier", // This is the default so it might be missing.
-  "solidity.defaultCompiler": "localNodeModule"
+  "[python]": {
+    "editor.defaultFormatter": "ms-python.black-formatter"
+  }
 }

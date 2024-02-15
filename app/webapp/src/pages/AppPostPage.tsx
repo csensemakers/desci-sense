@@ -10,12 +10,9 @@ import { ViewportPage } from '../app/Viewport';
 import { PostEditor } from '../post/PostEditor';
 import { getPostSemantics, postMessage } from '../post/post.utils';
 import { SemanticsEditor } from '../semantics/SemanticsEditor';
-import {
-  AppPost,
-  AppPostCreate,
-  AppPostSemantics,
-  PLATFORM,
-} from '../shared/types';
+import { PatternProps } from '../semantics/patterns/patterns';
+import { AppPostSemantics, ParserResult } from '../shared/parser.types';
+import { AppPost, AppPostCreate, PLATFORM } from '../shared/types';
 import { AppButton, AppCard, AppHeading } from '../ui-components';
 import { BoxCentered } from '../ui-components/BoxCentered';
 import { Loading } from '../ui-components/LoadingDiv';
@@ -32,8 +29,11 @@ export const AppPostPage = (props: {}) => {
   const [postText, setPostText] = useState<string>();
   const [postTextDebounced] = useDebounce(postText, 2000);
 
-  /** meta is the metadata of the post */
-  const [semantics, setPostSemantics] = useState<AppPostSemantics>();
+  /** parsed is the parsed semantics as computed by the service */
+  const [parsed, setParsed] = useState<ParserResult>();
+
+  /** parsedModified is the semantics after the user edited them */
+  const [semantics, setSemantics] = useState<AppPostSemantics>();
 
   const [isSending, setIsSending] = useState<boolean>();
   const [isGettingSemantics, setIsGettingSemantics] = useState<boolean>();
@@ -43,18 +43,27 @@ export const AppPostPage = (props: {}) => {
   /** the published post */
   const [post, setPost] = useState<AppPost>();
 
+  const reset = () => {
+    setPost(undefined);
+    setPostText(undefined);
+    setParsed(undefined);
+    setSemantics(undefined);
+    setIsSending(false);
+    setIsGettingSemantics(undefined);
+  };
+
   const send = () => {
-    if (postText && appAccessToken) {
+    if (postText && appAccessToken && parsed) {
       setIsSending(true);
       const postCreate: AppPostCreate = {
         content: postText,
+        originalParsed: parsed,
         semantics: semantics,
         platforms: [PLATFORM.X],
       };
       if (DEBUG) console.log('postMessage', { postCreate });
       postMessage(postCreate, appAccessToken).then((post) => {
         if (post) {
-          setPostText(undefined);
           setPost(post);
           setIsSending(false);
         } else {
@@ -65,14 +74,21 @@ export const AppPostPage = (props: {}) => {
   };
 
   const getSemantics = () => {
-    if (postText && appAccessToken) {
+    if (postText && appAccessToken && !semantics) {
       if (DEBUG) console.log('getPostMeta', { postText });
       setIsGettingSemantics(true);
-      getPostSemantics(postText, appAccessToken).then((semantics) => {
-        if (DEBUG) console.log({ semantics });
-        setPostSemantics(semantics);
+      getPostSemantics(postText, appAccessToken).then((result) => {
+        if (DEBUG) console.log({ result });
+        setParsed(result);
         setIsGettingSemantics(false);
       });
+    }
+  };
+
+  const semanticsUpdated: PatternProps['semanticsUpdated'] = (newSemantics) => {
+    if (parsed) {
+      if (DEBUG) console.log('semanticsUpdated', { newSemantics });
+      setSemantics(newSemantics);
     }
   };
 
@@ -84,8 +100,7 @@ export const AppPostPage = (props: {}) => {
   }, [postTextDebounced]);
 
   const newPost = () => {
-    setPost(undefined);
-    setPostSemantics(undefined);
+    reset();
   };
 
   const content = (() => {
@@ -124,18 +139,13 @@ export const AppPostPage = (props: {}) => {
           {isGettingSemantics !== undefined ? (
             <SemanticsEditor
               isLoading={isGettingSemantics}
-              semantics={semantics}></SemanticsEditor>
+              semantics={semantics}
+              originalParsed={parsed}
+              semanticsUpdated={semanticsUpdated}></SemanticsEditor>
           ) : (
             <></>
           )}
         </Box>
-
-        <AppButton
-          margin={{ vertical: 'small' }}
-          reverse
-          icon={<Send color={constants.colors.primary}></Send>}
-          label={t('post')}
-          onClick={() => send()}></AppButton>
       </Box>
     );
   })();
@@ -143,6 +153,16 @@ export const AppPostPage = (props: {}) => {
   return (
     <ViewportPage
       content={<BoxCentered>{content}</BoxCentered>}
-      nav={<></>}></ViewportPage>
+      nav={
+        <>
+          {' '}
+          <AppButton
+            margin={{ vertical: 'small' }}
+            reverse
+            icon={<Send color={constants.colors.primary}></Send>}
+            label={t('post')}
+            onClick={() => send()}></AppButton>
+        </>
+      }></ViewportPage>
   );
 };
