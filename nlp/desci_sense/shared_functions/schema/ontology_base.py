@@ -85,7 +85,7 @@ def create_ont_df_from_interface(ontology_interface: OntologyInterface) -> pd.Da
     return df
 
 
-# TODO fix for updated OntologyInterface schema
+# TODO to be deprecated - should use load_ontology_from_model
 def load_ontology_from_dict(ont_dict):
     """_summary_
 
