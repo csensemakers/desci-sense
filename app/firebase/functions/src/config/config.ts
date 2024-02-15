@@ -12,6 +12,8 @@ export const TWITTER_BEARER_TOKEN = env.TWITTER_BEARER_TOKEN as string;
 export const TWITTER_API_KEY = env.TWITTER_API_KEY as string;
 export const TWITTER_API_SECRET_KEY = env.TWITTER_API_SECRET_KEY as string;
 
+export const NANOPUB_SERVER = env.NANOPUB_SERVER;
+
 logger.debug('NODE_ENV', process.env.NODE_ENV);
 
 export const IS_TEST = process.env.IS_TEST === 'true';

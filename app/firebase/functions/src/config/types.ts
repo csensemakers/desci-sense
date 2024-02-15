@@ -10,4 +10,5 @@ export interface Env {
   TWITTER_CLIENT_ID: string;
   TWITTER_CLIENT_SECRET: string;
   TWITTER_BEARER_TOKEN: string;
+  NANOPUB_SERVER: string;
 }

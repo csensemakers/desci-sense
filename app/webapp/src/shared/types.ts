@@ -1,3 +1,4 @@
+import { Nanopub } from '@nanopub/sign';
 import { TweetV2PostTweetResult } from 'twitter-api-v2';
 
 import { AppPostSemantics, ParserResult } from './parser.types';
@@ -47,7 +48,7 @@ export interface AppPostCreate {
   content: string;
   originalParsed: ParserResult;
   semantics?: AppPostSemantics;
-  platforms: [PLATFORM];
+  platforms: PLATFORM[];
 }
 
 export interface AppPostGetSemantics {
@@ -57,6 +58,7 @@ export interface AppPostGetSemantics {
 export type AppPostStore = AppPostCreate & {
   author: string;
   tweet?: TweetRead;
+  nanopub?: Nanopub;
 };
 
 export type TweetRead = TweetV2PostTweetResult['data'];

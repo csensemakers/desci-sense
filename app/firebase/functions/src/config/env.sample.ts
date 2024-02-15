@@ -11,4 +11,5 @@ export const env: Env = {
   TWITTER_CLIENT_ID: '',
   TWITTER_CLIENT_SECRET: '',
   TWITTER_BEARER_TOKEN: '',
+  NANOPUB_SERVER: '',
 };

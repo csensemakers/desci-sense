@@ -1,9 +1,19 @@
-import { AppPost } from '../../@shared/types';
+import { ParserResult } from '../../@shared/parser.types';
+import { AppPost, AppPostCreate } from '../../@shared/types';
 import { HttpConnector } from '../http.connector';
 
 export const getSemantics = async (
-  content: Partial<string>,
+  content: string,
+  http: HttpConnector
+): Promise<ParserResult> => {
+  const data = await http.post('/posts/getSemantics', { content });
+  return (data as any).result;
+};
+
+export const publishPost = async (
+  post: AppPostCreate,
   http: HttpConnector
 ): Promise<AppPost> => {
-  return http.post('/posts/getSemantics', { content });
+  const data = await http.post('/posts/post', post);
+  return (data as any).post;
 };

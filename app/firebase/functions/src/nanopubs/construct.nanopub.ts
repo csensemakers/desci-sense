@@ -6,27 +6,34 @@ export const constructNanopub = async (
   postCreateData: AppPostCreate,
   user: AppUserRead
 ): Promise<Nanopub> => {
-  const rdfStr = `@prefix this: <http://purl.org/np/RAHtkscyyyJDLvWRuINckQrn5rbHzQKvwakNVC3fmRzGX> .
-  @prefix sub: <http://purl.org/np/RAHtkscyyyJDLvWRuINckQrn5rbHzQKvwakNVC3fmRzGX#> .
-  @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
-  @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
-  @prefix np: <http://www.nanopub.org/nschema#> .
-  @prefix npx: <http://purl.org/nanopub/x/> .
-  @prefix orcid: <https://orcid.org/> .
-  @prefix prov: <http://www.w3.org/ns/prov#> .
-  sub:Head {
-    this: np:hasAssertion sub:assertion ;
-      np:hasProvenance sub:provenance ;
-      np:hasPublicationInfo sub:pubinfo ;
-      a np:Nanopublication .
-  }
-  sub:assertion {
-    <http://identifiers.org/umls/C0355800> rdfs:label "Naltrexone hydrochloride" .
-  }
-  sub:provenance {
-    sub:assertion prov:generatedAtTime "2023-02-21T11:15:07.732162"^^xsd:dateTime ;
-      prov:wasAttributedTo orcid:0000-0002-1501-1082 .
-  }
+  const rdfStr = `
+    @prefix : <http://purl.org/nanopub/temp/mynanopub#> .
+    @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+    @prefix dc: <http://purl.org/dc/terms/> .
+    @prefix pav: <http://purl.org/pav/> .
+    @prefix prov: <http://www.w3.org/ns/prov#> .
+    @prefix np: <http://www.nanopub.org/nschema#> .
+    @prefix npx: <http://purl.org/nanopub/x/> .
+    @prefix ex: <http://example.org/> .
+    
+    :Head {
+      : np:hasAssertion :assertion ;
+        np:hasProvenance :provenance ;
+        np:hasPublicationInfo :pubinfo ;
+        a np:Nanopublication .
+    }
+    
+    :assertion {
+      ex:mosquito ex:transmits ex:malaria .
+    }
+    
+    :provenance {
+      :assertion prov:hadPrimarySource <http://dx.doi.org/10.3233/ISU-2010-0613> .
+    }
+    
+    :pubinfo {
+      : a npx:ExampleNanopub .
+    }
   `;
 
   const np = new Nanopub(rdfStr);
