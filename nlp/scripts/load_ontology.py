@@ -46,7 +46,7 @@ def write_outputs(notion_ontology, out_dir):
     out_dir_path.mkdir(parents=True, exist_ok=True)
 
     out_path = ROOT / out_dir_path / "ontology.json"
-    out_py_path = ROOT / out_dir_path / "ontology_test.py"
+    out_py_path = ROOT / out_dir_path / "ontology.py"
 
     logger.info(f"Writing output json to {out_path.absolute()}...")
     write_ontology_to_json(ontology, str(out_path))

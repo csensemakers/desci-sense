@@ -72,6 +72,19 @@ class OntologyInterface(BaseModel):
     ontology_config: NotionOntologyConfig = Field(default_factory=NotionOntologyConfig)
 
 
+def load_ontology_from_model(ont_model: dict) -> OntologyInterface:
+    ontology_interface = OntologyInterface.model_validate(ont_model)
+    return ontology_interface
+
+
+def create_ont_df_from_interface(ontology_interface: OntologyInterface) -> pd.DataFrame:
+    # convert ontology to dataframe format
+    records = [x.model_dump() for x in ontology_interface.semantic_predicates]
+    df = pd.DataFrame(records)
+    df.set_index("name", inplace=True, drop=False)
+    return df
+
+
 # TODO fix for updated OntologyInterface schema
 def load_ontology_from_dict(ont_dict):
     """_summary_
@@ -136,8 +149,10 @@ def write_ontology_to_json(ontology: OntologyInterface, outpath: str):
 
 class OntologyBase:
     def __init__(self, versions: List[str] = None) -> None:
+        self.ontology_interface = load_ontology_from_model(ontology)
+
         # Process the results into a format suitable for DataFrame
-        ont_df = load_ontology_from_dict(ontology)
+        ont_df = create_ont_df_from_interface(self.ontology_interface)
 
         # filter by chosen versions
         self.ont_df = filter_ontology_by_version(ont_df, allowed_versions=versions)
