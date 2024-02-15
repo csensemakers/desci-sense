@@ -11,4 +11,5 @@ html2text
 Mastodon.py
 url_normalize
 notion-client
+pydantic_settings
 python-dotenv

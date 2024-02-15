@@ -12,3 +12,4 @@ Mastodon.py
 url_normalize
 notion-client
 python-dotenv
+pydantic-settings
