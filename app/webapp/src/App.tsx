@@ -4,6 +4,10 @@ import { BrowserRouter } from 'react-router-dom';
 import { AccountContext } from './app/AccountContext';
 import { AppContainer } from './app/AppContainer';
 import { GlobalStyles } from './app/GlobalStyles';
+import { NanopubContext } from './app/NanopubContext';
+import { TwitterContext } from './app/TwitterContext';
+import { ConnectedWallet } from './app/signer/ConnectedWalletContext';
+import { SignerContext } from './app/signer/SignerContext';
 import { i18n } from './i18n/i18n';
 import { ResponsiveApp } from './ui-components/ResponsiveApp';
 import { ThemedApp } from './ui-components/ThemedApp';
@@ -12,16 +16,24 @@ function App() {
   return (
     <div className="App">
       <I18nextProvider i18n={i18n}>
-        <GlobalStyles />
-        <ThemedApp>
-          <ResponsiveApp>
-            <BrowserRouter>
-              <AccountContext>
-                <AppContainer></AppContainer>
-              </AccountContext>
-            </BrowserRouter>
-          </ResponsiveApp>
-        </ThemedApp>
+        <BrowserRouter>
+          <AccountContext>
+            <ConnectedWallet>
+              <SignerContext>
+                <TwitterContext>
+                  <NanopubContext>
+                    <GlobalStyles />
+                    <ThemedApp>
+                      <ResponsiveApp>
+                        <AppContainer></AppContainer>
+                      </ResponsiveApp>
+                    </ThemedApp>
+                  </NanopubContext>
+                </TwitterContext>
+              </SignerContext>
+            </ConnectedWallet>
+          </AccountContext>
+        </BrowserRouter>
       </I18nextProvider>
     </div>
   );

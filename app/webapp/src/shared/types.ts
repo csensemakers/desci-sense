@@ -68,3 +68,5 @@ export type AppPost = AppPostStore & {
 };
 
 export type Triplet = Array<string>;
+
+export type HexStr = `0x${string}`;

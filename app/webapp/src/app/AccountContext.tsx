@@ -10,7 +10,6 @@ import { useSearchParams } from 'react-router-dom';
 
 import { getLoggedUser, postOrcidCode } from '../auth/auth.requests';
 import { AppUserRead } from '../shared/types';
-import { TwitterContext } from './TwitterContext';
 import { ORCID_API_URL, ORCID_CLIENT_ID, ORCID_REDIRECT_URL } from './config';
 
 const DEBUG = true;
@@ -46,9 +45,9 @@ export const AccountContext = (props: PropsWithChildren) => {
   const [connectedUser, setConnectedUser] = useState<AppUserRead | null>();
   const [token, setToken] = useState<string>();
 
-  const [isInitializing, setIsInitializing] = useState<boolean>(true)
-  const [isConnecting, setIsConnecting] = useState<boolean>(false)
-  const [isGettingUser, setIsGettingUser] = useState<boolean>(false)
+  const [isInitializing, setIsInitializing] = useState<boolean>(true);
+  const [isConnecting, setIsConnecting] = useState<boolean>(false);
+  const [isGettingUser, setIsGettingUser] = useState<boolean>(false);
 
   // Extract the code from URL
   const [searchParams, setSearchParams] = useSearchParams();
@@ -60,22 +59,21 @@ export const AccountContext = (props: PropsWithChildren) => {
     if (token !== null) {
       if (DEBUG) console.log('tokend found in localstorage');
       setToken(token);
-      
     } else {
       setToken(undefined);
       setConnectedUser(null);
-      setIsInitializing(false)
+      setIsInitializing(false);
     }
   };
 
   const refresh = () => {
     if (token) {
-      setIsGettingUser(false)
+      setIsGettingUser(false);
       getLoggedUser(token).then((user) => {
         if (DEBUG) console.log('got connected user', { user });
-        setIsGettingUser(false)
+        setIsGettingUser(false);
         setConnectedUser(user);
-        setIsInitializing(false)
+        setIsInitializing(false);
       });
     }
   };
@@ -95,7 +93,7 @@ export const AccountContext = (props: PropsWithChildren) => {
     if (!codeHandled.current && code) {
       codeHandled.current = true;
       if (DEBUG) console.log('code received', { code });
-      setIsConnecting(true)
+      setIsConnecting(true);
 
       postOrcidCode(code).then((token) => {
         if (DEBUG)
@@ -105,7 +103,7 @@ export const AccountContext = (props: PropsWithChildren) => {
         setSearchParams(searchParams);
         localStorage.setItem('token', token);
 
-        setIsConnecting(false)
+        setIsConnecting(false);
         checkToken();
       });
     }
@@ -118,7 +116,7 @@ export const AccountContext = (props: PropsWithChildren) => {
   };
 
   const connect = () => {
-    setIsConnecting(true)
+    setIsConnecting(true);
     window.location.href = ORCID_LOGIN_URL;
   };
 
@@ -135,7 +133,7 @@ export const AccountContext = (props: PropsWithChildren) => {
         refresh,
         appAccessToken: token,
       }}>
-      <TwitterContext>{props.children}</TwitterContext>
+      {props.children}
     </AccountContextValue.Provider>
   );
 };

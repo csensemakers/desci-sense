@@ -17,6 +17,6 @@ export const LoadingDiv = (props: {
   );
 };
 
-export const Loading = () => {
-  return <Spinner></Spinner>;
+export const Loading = (props: { color?: string }) => {
+  return <Spinner color={props.color}></Spinner>;
 };
