@@ -1,6 +1,7 @@
 import { Nanopub } from '@nanopub/sign';
 
-import { parseRDF, replaceBlankNodes, writeRDF } from '../shared/n3.utils';
+import { THIS_POST_NAME } from '../app/config';
+import { parseRDF, replaceNamedNodes, writeRDF } from '../shared/n3.utils';
 import { AppPostSemantics } from '../shared/parser.types';
 
 export const constructNanopub = async (
@@ -9,7 +10,9 @@ export const constructNanopub = async (
   orcid: string
 ): Promise<Nanopub> => {
   const store = await parseRDF(semantics);
-  const assertionsStore = replaceBlankNodes(store, { '_:1': ':assertion' });
+  const assertionsStore = replaceNamedNodes(store, {
+    [THIS_POST_NAME]: '<http://purl.org/nanopub/temp/mynanopub#>',
+  });
   const assertionsRdf = await writeRDF(assertionsStore);
 
   const rdfStr = `

@@ -112,26 +112,25 @@ export const forEachStore = (
   return store.forEach(callback, subject, predicate, object, graph);
 };
 
-export const replaceBlankNodes = (
+export const replaceNamedNodes = (
   store: Store,
-  blankNodeMap: Record<string, string>
+  namedNodeMap: Record<string, string>
 ) => {
   const newStore = mapStore(store, (quad) => {
     let { subject, predicate, object, graph } = quad;
 
-    if (subject.termType === 'BlankNode') {
-      if (!blankNodeMap[subject.value]) {
+    if (subject.termType === 'NamedNode') {
+      if (!namedNodeMap[subject.value]) {
         throw new Error(`Undefined value for blank node ${subject.value}`);
       }
-      subject = DataFactory.namedNode(blankNodeMap[subject.value]);
+      subject = DataFactory.namedNode(namedNodeMap[subject.value]);
     }
 
-    // Replace object if it is a blank node
-    if (object.termType === 'BlankNode') {
-      if (!blankNodeMap[object.value]) {
+    if (object.termType === 'NamedNode') {
+      if (!namedNodeMap[object.value]) {
         throw new Error(`Undefined value for blank node ${subject.value}`);
       }
-      object = DataFactory.namedNode(blankNodeMap[object.value]);
+      object = DataFactory.namedNode(namedNodeMap[object.value]);
     }
 
     return DataFactory.quad(subject, predicate, object, graph);

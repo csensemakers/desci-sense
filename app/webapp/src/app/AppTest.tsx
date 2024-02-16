@@ -1,6 +1,7 @@
 import { Box } from 'grommet';
 import { useEffect } from 'react';
 
+import { constructNanopub } from '../nanopubs/construct.nanopub';
 import sample_result from '../sample.result.json';
 import { parseRDF } from '../shared/n3.utils';
 
@@ -28,11 +29,9 @@ export const AppTest = (props: {}) => {
 
     if (!semantics) throw new Error();
 
-    const parsed = await parseRDF(semantics);
+    const nanopub = await constructNanopub('A text', semantics, 'orcid-1234');
 
-    console.log({ semantics, parsed });
-
-    console.log({ size: parsed.size });
+    console.log({ semantics, nanopub });
   };
   useEffect(() => {
     start();
