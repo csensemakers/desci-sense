@@ -1,6 +1,6 @@
+import { mapStoreElements, parseRDF } from '../@shared/n3.utils';
 import { AppPostSemantics, ParserResult } from '../@shared/parser.types';
 import { AppPostCreate } from '../@shared/types';
-import { parseTriplet } from '../@shared/utils';
 
 const forceTag = (input: string) => {
   const emojiRegex =
@@ -42,21 +42,22 @@ export const getTwitterTags = (
   const keywordOntology = originalParsed.support.keywords.keyWordsOntology;
   const refLabelsOntology = originalParsed.support.refLabels.labelsOntology;
 
-  const triplets = semantics.triplets.map((t) => parseTriplet(t));
-  const keywords = triplets
-    .map((t) => {
-      if (t[1] === keywordOntology.URI) {
-        return t[2];
-      }
+  const store = parseRDF(semantics);
 
-      const item = refLabelsOntology.find((item) => item.URI === t[1]);
-      if (item) {
-        return item.display_name;
-      }
+  const keywords = mapStoreElements(store, (quad) => {
+    if (quad.predicate.value === keywordOntology.URI) {
+      return quad.object.value;
+    }
 
-      return undefined;
-    })
-    .filter((k) => k !== undefined);
+    const item = refLabelsOntology.find(
+      (item) => item.URI === quad.predicate.value
+    );
+    if (item) {
+      return item.display_name;
+    }
+
+    return undefined;
+  }).filter((e) => e !== undefined) as string[];
 
   return keywords.map((k) => forceTag(k as string));
 };
