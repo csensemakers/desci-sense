@@ -8,7 +8,7 @@ export const constructNanopub = async (
   semantics: AppPostSemantics,
   orcid: string
 ): Promise<Nanopub> => {
-  const store = parseRDF(semantics);
+  const store = await parseRDF(semantics);
   const assertionsStore = replaceBlankNodes(store, { '_:1': ':assertion' });
   const assertionsRdf = await writeRDF(assertionsStore);
 

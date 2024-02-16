@@ -2,6 +2,7 @@ import { Box } from 'grommet';
 import { DataFactory } from 'n3';
 import { useMemo } from 'react';
 
+import { THIS_POST_NAME } from '../../../app/config';
 import { filterStore, writeRDF } from '../../../shared/n3.utils';
 import { useSemanticsStore } from '../common/use.semantics';
 import { PatternProps } from '../patterns';
@@ -38,7 +39,7 @@ export const RefLabelsComponent = (props: PatternProps) => {
 
   const addLabel = async (ref: string, labelUri: string) => {
     if (props.semanticsUpdated && store) {
-      const THIS_POST = DataFactory.blankNode('<:this-text>');
+      const THIS_POST = DataFactory.namedNode(THIS_POST_NAME);
       const labelNode = DataFactory.namedNode(labelUri);
       const refNode = DataFactory.namedNode(ref);
 

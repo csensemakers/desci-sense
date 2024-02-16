@@ -2,6 +2,7 @@ import { Box } from 'grommet';
 import { DataFactory } from 'n3';
 import { useMemo } from 'react';
 
+import { THIS_POST_NAME } from '../../../app/config';
 import {
   filterStore,
   mapStoreElements,
@@ -33,7 +34,7 @@ export const KeywordsComponent = (props: PatternProps) => {
 
   const addKeyword = async (keyword: string) => {
     if (props.semanticsUpdated && store && KEYWORD_PREDICATE) {
-      const THIS_POST = DataFactory.blankNode('<:this-text>');
+      const THIS_POST = DataFactory.namedNode(THIS_POST_NAME);
       const labelNode = DataFactory.namedNode(KEYWORD_PREDICATE);
       const refNode = DataFactory.literal(keyword);
 

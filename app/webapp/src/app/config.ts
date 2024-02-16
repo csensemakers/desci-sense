@@ -18,3 +18,5 @@ export const WALLETCONNECT_PROJECT_ID = 'c12fdc701fd336cf8dc059f6784906bc';
 export const MAGIC_API_KEY = 'pk_live_A603B0287DAF3C97';
 
 export const NANOPUBS_SERVER = 'http://server.nanopubs.lod.labs.vu.nl/';
+
+export const THIS_POST_NAME = 'http://sensentes/ThisText';

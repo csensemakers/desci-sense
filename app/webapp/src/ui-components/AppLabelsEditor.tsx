@@ -1,5 +1,4 @@
 import { Box, Keyboard, Text } from 'grommet';
-import { Add } from 'grommet-icons';
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -9,7 +8,7 @@ import { AppLabel } from './AppLabel';
 import { useThemeContext } from './ThemedApp';
 import useOutsideClick from './hooks/OutsideClickHook';
 
-const DEBUG = true;
+const DEBUG = false;
 
 export const AppLabelsEditor = (props: {
   labels: string[];
@@ -56,8 +55,6 @@ export const AppLabelsEditor = (props: {
     setNewLabel('');
     setAdding(false);
   };
-
-  if (DEBUG) console.log({ adding });
 
   useOutsideClick(keyBox, () => {
     if (DEBUG) console.log('useOutsideClick', { adding });

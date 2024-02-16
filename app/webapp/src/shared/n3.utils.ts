@@ -1,24 +1,24 @@
 import { DataFactory, OTerm, Parser, Quad, Store, Writer } from 'n3';
 
-export const parseRDF = (text: string) => {
-  const parser = new Parser();
-  const store = new Store();
+export const parseRDF = (text: string): Promise<Store> => {
+  return new Promise((resolve, reject) => {
+    const parser = new Parser();
+    const store = new Store();
 
-  parser.parse(text, (error, quad, prefixes) => {
-    if (quad) {
-      store.addQuad(quad);
-    } else if (error) {
-      console.error(error);
-    } else {
-      console.log('Parsing finished. Found prefixes:', prefixes);
-      // Here you can query or manipulate the RDF data
-    }
+    parser.parse(text, (error, quad, prefixes) => {
+      if (quad) {
+        store.addQuad(quad);
+      } else if (error) {
+        console.error(error);
+      } else {
+        resolve(store);
+      }
+    });
   });
-  return store;
 };
 
 export const writeRDF = async (store: Store): Promise<string | undefined> => {
-  const writer = new Writer({ format: 'Turtle' });
+  const writer = new Writer({ format: 'N-Triples' });
   store.forEach((quad) => writer.addQuad(quad), null, null, null, null);
 
   return new Promise((resolve, reject) => {

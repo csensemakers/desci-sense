@@ -1,11 +1,5 @@
 {
-    "semantics": {
-        "triplets": [
-            "<_:1> <https://sparontologies.github.io/cito/current/cito.html#d4e441> <cancer-research>",
-            "<_:1> <https://sparontologies.github.io/cito/current/cito.html#d4e441> <science>",
-            "<_:1> <https://sparontologies.github.io/cito/current/cito.html#d4e10010> <https://abook.com/>"
-        ]
-    },
+    "semantics": "<http://sensentes/ThisText> <https://sparontologies.github.io/cito/current/cito.html#d4e441> \"cancer-research\" . <http://sensentes/ThisText> <https://sparontologies.github.io/cito/current/cito.html#d4e441> \"science\" .  <http://sensentes/ThisText> <https://sparontologies.github.io/cito/current/cito.html#d4e10010> <https://abook.com/> .",
     "support": {
         "keywords": {
             "keyWordsOntology": {
@@ -24,16 +18,9 @@
                     "label": "disagrees",
                     "prompt": "this post disputes or expresses disagreement with statements, ideas or conclusions presented in the mentioned reference.",
                     "notes": null,
-                    "valid_subject_types": [
-                        "post",
-                        "ref"
-                    ],
-                    "valid_object_types": [
-                        "ref"
-                    ],
-                    "versions": [
-                        "v0"
-                    ]
+                    "valid_subject_types": ["post", "ref"],
+                    "valid_object_types": ["ref"],
+                    "versions": ["v0"]
                 },
                 {
                     "Name": "agrees",
@@ -42,16 +29,9 @@
                     "label": "agrees",
                     "prompt": "this post expresses agreement with statements, ideas or conclusions presented in the mentioned reference.",
                     "notes": null,
-                    "valid_subject_types": [
-                        "post",
-                        "ref"
-                    ],
-                    "valid_object_types": [
-                        "ref"
-                    ],
-                    "versions": [
-                        "v0"
-                    ]
+                    "valid_subject_types": ["post", "ref"],
+                    "valid_object_types": ["ref"],
+                    "versions": ["v0"]
                 },
                 {
                     "Name": "possible-missing-reference",
@@ -60,15 +40,9 @@
                     "label": "missing-ref",
                     "prompt": "this post seems to be referring to a reference by name but has not explicitly provided a URL link to the reference. For example, a post that discusses a book and mentions it by title, but contains no link to the book.",
                     "notes": null,
-                    "valid_subject_types": [
-                        "post"
-                    ],
-                    "valid_object_types": [
-                        "nan"
-                    ],
-                    "versions": [
-                        "v0"
-                    ]
+                    "valid_subject_types": ["post"],
+                    "valid_object_types": ["nan"],
+                    "versions": ["v0"]
                 },
                 {
                     "Name": "dg-observation",
@@ -77,15 +51,9 @@
                     "label": "dg-observation",
                     "prompt": "this post is articulating a single, highly observation. The intuition is that observation notes should be as close to “the data” as possible. They should be similar to how results are described in results sections of academic publications.",
                     "notes": null,
-                    "valid_subject_types": [
-                        "post"
-                    ],
-                    "valid_object_types": [
-                        "nan"
-                    ],
-                    "versions": [
-                        "v0"
-                    ]
+                    "valid_subject_types": ["post"],
+                    "valid_object_types": ["nan"],
+                    "versions": ["v0"]
                 },
                 {
                     "Name": "dg-claim",
@@ -94,15 +62,9 @@
                     "label": "dg-claim",
                     "prompt": "this post is articulating an idea or a claim",
                     "notes": null,
-                    "valid_subject_types": [
-                        "post"
-                    ],
-                    "valid_object_types": [
-                        "nan"
-                    ],
-                    "versions": [
-                        "v0"
-                    ]
+                    "valid_subject_types": ["post"],
+                    "valid_object_types": ["nan"],
+                    "versions": ["v0"]
                 },
                 {
                     "Name": "dg-question",
@@ -111,15 +73,9 @@
                     "label": "dg-question",
                     "prompt": "this post is raising a research question.",
                     "notes": null,
-                    "valid_subject_types": [
-                        "post"
-                    ],
-                    "valid_object_types": [
-                        "nan"
-                    ],
-                    "versions": [
-                        "v0"
-                    ]
+                    "valid_subject_types": ["post"],
+                    "valid_object_types": ["nan"],
+                    "versions": ["v0"]
                 },
                 {
                     "Name": "watching-consumption-status",
@@ -128,15 +84,9 @@
                     "label": "watching",
                     "prompt": "this post describes the watching status of the author in relation to a reference, such as a video or movie. The author may have watched the content in the past, is watching the content in the present, or is looking forward to watching the content in the future.",
                     "notes": null,
-                    "valid_subject_types": [
-                        "post"
-                    ],
-                    "valid_object_types": [
-                        "ref"
-                    ],
-                    "versions": [
-                        "v0"
-                    ]
+                    "valid_subject_types": ["post"],
+                    "valid_object_types": ["ref"],
+                    "versions": ["v0"]
                 },
                 {
                     "Name": "reading-consumption-status",
@@ -145,15 +95,9 @@
                     "label": "reading",
                     "prompt": "this post describes the reading status of the author in relation to a reference, such as a book or article. The author may either have read the reference in the past, is reading the reference in the present, or is looking forward to reading the reference in the future.",
                     "notes": null,
-                    "valid_subject_types": [
-                        "post"
-                    ],
-                    "valid_object_types": [
-                        "ref"
-                    ],
-                    "versions": [
-                        "v0"
-                    ]
+                    "valid_subject_types": ["post"],
+                    "valid_object_types": ["ref"],
+                    "versions": ["v0"]
                 },
                 {
                     "Name": "listening-consumption-status",
@@ -162,15 +106,9 @@
                     "label": "listening",
                     "prompt": "this post describes the listening status of the author in relation to a reference, such as a podcast or radio station. The author may have listened to the content in the past, is listening to the content in the present, or is looking forward to listening the content in the future.",
                     "notes": null,
-                    "valid_subject_types": [
-                        "post"
-                    ],
-                    "valid_object_types": [
-                        "ref"
-                    ],
-                    "versions": [
-                        "v0"
-                    ]
+                    "valid_subject_types": ["post"],
+                    "valid_object_types": ["ref"],
+                    "versions": ["v0"]
                 },
                 {
                     "Name": "links to",
@@ -179,16 +117,9 @@
                     "label": "default",
                     "prompt": "This is a special tag. Use this tag if none of the tags above are suitable.",
                     "notes": "default predicate for a mention of a URL (always applicable)",
-                    "valid_subject_types": [
-                        "post"
-                    ],
-                    "valid_object_types": [
-                        "ref",
-                        "nan"
-                    ],
-                    "versions": [
-                        "v0"
-                    ]
+                    "valid_subject_types": ["post"],
+                    "valid_object_types": ["ref", "nan"],
+                    "versions": ["v0"]
                 },
                 {
                     "Name": "reviews",
@@ -197,16 +128,9 @@
                     "label": "review",
                     "prompt": "this post contains a review of another reference, such as a book, article or movie. The review could be positive or negative. A review can be detailed or a simple short endorsement.",
                     "notes": null,
-                    "valid_subject_types": [
-                        "post",
-                        "ref"
-                    ],
-                    "valid_object_types": [
-                        "ref"
-                    ],
-                    "versions": [
-                        "v0"
-                    ]
+                    "valid_subject_types": ["post", "ref"],
+                    "valid_object_types": ["ref"],
+                    "versions": ["v0"]
                 },
                 {
                     "Name": "recommends",
@@ -215,16 +139,9 @@
                     "label": "recommendation",
                     "prompt": "The author is recommending any kind of content: an article, a movie, podcast, book, another post, etc. This tag can also be used for cases of implicit recommendation, where the author is expressing enjoyment of some content but not explicitly recommending it.",
                     "notes": null,
-                    "valid_subject_types": [
-                        "post",
-                        "ref"
-                    ],
-                    "valid_object_types": [
-                        "ref"
-                    ],
-                    "versions": [
-                        "v0"
-                    ]
+                    "valid_subject_types": ["post", "ref"],
+                    "valid_object_types": ["ref"],
+                    "versions": ["v0"]
                 },
                 {
                     "Name": "asks-question-about",
@@ -233,16 +150,9 @@
                     "label": "question",
                     "prompt": "this post is raising a question or questions about some content it's referring to. The content could be a research paper or other media like a podcast, video or blog post.",
                     "notes": null,
-                    "valid_subject_types": [
-                        "post",
-                        "ref"
-                    ],
-                    "valid_object_types": [
-                        "ref"
-                    ],
-                    "versions": [
-                        "v0"
-                    ]
+                    "valid_subject_types": ["post", "ref"],
+                    "valid_object_types": ["ref"],
+                    "versions": ["v0"]
                 },
                 {
                     "Name": "Includes-quotation-from",
@@ -251,16 +161,9 @@
                     "label": "quote",
                     "prompt": "this post is quoting text from an article it's referring to. Symbols like \">\" or quotation marks are often used to indicate quotations.",
                     "notes": null,
-                    "valid_subject_types": [
-                        "post",
-                        "ref"
-                    ],
-                    "valid_object_types": [
-                        "ref"
-                    ],
-                    "versions": [
-                        "v0"
-                    ]
+                    "valid_subject_types": ["post", "ref"],
+                    "valid_object_types": ["ref"],
+                    "versions": ["v0"]
                 },
                 {
                     "Name": "Discussion",
@@ -269,16 +172,9 @@
                     "label": "discussion",
                     "prompt": "this post discusses how the cited reference relates to other facts or claims. For example, post might discuss how the cited reference informs questions, provides evidence, or supports or opposes claims.",
                     "notes": null,
-                    "valid_subject_types": [
-                        "post",
-                        "ref"
-                    ],
-                    "valid_object_types": [
-                        "ref"
-                    ],
-                    "versions": [
-                        "v0"
-                    ]
+                    "valid_subject_types": ["post", "ref"],
+                    "valid_object_types": ["ref"],
+                    "versions": ["v0"]
                 },
                 {
                     "Name": "Announcement-event",
@@ -287,15 +183,9 @@
                     "label": "event",
                     "prompt": "this post includes an invitation to an event, either a real-world or an online event. Any kind of event is relevant, some examples of such events could be seminars, meetups, or hackathons. This tag shold only be used for invitations to events, not for posts describing other kinds of events.",
                     "notes": null,
-                    "valid_subject_types": [
-                        "post"
-                    ],
-                    "valid_object_types": [
-                        "ref"
-                    ],
-                    "versions": [
-                        "v0"
-                    ]
+                    "valid_subject_types": ["post"],
+                    "valid_object_types": ["ref"],
+                    "versions": ["v0"]
                 },
                 {
                     "Name": "announcement-job",
@@ -304,15 +194,9 @@
                     "label": "job",
                     "prompt": "this post describes a job listing, for example a call for graduate students or faculty applications.",
                     "notes": null,
-                    "valid_subject_types": [
-                        "post"
-                    ],
-                    "valid_object_types": [
-                        "ref"
-                    ],
-                    "versions": [
-                        "v0"
-                    ]
+                    "valid_subject_types": ["post"],
+                    "valid_object_types": ["ref"],
+                    "versions": ["v0"]
                 },
                 {
                     "Name": "Announcement-research",
@@ -321,16 +205,9 @@
                     "label": "announce",
                     "prompt": "this post contains an announcement of new research. The announcement is likely made by the authors but may be a third party. We use a broad definition of research that includes classic and non-traditional outputs. Classic outputs include papers, datasets or code. Non traditional outputs can include a podcast, blog post, video explainers, etc.",
                     "notes": null,
-                    "valid_subject_types": [
-                        "post",
-                        "ref"
-                    ],
-                    "valid_object_types": [
-                        "ref"
-                    ],
-                    "versions": [
-                        "v0"
-                    ]
+                    "valid_subject_types": ["post", "ref"],
+                    "valid_object_types": ["ref"],
+                    "versions": ["v0"]
                 }
             ],
             "refsMeta": {
