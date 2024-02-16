@@ -3,6 +3,7 @@ import { BrowserRouter } from 'react-router-dom';
 
 import { AccountContext } from './app/AccountContext';
 import { AppContainer } from './app/AppContainer';
+import { DisconnectContext } from './app/DisconnectContext';
 import { GlobalStyles } from './app/GlobalStyles';
 import { NanopubContext } from './app/NanopubContext';
 import { TwitterContext } from './app/TwitterContext';
@@ -22,12 +23,14 @@ function App() {
               <SignerContext>
                 <TwitterContext>
                   <NanopubContext>
-                    <GlobalStyles />
-                    <ThemedApp>
-                      <ResponsiveApp>
-                        <AppContainer></AppContainer>
-                      </ResponsiveApp>
-                    </ThemedApp>
+                    <DisconnectContext>
+                      <GlobalStyles />
+                      <ThemedApp>
+                        <ResponsiveApp>
+                          <AppContainer></AppContainer>
+                        </ResponsiveApp>
+                      </ThemedApp>
+                    </DisconnectContext>
                   </NanopubContext>
                 </TwitterContext>
               </SignerContext>
