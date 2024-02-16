@@ -1,12 +1,16 @@
+import { Nanopub } from '@nanopub/sign';
 import { Box, Text } from 'grommet';
 import { Send } from 'grommet-icons';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDebounce } from 'use-debounce';
 
 import { useAccountContext } from '../app/AccountContext';
+import { useNanopubContext } from '../app/NanopubContext';
 import { TweetAnchor } from '../app/TwitterAnchor';
 import { ViewportPage } from '../app/Viewport';
+import { NANOPUBS_SERVER } from '../app/config';
+import { constructNanopub } from '../nanopubs/construct.nanopub';
 import { PostEditor } from '../post/PostEditor';
 import { getPostSemantics, postMessage } from '../post/post.utils';
 import { SemanticsEditor } from '../semantics/SemanticsEditor';
@@ -23,7 +27,10 @@ const DEBUG = true;
 export const AppPostPage = (props: {}) => {
   const { t } = useTranslation();
   const { constants } = useThemeContext();
-  const { appAccessToken, isConnecting, isConnected } = useAccountContext();
+  const { appAccessToken, isConnecting, isConnected, connectedUser } =
+    useAccountContext();
+
+  const { profile } = useNanopubContext();
 
   /** postText is the text and is in sync with the PostEditor content */
   const [postText, setPostText] = useState<string>();
@@ -52,13 +59,25 @@ export const AppPostPage = (props: {}) => {
     setIsGettingSemantics(undefined);
   };
 
-  const send = () => {
+  const send = useCallback(async () => {
     if (postText && appAccessToken && parsed) {
       setIsSending(true);
+
+      let nanopubPublished: Nanopub | undefined = undefined;
+      if (profile) {
+        const _semantis = semantics || parsed.semantics;
+        const orcid = connectedUser?.orcid?.orcid;
+        if (!orcid) throw new Error('Orcid mandatory');
+
+        const nanopub = await constructNanopub(postText, _semantis, orcid);
+        nanopubPublished = await nanopub.publish(profile, NANOPUBS_SERVER);
+      }
+
       const postCreate: AppPostCreate = {
         content: postText,
         originalParsed: parsed,
         semantics: semantics,
+        signedNanopub: nanopubPublished?.toString(),
         platforms: [PLATFORM.X],
       };
       if (DEBUG) console.log('postMessage', { postCreate });
@@ -71,7 +90,14 @@ export const AppPostPage = (props: {}) => {
         }
       });
     }
-  };
+  }, [
+    appAccessToken,
+    connectedUser?.orcid?.orcid,
+    parsed,
+    postText,
+    profile,
+    semantics,
+  ]);
 
   const getSemantics = () => {
     if (postText && appAccessToken && !semantics) {
@@ -155,7 +181,6 @@ export const AppPostPage = (props: {}) => {
       content={<BoxCentered>{content}</BoxCentered>}
       nav={
         <>
-          {' '}
           <AppButton
             margin={{ vertical: 'small' }}
             reverse

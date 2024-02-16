@@ -2,11 +2,10 @@ import { Box } from 'grommet';
 import { useMemo } from 'react';
 
 import { ReflabelsSupport } from '../../../shared/parser.types';
-import { AppLabel } from '../../../ui-components';
 import { AppLabelsEditor } from '../../../ui-components/AppLabelsEditor';
 import { useThemeContext } from '../../../ui-components/ThemedApp';
 import { RefCard } from '../common/RefCard';
-import { RefData } from './process.triplets';
+import { RefData } from './process.semantics';
 
 const DEBUG = true;
 

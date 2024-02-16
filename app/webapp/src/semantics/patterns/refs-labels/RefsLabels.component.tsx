@@ -1,68 +1,59 @@
 import { Box } from 'grommet';
+import { DataFactory } from 'n3';
 import { useMemo } from 'react';
 
-import { AppPostSemantics } from '../../../shared/parser.types';
-import { Triplet } from '../../../shared/types';
-import { parseTriplet } from '../../../shared/utils';
+import { filterStore, writeRDF } from '../../../shared/n3.utils';
+import { useSemanticsStore } from '../common/use.semantics';
 import { PatternProps } from '../patterns';
 import { RefLabel } from './RefLabel';
-import { RefsMap, processTriplets } from './process.triplets';
+import { RefsMap, processSemantics } from './process.semantics';
 
 export const RefLabelsComponent = (props: PatternProps) => {
-  /** actual semantics */
-  const semantics = useMemo<AppPostSemantics | undefined>(() => {
-    if (props.semantics) {
-      return props.semantics;
-    }
-    if (props.originalParsed) {
-      return props.originalParsed.semantics;
-    }
-  }, [props.originalParsed, props.semantics]);
-
-  /** parsed triplets */
-  const triplets = useMemo<Triplet[]>(
-    () => (semantics ? semantics.triplets.map((t) => parseTriplet(t)) : []),
-    [semantics]
-  );
+  const store = useSemanticsStore(props);
 
   /** processed ref labels with metadata */
   const refs = useMemo<RefsMap>(
     () =>
-      triplets && props.originalParsed
-        ? processTriplets(triplets, props.originalParsed.support.refLabels)
+      store && props.originalParsed
+        ? processSemantics(store, props.originalParsed.support.refLabels)
         : new Map(),
-    [props.originalParsed, triplets]
+    [props.originalParsed, store]
   );
 
-  const removeLabel = (ref: string, labelUri: string) => {
-    if (props.semanticsUpdated && semantics) {
-      const newTriplets = [...semantics.triplets];
-      const ix = newTriplets.findIndex((triplet) => {
-        const parts = parseTriplet(triplet);
-        return parts[1] === labelUri && parts[2] === ref;
-      });
-
-      if (ix === -1) {
-        throw new Error(`Unexpected labelUri ${labelUri} not found`);
-      }
-
-      newTriplets.splice(ix, 1);
-      props.semanticsUpdated({ triplets: newTriplets });
+  const removeLabel = async (ref: string, labelUri: string) => {
+    if (props.semanticsUpdated && store) {
+      const newStore = filterStore(
+        store,
+        () => true,
+        null,
+        labelUri,
+        ref,
+        null
+      );
+      const newSemantics = await writeRDF(newStore);
+      if (!newSemantics) throw new Error('Unexpected');
+      props.semanticsUpdated(newSemantics);
     }
   };
 
-  const addLabel = (ref: string, labelUri: string) => {
-    if (props.semanticsUpdated && semantics) {
-      if (
-        /** prevent duplicates */
-        triplets.find(
-          (triplet) => triplet[1] === labelUri && triplet[2] === ref
-        ) === undefined
-      ) {
-        props.semanticsUpdated({
-          triplets: semantics.triplets.concat([`<_:1> <${labelUri}> <${ref}>`]),
-        });
-      }
+  const addLabel = async (ref: string, labelUri: string) => {
+    if (props.semanticsUpdated && store) {
+      const THIS_POST = DataFactory.blankNode('<:this-text>');
+      const labelNode = DataFactory.namedNode(labelUri);
+      const refNode = DataFactory.namedNode(ref);
+
+      store.addQuad(
+        DataFactory.quad(
+          THIS_POST,
+          labelNode,
+          refNode,
+          DataFactory.defaultGraph()
+        )
+      );
+
+      const newSemantics = await writeRDF(store);
+      if (!newSemantics) throw new Error('Unexpected');
+      props.semanticsUpdated(newSemantics);
     }
   };
 

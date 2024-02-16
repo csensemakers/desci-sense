@@ -165,6 +165,7 @@ export const NanopubContext = (props: PropsWithChildren) => {
       value={{
         connect,
         disconnect,
+        profile,
         isConnecting,
         needAuthorize: profile === undefined,
         profileAddress,

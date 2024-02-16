@@ -1,5 +1,3 @@
-import { Nanopub } from '@nanopub/sign';
-
 import { AppPostSemantics, ParserResult } from '../@shared/parser.types';
 import { AppPostCreate } from '../@shared/types';
 import { parseTriplet } from '../@shared/utils';
@@ -19,7 +17,10 @@ const forceTag = (input: string) => {
     .join('');
 };
 
-export const constructTweet = (post: AppPostCreate, nanopub?: Nanopub) => {
+export const constructTweet = (
+  post: AppPostCreate,
+  nanopubInfo?: { uri: string }
+) => {
   const tags = getTwitterTags(post.originalParsed, post.semantics);
 
   const appendTags =
@@ -28,7 +29,7 @@ export const constructTweet = (post: AppPostCreate, nanopub?: Nanopub) => {
       : '';
 
   const appendNpUrl =
-    nanopub !== undefined ? '\n\n' + `nanopub: ${nanopub.info().uri})` : '';
+    nanopubInfo !== undefined ? '\n\n' + `nanopub: ${nanopubInfo.uri})` : '';
 
   return post.content + appendTags + appendNpUrl;
 };

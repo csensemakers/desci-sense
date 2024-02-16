@@ -48,10 +48,15 @@ export interface AppPostCreate {
   content: string;
   originalParsed: ParserResult;
   semantics?: AppPostSemantics;
+  signedNanopub?: string;
   platforms: PLATFORM[];
 }
 
 export interface AppPostGetSemantics {
+  content: string;
+}
+
+export interface AppPostConstructNanopub {
   content: string;
 }
 
@@ -66,7 +71,5 @@ export type TweetRead = TweetV2PostTweetResult['data'];
 export type AppPost = AppPostStore & {
   id: string;
 };
-
-export type Triplet = Array<string>;
 
 export type HexStr = `0x${string}`;

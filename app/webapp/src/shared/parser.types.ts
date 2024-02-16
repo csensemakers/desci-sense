@@ -1,6 +1,4 @@
-export interface AppPostSemantics {
-  triplets: string[];
-}
+export type AppPostSemantics = string;
 
 export interface OntologyItem {
   URI: string;

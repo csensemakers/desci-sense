@@ -1,71 +1,70 @@
 import { Box } from 'grommet';
+import { DataFactory } from 'n3';
 import { useMemo } from 'react';
 
-import { parseTriplet } from '../../../shared/utils';
+import {
+  filterStore,
+  mapStoreElements,
+  writeRDF,
+} from '../../../shared/n3.utils';
 import { AppLabelsEditor } from '../../../ui-components/AppLabelsEditor';
 import { useThemeContext } from '../../../ui-components/ThemedApp';
+import { useSemanticsStore } from '../common/use.semantics';
 import { PatternProps } from '../patterns';
 
 export const KeywordsComponent = (props: PatternProps) => {
   const { constants } = useThemeContext();
 
   /** actual semantics */
-  const semantics = useMemo(() => {
-    if (props.semantics) {
-      return props.semantics;
-    }
-    if (props.originalParsed) {
-      return props.originalParsed.semantics;
-    }
-  }, [props.originalParsed, props.semantics]);
+  const store = useSemanticsStore(props);
 
-  const HAS_KEYWORD_PREDICATE =
+  const KEYWORD_PREDICATE =
     props.originalParsed?.support.keywords.keyWordsOntology.URI;
 
-  /** conversion to triplets */
-  const triplets = useMemo(
-    () => (semantics ? semantics.triplets.map((t) => parseTriplet(t)) : []),
-    [semantics]
-  );
+  const keywords = useMemo<string[]>(() => {
+    if (!store) return [];
+    return mapStoreElements<string>(
+      store,
+      (quad) => quad.object.value,
+      null,
+      KEYWORD_PREDICATE
+    );
+  }, [KEYWORD_PREDICATE, store]);
 
-  const keywords = useMemo(
-    () =>
-      triplets.filter((t) => t[1] === HAS_KEYWORD_PREDICATE).map((t) => t[2]),
-    [triplets]
-  );
+  const addKeyword = async (keyword: string) => {
+    if (props.semanticsUpdated && store && KEYWORD_PREDICATE) {
+      const THIS_POST = DataFactory.blankNode('<:this-text>');
+      const labelNode = DataFactory.namedNode(KEYWORD_PREDICATE);
+      const refNode = DataFactory.literal(keyword);
 
-  const addKeyword = (keyword: string) => {
-    if (props.semanticsUpdated && semantics) {
-      if (
-        /** prevent duplicates */
-        triplets.find(
-          (triplet) =>
-            triplet[1] === HAS_KEYWORD_PREDICATE && triplet[2] === keyword
-        ) === undefined
-      ) {
-        props.semanticsUpdated({
-          triplets: semantics.triplets.concat([
-            `<_:1> <${HAS_KEYWORD_PREDICATE}> <${keyword}>`,
-          ]),
-        });
-      }
+      store.addQuad(
+        DataFactory.quad(
+          THIS_POST,
+          labelNode,
+          refNode,
+          DataFactory.defaultGraph()
+        )
+      );
+
+      const newSemantics = await writeRDF(store);
+      if (!newSemantics) throw new Error('Unexpected');
+      props.semanticsUpdated(newSemantics);
     }
   };
 
-  const removeKeyword = (keyword: string) => {
-    if (props.semanticsUpdated && semantics) {
-      const newTriplets = [...semantics.triplets];
-      const ix = newTriplets.findIndex((triplet) => {
-        const parts = parseTriplet(triplet);
-        return parts[1] === HAS_KEYWORD_PREDICATE && parts[2] === keyword;
-      });
-
-      if (ix === -1) {
-        throw new Error(`Unexpected keyword ${keyword} not found`);
-      }
-
-      newTriplets.splice(ix, 1);
-      props.semanticsUpdated({ triplets: newTriplets });
+  const removeKeyword = async (keyword: string) => {
+    if (props.semanticsUpdated && store) {
+      const newStore = filterStore(
+        store,
+        () => true,
+        null,
+        KEYWORD_PREDICATE,
+        keyword,
+        null
+      );
+      const newSemantics = await writeRDF(newStore);
+      if (!newSemantics) throw new Error('Unexpected');
+      props.semanticsUpdated(newSemantics);
     }
   };
 

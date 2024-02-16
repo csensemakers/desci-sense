@@ -31,7 +31,7 @@ export const AppHome = (props: {}) => {
         <AppPlatformManager></AppPlatformManager>
         <AppButton
           primary
-          disabled={canPost}
+          disabled={!canPost}
           label={t('post')}
           onClick={() => navigate(AbsoluteRoutes.Post)}
           style={{ minWidth: '180px' }}></AppButton>
