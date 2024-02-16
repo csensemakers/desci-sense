@@ -3,13 +3,13 @@ import { useNavigate } from 'react-router-dom';
 
 import { useAccountContext } from '../app/AccountContext';
 import { AppConnectWidget } from '../app/AppConnectButton';
+import { AppPlatformManager } from '../app/AppPlaformManager';
 import { useTwitterContext } from '../app/TwitterContext';
 import { ViewportPage } from '../app/Viewport';
 import { AbsoluteRoutes } from '../route.names';
 import { AppButton } from '../ui-components';
 import { BoxCentered } from '../ui-components/BoxCentered';
 import { Loading } from '../ui-components/LoadingDiv';
-import { AppPlatformManager } from './AppPlaformManager';
 
 export const AppHome = (props: {}) => {
   const { t } = useTranslation();

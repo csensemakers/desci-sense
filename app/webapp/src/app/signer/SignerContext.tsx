@@ -48,7 +48,7 @@ export const SignerContext = (props: PropsWithChildren) => {
   useEffect(() => {
     setIsChecking(true);
     magic.user.isLoggedIn().then((res) => {
-      if (res) {
+      if (res && !magicSigner) {
         console.log('Autoconnecting Magic');
         connectMagic();
       } else {

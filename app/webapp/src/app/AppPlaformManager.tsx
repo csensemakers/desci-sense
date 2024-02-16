@@ -1,9 +1,9 @@
 import { Box } from 'grommet';
 import { useTranslation } from 'react-i18next';
 
-import { useNanopubContext } from '../app/NanopubContext';
-import { useTwitterContext } from '../app/TwitterContext';
 import { AppButton } from '../ui-components';
+import { useNanopubContext } from './NanopubContext';
+import { useTwitterContext } from './TwitterContext';
 
 export const AppPlatformManager = (props: {}) => {
   const { t } = useTranslation();

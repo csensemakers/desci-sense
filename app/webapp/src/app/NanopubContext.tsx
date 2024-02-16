@@ -12,9 +12,10 @@ import { getRSAKeys } from '../utils/rsa.keys';
 import { useAccountContext } from './AccountContext';
 import { useAppSigner } from './signer/SignerContext';
 
-const DEBUG = true;
+const DEBUG = false;
 
 export type TwitterContextType = {
+  profile?: NpProfile;
   connect: () => void;
   isConnecting: boolean;
   needAuthorize?: boolean;
@@ -32,16 +33,16 @@ export const NanopubContext = (props: PropsWithChildren) => {
   const { signMessage, connect: connectWallet } = useAppSigner();
 
   const [isConnecting, setIsConnecting] = useState<boolean>(false);
-  const [needAuthorize, setNeedAuthorize] = useState<boolean>(true);
   const [connectIntention, setConnectIntention] = useState<boolean>(false);
+  const [signatureAsked, setSignatureAsked] = useState<boolean>(false);
+  const [connectAsked, setConnectAsked] = useState<boolean>();
   const [profile, setProfile] = useState<NpProfile>();
 
-  const checkProfile = useCallback(() => {
+  const checkProfile = useCallback(async () => {
     const keysStr = localStorage.getItem(KEYS_KEY);
     if (DEBUG) console.log('checkProfile', { keysStr });
 
-    if (!connectedUser || !connectedUser.orcid)
-      throw new Error(`Unexpected not connected user`);
+    if (!connectedUser || !connectedUser.orcid) return;
 
     if (keysStr) {
       const keys = JSON.parse(keysStr);
@@ -52,6 +53,7 @@ export const NanopubContext = (props: PropsWithChildren) => {
         .replace(/\n/g, '');
 
       if (DEBUG) console.log('checkProfile', { keyBody });
+      await (init as any)();
 
       const profile = new NpProfile(
         keyBody,
@@ -67,10 +69,14 @@ export const NanopubContext = (props: PropsWithChildren) => {
     }
   }, [connectedUser]);
 
+  /** check profile once */
+  useEffect(() => {
+    checkProfile();
+  }, [checkProfile]);
+
   const deriveKeys = useCallback(
     async (sig: string) => {
       if (DEBUG) console.log('deriveKeys start', { sig });
-      await (init as any)();
       const keys = getRSAKeys(sig);
       if (DEBUG) console.log('deriveKeys done', { keys });
       localStorage.setItem(KEYS_KEY, JSON.stringify(keys));
@@ -88,16 +94,18 @@ export const NanopubContext = (props: PropsWithChildren) => {
     }
 
     /** once there is a connected user who can sign, sign */
-    if (connectIntention && connectedUser && signMessage) {
+    if (connectIntention && connectedUser && signMessage && !signatureAsked) {
       if (DEBUG) console.log('getting signature');
       setIsConnecting(true);
+      setSignatureAsked(true);
       signMessage('Prepare my Nanopub identity').then((sig) => {
         deriveKeys(sig);
       });
     } else {
       /** if there is not connected user, connect it (should enable the signMessage) */
-      if (connectIntention) {
+      if (connectIntention && !connectAsked) {
         if (DEBUG) console.log('connecting wallet');
+        setConnectAsked(true);
         setIsConnecting(true);
         connectWallet();
       }
@@ -109,24 +117,20 @@ export const NanopubContext = (props: PropsWithChildren) => {
     connectedUser,
     profile,
     deriveKeys,
+    signatureAsked,
+    connectAsked,
   ]);
 
   const connect = () => {
     setConnectIntention(true);
   };
 
-  useEffect(() => {
-    if (connectedUser && connectedUser.twitter === undefined) {
-      setNeedAuthorize(true);
-    }
-  }, [connectedUser]);
-
   return (
     <NanopubContextValue.Provider
       value={{
         connect,
         isConnecting,
-        needAuthorize,
+        needAuthorize: profile === undefined,
       }}>
       {props.children}
     </NanopubContextValue.Provider>
