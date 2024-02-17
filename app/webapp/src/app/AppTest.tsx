@@ -3,9 +3,12 @@ import { useEffect } from 'react';
 
 import { constructNanopub } from '../nanopubs/construct.nanopub';
 import sample_result from '../sample.result.json';
-import { parseRDF } from '../shared/n3.utils';
+import { AppButton } from '../ui-components';
+import { useNanopubContext } from './NanopubContext';
+import { NANOPUBS_SERVER } from './config';
 
 export const AppTest = (props: {}) => {
+  const { profile } = useNanopubContext();
   const start = async () => {
     // const semantics = `<http://example.org/subject2> <http://example.org/subject1> "cancer-research"@en .`;
     // const semantics = `<http://example.org/subject3> <http://example.org/subject1> "cancer-research" . \n <http://example.org/subject3> <https://sparontologies.github.io/cito/current/Keyword> "science" . \n <http://example.org/subject3> <https://sparontologies.github.io/cito/current/Label> <https://abook.com/> .`;
@@ -32,10 +35,16 @@ export const AppTest = (props: {}) => {
     const nanopub = await constructNanopub('A text', semantics, 'orcid-1234');
 
     console.log({ semantics, nanopub });
-  };
-  useEffect(() => {
-    start();
-  });
 
-  return <Box>Testing</Box>;
+    if (profile) {
+      const published = await nanopub.publish(profile, NANOPUBS_SERVER);
+      console.log({ info: published.info() });
+    }
+  };
+
+  return (
+    <Box>
+      <AppButton label="run" onClick={() => start()}></AppButton>
+    </Box>
+  );
 };

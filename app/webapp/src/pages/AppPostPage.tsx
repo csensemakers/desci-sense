@@ -70,14 +70,17 @@ export const AppPostPage = (props: {}) => {
         if (!orcid) throw new Error('Orcid mandatory');
 
         const nanopub = await constructNanopub(postText, _semantis, orcid);
+        if (DEBUG) console.log({ nanopub });
+
         nanopubPublished = await nanopub.publish(profile, NANOPUBS_SERVER);
+        if (DEBUG) console.log({ nanopubPublished });
       }
 
       const postCreate: AppPostCreate = {
         content: postText,
         originalParsed: parsed,
         semantics: semantics,
-        signedNanopub: nanopubPublished?.toString(),
+        signedNanopub: nanopubPublished?.info(),
         platforms: [PLATFORM.X],
       };
       if (DEBUG) console.log('postMessage', { postCreate });

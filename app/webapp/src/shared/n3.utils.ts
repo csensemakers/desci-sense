@@ -1,4 +1,18 @@
-import { DataFactory, OTerm, Parser, Quad, Store, Writer } from 'n3';
+import {
+  BlankNode,
+  DataFactory,
+  Literal,
+  NamedNode,
+  OTerm,
+  Parser,
+  Quad,
+  Quad_Object,
+  Quad_Predicate,
+  Quad_Subject,
+  Store,
+  Variable,
+  Writer,
+} from 'n3';
 
 export const parseRDF = (text: string): Promise<Store> => {
   return new Promise((resolve, reject) => {
@@ -112,28 +126,44 @@ export const forEachStore = (
   return store.forEach(callback, subject, predicate, object, graph);
 };
 
-export const replaceNamedNodes = (
+/**
+ * from a dictionary of values, return a node of the same type if the value
+ * is a key in the dictionary with the dictionary value for that key */
+const replaceNode = (
+  node: NamedNode | BlankNode | Variable | Literal,
+  replaceMap: Record<string, string>
+): NamedNode | BlankNode | Variable | Literal => {
+  if (replaceMap[node.value]) {
+    if (node.termType === 'NamedNode') {
+      return DataFactory.namedNode(replaceMap[node.value]);
+    }
+    if (node.termType === 'BlankNode') {
+      return DataFactory.blankNode(replaceMap[node.value]);
+    }
+    if (node.termType === 'Literal') {
+      return DataFactory.literal(replaceMap[node.value]);
+    }
+    if (node.termType === 'Variable') {
+      return DataFactory.variable(replaceMap[node.value]);
+    }
+  }
+
+  return node;
+};
+
+export const replaceNodes = (
   store: Store,
-  namedNodeMap: Record<string, string>
+  replaceMap: Record<string, string>
 ) => {
   const newStore = mapStore(store, (quad) => {
     let { subject, predicate, object, graph } = quad;
 
-    if (subject.termType === 'NamedNode') {
-      if (!namedNodeMap[subject.value]) {
-        throw new Error(`Undefined value for blank node ${subject.value}`);
-      }
-      subject = DataFactory.namedNode(namedNodeMap[subject.value]);
-    }
-
-    if (object.termType === 'NamedNode') {
-      if (!namedNodeMap[object.value]) {
-        throw new Error(`Undefined value for blank node ${subject.value}`);
-      }
-      object = DataFactory.namedNode(namedNodeMap[object.value]);
-    }
-
-    return DataFactory.quad(subject, predicate, object, graph);
+    return DataFactory.quad(
+      replaceNode(subject, replaceMap) as Quad_Subject,
+      replaceNode(predicate, replaceMap) as Quad_Predicate,
+      replaceNode(object, replaceMap) as Quad_Object,
+      graph
+    );
   });
 
   return newStore;
