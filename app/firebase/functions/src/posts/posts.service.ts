@@ -17,7 +17,7 @@ export const publishPost = async (userId: string, post: AppPostCreate) => {
   const nanopubInfo = nanopub ? nanopub.info() : undefined;
 
   if (post.platforms.includes(PLATFORM.X)) {
-    const tweetContent = constructTweet(post, nanopubInfo);
+    const tweetContent = await constructTweet(post, nanopubInfo);
     if (IS_TEST) {
       tweet = { id: 'dummyurl', text: tweetContent };
       logger.debug('skipping publish', { tweet });
@@ -29,7 +29,7 @@ export const publishPost = async (userId: string, post: AppPostCreate) => {
   const createdPost = await createPost({
     ...post,
     author: userId,
-    tweet
+    tweet,
   });
 
   if (nanopubInfo) {

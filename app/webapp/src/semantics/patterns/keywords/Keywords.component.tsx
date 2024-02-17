@@ -23,12 +23,12 @@ export const KeywordsComponent = (props: PatternProps) => {
     props.originalParsed?.support.keywords.keyWordsOntology.URI;
 
   const keywords = useMemo<string[]>(() => {
-    if (!store) return [];
+    if (!store || !KEYWORD_PREDICATE) return [];
     return mapStoreElements<string>(
       store,
       (quad) => quad.object.value,
       null,
-      KEYWORD_PREDICATE
+      DataFactory.namedNode(KEYWORD_PREDICATE)
     );
   }, [KEYWORD_PREDICATE, store]);
 
@@ -54,15 +54,17 @@ export const KeywordsComponent = (props: PatternProps) => {
   };
 
   const removeKeyword = async (keyword: string) => {
-    if (props.semanticsUpdated && store) {
-      const newStore = filterStore(
-        store,
-        () => true,
-        null,
-        KEYWORD_PREDICATE,
-        keyword,
-        null
-      );
+    if (props.semanticsUpdated && store && KEYWORD_PREDICATE) {
+      const newStore = filterStore(store, (quad) => {
+        if (
+          quad.object.termType === 'Literal' &&
+          quad.object.value === keyword
+        ) {
+          return false;
+        } else {
+          return true;
+        }
+      });
       const newSemantics = await writeRDF(newStore);
       if (!newSemantics) throw new Error('Unexpected');
       props.semanticsUpdated(newSemantics);

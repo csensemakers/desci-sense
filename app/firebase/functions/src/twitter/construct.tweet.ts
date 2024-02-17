@@ -17,11 +17,11 @@ const forceTag = (input: string) => {
     .join('');
 };
 
-export const constructTweet = (
+export const constructTweet = async (
   post: AppPostCreate,
   nanopubInfo?: { uri: string }
 ) => {
-  const tags = getTwitterTags(post.originalParsed, post.semantics);
+  const tags = await getTwitterTags(post.originalParsed, post.semantics);
 
   const appendTags =
     tags !== undefined
@@ -34,15 +34,15 @@ export const constructTweet = (
   return post.content + appendTags + appendNpUrl;
 };
 
-export const getTwitterTags = (
+export const getTwitterTags = async (
   originalParsed: ParserResult,
   _semantics?: AppPostSemantics
-): string[] | undefined => {
+): Promise<string[] | undefined> => {
   const semantics = _semantics || originalParsed.semantics;
   const keywordOntology = originalParsed.support.keywords.keyWordsOntology;
   const refLabelsOntology = originalParsed.support.refLabels.labelsOntology;
 
-  const store = parseRDF(semantics);
+  const store = await parseRDF(semantics);
 
   const keywords = mapStoreElements(store, (quad) => {
     if (quad.predicate.value === keywordOntology.URI) {

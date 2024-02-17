@@ -23,14 +23,19 @@ export const RefLabelsComponent = (props: PatternProps) => {
 
   const removeLabel = async (ref: string, labelUri: string) => {
     if (props.semanticsUpdated && store) {
-      const newStore = filterStore(
-        store,
-        () => true,
-        null,
-        labelUri,
-        ref,
-        null
-      );
+      const newStore = filterStore(store, (quad) => {
+        if (
+          quad.predicate.termType === 'NamedNode' &&
+          quad.predicate.value === labelUri &&
+          quad.object.termType === 'NamedNode' &&
+          quad.object.value === ref
+        ) {
+          return false;
+        } else {
+          return true;
+        }
+      });
+
       const newSemantics = await writeRDF(newStore);
       if (!newSemantics) throw new Error('Unexpected');
       props.semanticsUpdated(newSemantics);
