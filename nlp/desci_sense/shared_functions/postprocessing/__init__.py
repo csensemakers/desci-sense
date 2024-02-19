@@ -1,7 +1,11 @@
 from typing import List, Dict
 from rdflib.namespace import RDF
 from rdflib import URIRef, Literal, Graph
-from ..interface import RDFTriplet, isAConceptDefintion
+from ..interface import (
+    RDFTriplet,
+    isAConceptDefintion,
+    KeywordConceptDefinition,
+)
 from ..schema.ontology_base import OntologyBase
 from ..schema.post import RefPost
 
@@ -28,7 +32,7 @@ def convert_predicted_relations_to_rdf_triplets(
             # TODO change to real URI once we have that
             triplets += [
                 RDFTriplet(
-                    predicate=URIRef(concept.label),
+                    predicate=URIRef(concept.uri),
                     object=URIRef(ref),
                 )
                 for ref in refs
@@ -51,6 +55,20 @@ def convert_predicted_relations_to_rdf_triplets(
                 f"Label type {label} is netiher a subject \
                               or predicate"
             )
+
+    return triplets
+
+
+def convert_keywords_to_triplets(prediction: Dict) -> List[RDFTriplet]:
+    keywords = prediction["answer"].get("valid_keywords")
+
+    triplets = [
+        RDFTriplet(
+            predicate=URIRef(KeywordConceptDefinition().uri),
+            object=Literal(kw),
+        )
+        for kw in keywords
+    ]
 
     return triplets
 

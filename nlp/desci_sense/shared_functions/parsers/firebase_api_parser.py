@@ -5,6 +5,7 @@ from typing import List, Dict
 
 from langchain.chat_models import ChatOpenAI
 from langchain.prompts import PromptTemplate
+from langchain_core.runnables import RunnableParallel
 
 from ..interface import ParserResult, ParserSupport
 from ..init import MAX_SUMMARY_LENGTH
@@ -14,6 +15,7 @@ from ..schema.helpers import convert_text_to_ref_post
 from ..postprocessing import (
     convert_predicted_relations_to_rdf_triplets,
     convert_triplets_to_graph,
+    convert_keywords_to_triplets,
 )
 from ..postprocessing.output_parsers import TagTypeParser, KeywordParser
 from ..dataloaders import scrape_post
@@ -59,7 +61,7 @@ def create_model(
         temperature=temperature,
         openai_api_key=api_key,
         openai_api_base=api_base,
-        headers={"HTTP-Referer": openapi_referer},
+        # headers={"HTTP-Referer": openapi_referer},
     )
     return model
 
@@ -102,7 +104,7 @@ class FirebaseAPIParser:
             temperature=self.config["model"]["temperature"],
             openai_api_key=self.config["openai_api"]["openai_api_key"],
             openai_api_base=self.config["openai_api"]["openai_api_base"],
-            headers={"HTTP-Referer": self.config["openai_api"]["openai_api_referer"]},
+            # headers={"HTTP-Referer": self.config["openai_api"]["openai_api_referer"]},
         )
 
         # init kw extraction chain
@@ -235,38 +237,83 @@ class FirebaseAPIParser:
 
     def post_process_result(
         self,
-        result_dict: Dict,
+        semantics: Dict,
+        keywords: Dict = None,
     ) -> ParserResult:
         """convert parser output result into format
         required by app interface."""
 
         # get metadata
-        metadata_list: List[RefMetadata] = result_dict.get("md_list", list())
+        metadata_list: List[RefMetadata] = semantics.get("md_list", list())
 
         # convert model outputs to triplets
         triplets = convert_predicted_relations_to_rdf_triplets(
-            result_dict,
+            semantics,
             self.ontology,
         )
 
         # convert triplets to graph
         graph = convert_triplets_to_graph(triplets)
 
-        # TODO keywords
+        # add keywords to graph
+        if keywords:
+            kw_triplets = convert_keywords_to_triplets(keywords)
+            for t in kw_triplets:
+                graph.add(t.to_tuple())
 
         # gather support info
         parser_support: ParserSupport = self.get_support_data(metadata_list)
 
         return ParserResult(semantics=graph, support=parser_support)
 
-    def process_by_case(
-        self, post: RefPost, case: PromptCase, metadata_list: List[RefMetadata] = None
-    ) -> dict:
+    def create_kw_prompt(
+        self,
+        post: RefPost,
+        metadata_list: List[RefMetadata] = None,
+    ) -> str:
+        """
+        Return full prompt for keyword chain
+
+        Args:
+            post (RefPost): input post
+            metadata_list (List[RefMetadata], optional): List of extracted
+            references metadata. Defaults to None.
+
+        Returns:
+            str: full instantiated prompt
+        """
+        prompt_j2_template = self.kw_extraction["prompt_j2_template"]
+
+        # instantiate prompt with ref post details
+        full_prompt = prompt_j2_template.render(
+            author_name=post.author,
+            content=post.content,
+            metadata_list=metadata_list,
+            max_keywords=self.kw_extraction["max_keywords"],
+        )
+
+        return full_prompt
+
+    def create_semantics_prompt_by_case(
+        self,
+        post: RefPost,
+        case: PromptCase,
+        metadata_list: List[RefMetadata] = None,
+    ) -> str:
+        """
+        Return full prompt for semantics chain, depending on input PromptCase
+
+        Args:
+            post (RefPost): input post
+            case (PromptCase): input PromptCase
+            metadata_list (List[RefMetadata], optional): List of extracted
+            references metadata. Defaults to None.
+
+        Returns:
+            str: full instantiated prompt
+        """
         prompt_j2_template = self.prompt_case_dict[case]["prompt_j2_template"]
         type_templates = self.prompt_case_dict[case]["type_templates"]
-
-        # load corresponding chain
-        chain = self.prompt_case_dict[case]["chain"]
 
         # instantiate prompt with ref post details
         full_prompt = prompt_j2_template.render(
@@ -275,6 +322,24 @@ class FirebaseAPIParser:
             content=post.content,
             metadata_list=metadata_list,
         )
+
+        return full_prompt
+
+    def process_by_case(
+        self,
+        post: RefPost,
+        case: PromptCase,
+        metadata_list: List[RefMetadata] = None,
+    ) -> dict:
+        # get full prompt
+        full_prompt = self.create_semantics_prompt_by_case(
+            post,
+            case,
+            metadata_list,
+        )
+
+        # load corresponding chain
+        chain = self.prompt_case_dict[case]["chain"]
 
         # run chain on full prompt
         answer = chain.invoke({"input": full_prompt})
@@ -305,6 +370,9 @@ class FirebaseAPIParser:
             )
         )
 
+        # setup prompt template
+        self.kw_prompt_template = PromptTemplate.from_template("{kw_input}")
+
         # load template
         kw_template = keywords_extraction_template
 
@@ -324,7 +392,7 @@ class FirebaseAPIParser:
 
         self.kw_extraction = {
             "prompt_j2_template": kw_template,
-            "chain": self.prompt_template
+            "chain": self.kw_prompt_template
             | self.kw_model
             | KeywordParser(max_keywords=max_keywords),
             "max_keywords": max_keywords,
@@ -335,26 +403,111 @@ class FirebaseAPIParser:
     def extract_post_topics(
         self, post: RefPost, metadata_list: List[RefMetadata] = None
     ) -> dict:
-        prompt_j2_template = self.kw_extraction["prompt_j2_template"]
+        # instantiate prompt with ref post details
+        full_prompt = self.create_kw_prompt(
+            post,
+            metadata_list,
+        )
 
         # load corresponding chain
         chain = self.kw_extraction["chain"]
 
-        # instantiate prompt with ref post details
-        full_prompt = prompt_j2_template.render(
-            author_name=post.author,
-            content=post.content,
-            metadata_list=metadata_list,
-            max_keywords=self.kw_extraction["max_keywords"],
-        )
-
         # run chain on full prompt
-        answer = chain.invoke({"input": full_prompt})
+        answer = chain.invoke({"kw_input": full_prompt})
 
         # TODO make structured output type
         result = {"post": post, "full_prompt": full_prompt, "answer": answer}
 
         return result
+
+    def process_text_parallel(
+        self,
+        text: str,
+        author: str = "default_author",
+        source: str = "default_source",
+    ) -> ParserResult:
+        """
+        Process input text and return results in format required by the
+        API interface.
+
+        Runs keyword extraction in parallel chain if enabled in config
+        """
+        # convert text to RefPost
+        post: RefPost = convert_text_to_ref_post(text, author, source)
+
+        combined_result = self.process_ref_post_parallel(post)
+
+        final_result = self.post_process_result(**combined_result)
+
+        return final_result
+
+    def process_ref_post_parallel(self, post: RefPost):
+        assert self.kw_mode_enabled
+        md_list = []
+
+        # check how many external references post mentions
+        if len(post.ref_urls) == 0:
+            case = PromptCase.ZERO_REF
+
+        else:
+            # at least one external reference
+            if len(post.ref_urls) == 1:
+                case = PromptCase.SINGLE_REF
+                # if metadata flag is active, retreive metadata
+                md_list = extract_metadata_by_type(
+                    post.ref_urls[0],
+                    self.md_extract_method,
+                    self.config["general"]["max_summary_length"],
+                )
+
+            else:
+                case = PromptCase.MULTI_REF
+                # TODO finish
+                # md_list = extract_metadata_by_type(post.ref_urls[0], self.md_extract_method)
+
+        # run filters if specified TODO
+
+        # create prompts
+        full_semantics_prompt = self.create_semantics_prompt_by_case(
+            post,
+            case,
+            md_list,
+        )
+
+        full_kw_prompt = self.create_kw_prompt(post, md_list)
+
+        # create parallel chain
+        kw_chain = self.kw_extraction.get("chain")
+        semantics_chain = self.prompt_case_dict[case]["chain"]
+
+        map_chain = RunnableParallel(semantics=semantics_chain, keywords=kw_chain)
+
+        combined_result = map_chain.invoke(
+            {
+                "kw_input": full_kw_prompt,
+                "input": full_semantics_prompt,
+            }
+        )
+
+        # TODO hacky, find a cleaner way to pass this info
+        semantics_answer = combined_result.get("semantics")
+        kw_answer = combined_result.get("keywords")
+
+        combined_result["keywords"] = {
+            "post": post,
+            "full_prompt": full_kw_prompt,
+            "answer": kw_answer,
+        }
+
+        combined_result["semantics"] = {
+            "post": post,
+            "full_prompt": full_semantics_prompt,
+            "answer": semantics_answer,
+            "possible_labels": self.prompt_case_dict[case]["labels"],
+            "md_list": md_list,
+        }
+
+        return combined_result
 
     def extract_post_topics_w_metadata(self, post: RefPost) -> List[str]:
         md_list = extract_all_metadata_by_type(
