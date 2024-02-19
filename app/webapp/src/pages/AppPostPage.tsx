@@ -96,14 +96,7 @@ export const AppPostPage = (props: {}) => {
         }
       });
     }
-  }, [
-    appAccessToken,
-    connectedUser?.orcid?.orcid,
-    parsed,
-    postText,
-    profile,
-    semantics,
-  ]);
+  }, [appAccessToken, connectedUser, parsed, postText, profile, semantics]);
 
   const getSemantics = () => {
     if (postText && appAccessToken && !semantics) {

@@ -57,7 +57,7 @@ export interface AppPostCreate {
   content: string;
   originalParsed: ParserResult;
   semantics?: AppPostSemantics;
-  signedNanopub?: string;
+  signedNanopub?: { uri: string };
   platforms: PLATFORM[];
 }
 

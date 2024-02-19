@@ -18,9 +18,7 @@ export const constructNanopub = async (
   const assertionsRdf = await writeRDF(assertionsStore);
 
   const exampleTriplet =
-    process.env.NODE_ENV !== 'production'
-      ? `: <http://www.w3.org/1999/02/22-rdf-syntax-ns#isa> <http://purl.org/nanopub/x/ExampleNanopub>`
-      : '';
+    process.env.NODE_ENV !== 'production' ? `: a npx:ExampleNanopub .` : '';
 
   /** identity data */
   const orcid = user.orcid?.orcid;
@@ -30,10 +28,13 @@ export const constructNanopub = async (
   const rsaToEthSignature = user.eth?.rsaToEthSignature;
   const rootToRsaSignature = user.eth?.rootToRsaSignature;
 
-  const ethSignerRdf = `
-      : rootSigner ${address}
-      : rsaToEthSignature ${rsaToEthSignature}
-      : rootToRsaSignature ${rootToRsaSignature}`;
+  const ethSignerRdf = hasEthSigner
+    ? `
+      : <http://sense-nets.xyz/rootSigner> "${address}" .
+      : <http://sense-nets.xyz/rsaToEthSignature> "${rsaToEthSignature}" .
+      : <http://sense-nets.xyz/rootToRsaSignature> "${rootToRsaSignature}" .
+  `
+    : '';
 
   const rdfStr = `
     @prefix : <${NANOPUB_PLACEHOLDER}> .

@@ -17,10 +17,7 @@ const forceTag = (input: string) => {
     .join('');
 };
 
-export const constructTweet = async (
-  post: AppPostCreate,
-  nanopubInfo?: { uri: string }
-) => {
+export const constructTweet = async (post: AppPostCreate) => {
   const tags = await getTwitterTags(post.originalParsed, post.semantics);
 
   const appendTags =
@@ -29,7 +26,9 @@ export const constructTweet = async (
       : '';
 
   const appendNpUrl =
-    nanopubInfo !== undefined ? '\n\n' + `nanopub: ${nanopubInfo.uri})` : '';
+    post.signedNanopub !== undefined
+      ? '\n\n' + `nanopub: ${post.signedNanopub.uri})`
+      : '';
 
   return post.content + appendTags + appendNpUrl;
 };

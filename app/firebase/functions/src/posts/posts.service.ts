@@ -1,4 +1,3 @@
-import { Nanopub } from '@nanopub/sign';
 import { logger } from 'firebase-functions/v1';
 
 import { AppPostCreate, PLATFORM, TweetRead } from '../@shared/types';
@@ -11,13 +10,8 @@ import { TAG_OPTIONS } from './TAG_OPTIONS';
 export const publishPost = async (userId: string, post: AppPostCreate) => {
   let tweet: TweetRead | undefined = undefined;
 
-  const nanopub = post.signedNanopub
-    ? new Nanopub(post.signedNanopub)
-    : undefined;
-  const nanopubInfo = nanopub ? nanopub.info() : undefined;
-
   if (post.platforms.includes(PLATFORM.X)) {
-    const tweetContent = await constructTweet(post, nanopubInfo);
+    const tweetContent = await constructTweet(post);
     if (IS_TEST) {
       tweet = { id: 'dummyurl', text: tweetContent };
       logger.debug('skipping publish', { tweet });
@@ -31,10 +25,6 @@ export const publishPost = async (userId: string, post: AppPostCreate) => {
     author: userId,
     tweet,
   });
-
-  if (nanopubInfo) {
-    createdPost.nanopub = nanopubInfo;
-  }
 
   return createdPost;
 };
