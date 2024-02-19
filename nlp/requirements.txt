@@ -13,3 +13,4 @@ url_normalize
 notion-client
 python-dotenv
 pydantic-settings
+rdflib

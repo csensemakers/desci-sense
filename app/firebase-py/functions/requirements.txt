@@ -9,3 +9,4 @@ url-normalize==1.4.3
 python-dotenv 
 jinja2
 pydantic_settings
+rdflib
