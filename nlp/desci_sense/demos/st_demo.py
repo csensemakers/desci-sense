@@ -221,7 +221,7 @@ def st_scrape_post(post_url):
 def process_text(text, model):
     # parse text
     with st.spinner("Parsing text..."):
-        result = model.process_text(text, author="unknown", source="raw_text_input")
+        result = model.process_text_st(text, author="unknown", source="raw_text_input")
         # st.write(result["answer"])
         return result
 
@@ -232,7 +232,7 @@ def process_post(post: RefPost, model):
     assert sm_type in ["twitter", "mastodon"]
 
     with st.spinner(f"Parsing {sm_type} post..."):
-        result = model.process_ref_post(post)
+        result = model.process_ref_post_st(post)
         # st.write(result["answer"])
         return result
 
