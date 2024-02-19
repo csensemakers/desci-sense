@@ -27,7 +27,7 @@ export const constructTweet = async (post: AppPostCreate) => {
 
   const appendNpUrl =
     post.signedNanopub !== undefined
-      ? '\n\n' + `nanopub: ${post.signedNanopub.uri})`
+      ? '\n\n' + `nanopub: ${post.signedNanopub.uri}`
       : '';
 
   return post.content + appendTags + appendNpUrl;

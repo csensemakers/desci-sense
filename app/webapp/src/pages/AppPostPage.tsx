@@ -1,7 +1,7 @@
 import { Nanopub } from '@nanopub/sign';
 import { Box, Text } from 'grommet';
 import { Magic, Send } from 'grommet-icons';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 // import { useDebounce } from 'use-debounce';
@@ -22,13 +22,18 @@ import { BoxCentered } from '../ui-components/BoxCentered';
 import { Loading } from '../ui-components/LoadingDiv';
 import { useThemeContext } from '../ui-components/ThemedApp';
 
-const DEBUG = true;
+const DEBUG = false;
 
 export const AppPostPage = (props: {}) => {
   const { t } = useTranslation();
   const { constants } = useThemeContext();
-  const { appAccessToken, isConnecting, isConnected, connectedUser } =
-    useAccountContext();
+  const {
+    appAccessToken,
+    isConnecting,
+    isConnected,
+    connectedUser,
+    isInitializing,
+  } = useAccountContext();
 
   const { profile } = useNanopubContext();
 
@@ -52,14 +57,14 @@ export const AppPostPage = (props: {}) => {
 
   const canReRun = parsed && postText !== parsed.post;
 
-  const reset = () => {
-    setPost(undefined);
-    setPostText(undefined);
-    setParsed(undefined);
-    setSemantics(undefined);
-    setIsSending(false);
-    setIsGettingSemantics(undefined);
-  };
+  // const reset = () => {
+  //   setPost(undefined);
+  //   setPostText(undefined);
+  //   setParsed(undefined);
+  //   setSemantics(undefined);
+  //   setIsSending(false);
+  //   setIsGettingSemantics(undefined);
+  // };
 
   const send = useCallback(async () => {
     if (postText && appAccessToken && parsed) {
@@ -104,8 +109,9 @@ export const AppPostPage = (props: {}) => {
     }
   }, [appAccessToken, connectedUser, parsed, postText, profile, semantics]);
 
+  const canGetSemantics = postText && appAccessToken;
   const getSemantics = () => {
-    if (postText && appAccessToken) {
+    if (canGetSemantics) {
       setSemantics(undefined);
       if (DEBUG) console.log('getPostMeta', { postText });
       setIsGettingSemantics(true);
@@ -131,6 +137,10 @@ export const AppPostPage = (props: {}) => {
 
   const content = (() => {
     if (isSending || isConnecting) {
+      return <Loading></Loading>;
+    }
+
+    if (isInitializing || isConnecting) {
       return <Loading></Loading>;
     }
 
@@ -193,6 +203,7 @@ export const AppPostPage = (props: {}) => {
                 borderRadius: '8px',
               }}>
               <AppButton
+                disabled={!canGetSemantics}
                 onClick={() => getSemantics()}
                 label={t('process')}
                 icon={
