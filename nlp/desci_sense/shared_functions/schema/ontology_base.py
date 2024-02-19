@@ -4,72 +4,12 @@ import json
 from pydantic import Field, BaseModel
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+from ..interface import (
+    OntologyInterface,
+    LLMOntologyConceptDefinition,
+)
 from .ontology import ontology
 from ..utils import render_to_py_dict
-
-
-# TODO fix using alias for env var default loading
-class NotionOntologyConfig(BaseSettings):
-    model_config = SettingsConfigDict(populate_by_name=True)
-    db_id: str = Field(
-        default=None,
-        description="Database ID of Notion ontology",
-        validate_default=False,
-    )
-    notion_api_token: str = Field(
-        default=None,
-        description="Notion integration API key",
-        validate_default=False,
-        exclude=True,
-    )
-    versions: List[str] = Field(
-        default_factory=lambda: ["v0"],
-        description="Versions for which to take rows from ontology",
-    )
-
-
-class OntologyPredicateDefinition(BaseModel):
-    name: str = Field(description="Predicate name.")
-    uri: Union[str, None] = Field(description="Linked data URI for this predicate.")
-    versions: List[str] = Field(
-        description="Which ontology versions is this item included in."
-    )
-
-
-class KeywordPredicateDefinition(OntologyPredicateDefinition):
-    """
-    Special OntologyPredicateDefinition class intialized to represent
-    a keyword concept.
-    """
-
-    name: str = Field("hasKeyword", description="Predicate name.")
-    uri: str = Field(
-        "https://pcp-on-web.de/ontology/0.2/index-en.html#hasKeyword",
-        description="Linked data URI for this predicate.",
-    )
-    versions: List[str] = Field(
-        ["v0"], description="Which ontology versions is this item included in."
-    )
-
-
-class LLMOntologyPredicateDefinition(OntologyPredicateDefinition):
-    label: str = Field(description="Output label model should use for this predicate")
-    display_name: str = Field(description="Name to display in app front-ends.")
-    prompt: str = Field(description="Description to use in prompt for this predicate")
-    valid_subject_types: List[str] = Field(
-        description="List of valid subject entity types for this predicate"
-    )
-    valid_object_types: List[str] = Field(
-        description="List of valid object entity types for this predicate"
-    )
-
-
-class OntologyInterface(BaseModel):
-    semantic_predicates: List[LLMOntologyPredicateDefinition]
-    keyword_predicate: KeywordPredicateDefinition = Field(
-        default_factory=KeywordPredicateDefinition
-    )
-    ontology_config: NotionOntologyConfig = Field(default_factory=NotionOntologyConfig)
 
 
 def load_ontology_from_model(ont_model: dict) -> OntologyInterface:
@@ -102,9 +42,9 @@ def load_ontology_from_dict(ont_dict):
 
 def get_llm_predicate_defs_from_df(
     df: pd.DataFrame,
-) -> List[LLMOntologyPredicateDefinition]:
+) -> List[LLMOntologyConceptDefinition]:
     records = df.to_dict(orient="records")
-    return [LLMOntologyPredicateDefinition(**r) for r in records]
+    return [LLMOntologyConceptDefinition(**r) for r in records]
 
 
 def filter_ontology_by_version(
@@ -151,6 +91,9 @@ class OntologyBase:
     def __init__(self, versions: List[str] = None) -> None:
         self.ontology_interface = load_ontology_from_model(ontology)
 
+        # for fast lookup
+        self._ontology_dict = self.ontology_interface.model_dump()
+
         # Process the results into a format suitable for DataFrame
         ont_df = create_ont_df_from_interface(self.ontology_interface)
 
@@ -158,9 +101,13 @@ class OntologyBase:
         self.ont_df = filter_ontology_by_version(ont_df, allowed_versions=versions)
 
         # set dict versions with alternate keys for fast lookup
-        self._label_map = self.ont_df.set_index("label")
-        self._display_map = self.ont_df.set_index("display_name")
+        self._label_map = self.ont_df.set_index("label", drop=False)
+        self._display_map = self.ont_df.set_index("display_name", drop=False)
         self._template_type_map = self.ont_df
+
+    @property
+    def ontology_dict(self) -> Dict:
+        return self._ontology_dict
 
     @property
     def label_df(self):
@@ -199,6 +146,10 @@ class OntologyBase:
             res = valid_templates.to_dict(orient="records")
 
         return res
+
+    def get_concept_by_label(self, label: str) -> LLMOntologyConceptDefinition:
+        row = self.label_df.loc[label]
+        return LLMOntologyConceptDefinition.model_validate(row.to_dict())
 
     def get_all_labels(self) -> List[str]:
         return self.ont_df.label.to_list()

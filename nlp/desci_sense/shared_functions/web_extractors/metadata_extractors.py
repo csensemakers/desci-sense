@@ -1,32 +1,13 @@
 from typing import List
 from enum import Enum
-from dataclasses import dataclass
 
+from ..interface import RefMetadata
 from .citoid import fetch_citation, fetch_all_citations
 
 
 class MetadataExtractionType(str, Enum):
     NONE = "none"
     CITOID = "citoid"
-
-
-@dataclass
-class RefMetadata:
-    url: str
-    item_type: str = None
-    title: str = ""
-    summary: str = ""
-
-    def to_str(self):
-        """
-        Prints each attribute on a new line in the form: attribute: value
-        """
-        result = []
-        for attr, value in vars(self).items():
-            if isinstance(value, str) or value is None:
-                value = value or "None"  # Convert None or empty strings to "None"
-                result.append(f"{attr}: {value}")
-        return "\n".join(result)
 
 
 def get_trunc_str(input_str: str, max_len: int) -> str:
@@ -81,7 +62,10 @@ def extract_metadata_by_type(
         raise ValueError(f"Unsupported extraaction type:{md_type.value}")
 
 
-def extract_urls_citoid_metadata(target_urls: List[str], max_summary_length: int):
+def extract_urls_citoid_metadata(
+    target_urls: List[str],
+    max_summary_length: int,
+):
     """_summary_
 
     Args:

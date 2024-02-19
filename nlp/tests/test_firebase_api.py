@@ -1,14 +1,15 @@
 import sys
 from pathlib import Path
+
+ROOT = Path(__file__).parents[1]
+sys.path.append(str(ROOT))
+
 from desci_sense.configs import default_init_parser_config
 from desci_sense.shared_functions.parsers.firebase_api_parser import (
     FirebaseAPIParser,
     PromptCase,
 )
-from desci_sense.dataloaders import scrape_post
-
-ROOT = Path(__file__).parents[1]
-sys.path.append(str(ROOT))
+from desci_sense.shared_functions.dataloaders import scrape_post
 
 
 TEST_POST_TEXT_W_REF = """

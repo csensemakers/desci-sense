@@ -1,16 +1,20 @@
 from confection import Config
 
 from loguru import logger
-from typing import List
+from typing import List, Dict
 
 from langchain.chat_models import ChatOpenAI
 from langchain.prompts import PromptTemplate
 
-from ..interface import ParserResult
+from ..interface import ParserResult, ParserSupport
 from ..init import MAX_SUMMARY_LENGTH
 from ..schema.ontology_base import OntologyBase
 from ..schema.post import RefPost
 from ..schema.helpers import convert_text_to_ref_post
+from ..postprocessing import (
+    convert_predicted_relations_to_rdf_triplets,
+    convert_triplets_to_graph,
+)
 from ..postprocessing.output_parsers import TagTypeParser, KeywordParser
 from ..dataloaders import scrape_post
 from ..enum_dict import EnumDict, EnumDictKey
@@ -25,8 +29,6 @@ from ..prompting.jinja.zero_ref_template import zero_ref_template
 from ..prompting.jinja.single_ref_template import single_ref_template
 from ..prompting.jinja.keywords_extraction_template import keywords_extraction_template
 from ..prompting.jinja.multi_ref_template import multi_ref_template
-
-from ..schema.ontology import refLabelsOntoloty, keyWordsOntology
 
 
 class PromptCase(EnumDictKey):
@@ -87,11 +89,14 @@ class FirebaseAPIParser:
         # init model
         model_name = (
             "mistralai/mistral-7b-instruct"
-            if not "model_name" in config["model"]
+            if "model_name" not in config["model"]
             else config["model"]["model_name"]
         )
         logger.info(f"Loading parser model (type={model_name})...")
-        logger.info("self.config {}", self.config)
+
+        # TODO replace this with new config serialize to not print api key
+        # logger.info("self.config {}", self.config)
+
         self.parser_model = ChatOpenAI(
             model=model_name,
             temperature=self.config["model"]["temperature"],
@@ -215,7 +220,44 @@ class FirebaseAPIParser:
 
     @property
     def max_summary_length(self):
-        return self.config["general"].get("max_summary_length", MAX_SUMMARY_LENGTH)
+        return self.config["general"].get(
+            "max_summary_length",
+            MAX_SUMMARY_LENGTH,
+        )
+
+    def get_support_data(
+        self,
+        metadata_list: List[RefMetadata],
+    ) -> ParserSupport:
+        ontology = self.ontology.ontology_interface
+        md_dict = {m.url: m for m in metadata_list}
+        return ParserSupport(ontology=ontology, refs_meta=md_dict)
+
+    def post_process_result(
+        self,
+        result_dict: Dict,
+    ) -> ParserResult:
+        """convert parser output result into format
+        required by app interface."""
+
+        # get metadata
+        metadata_list: List[RefMetadata] = result_dict.get("md_list", list())
+
+        # convert model outputs to triplets
+        triplets = convert_predicted_relations_to_rdf_triplets(
+            result_dict,
+            self.ontology,
+        )
+
+        # convert triplets to graph
+        graph = convert_triplets_to_graph(triplets)
+
+        # TODO keywords
+
+        # gather support info
+        parser_support: ParserSupport = self.get_support_data(metadata_list)
+
+        return ParserResult(semantics=graph, support=parser_support)
 
     def process_by_case(
         self, post: RefPost, case: PromptCase, metadata_list: List[RefMetadata] = None
@@ -243,6 +285,7 @@ class FirebaseAPIParser:
             "full_prompt": full_prompt,
             "answer": answer,
             "possible_labels": self.prompt_case_dict[case]["labels"],
+            "md_list": metadata_list,
         }
 
         return result
@@ -322,6 +365,16 @@ class FirebaseAPIParser:
 
         return result
 
+    def api_process_ref_post(self, post: RefPost) -> ParserResult:
+        result: Dict = self.process_ref_post(post)
+
+        # post processing
+        full_result: ParserResult = self.post_process_result(
+            result,
+        )
+
+        return full_result
+
     def process_ref_post(self, post: RefPost) -> ParserResult:
         """
         TODO
@@ -353,55 +406,57 @@ class FirebaseAPIParser:
         # process post
         result = self.process_by_case(post, case, md_list)
 
+        return result
+
         # PostProc PLACEHOLDER
 
         # I couldn't find the keywords on the result
         # (are we sure we dont want to use the LLM to extract keywords too?)
-        keywords = ["cancer-research", "science"]
+        # keywords = ["cancer-research", "science"]
 
-        def getLabelUri(label):
-            def condition(item):
-                return item["label"] == label
+        # def getLabelUri(label):
+        #     def condition(item):
+        #         return item["label"] == label
 
-            matches = [item for item in refLabelsOntoloty if condition(item)]
-            return matches[0]["URI"]
+        #     matches = [item for item in refLabelsOntoloty if condition(item)]
+        #     return matches[0]["URI"]
 
-        ref_url = (
-            result["post"].ref_urls[0] if len(result["post"].ref_urls) > 0 else None
-        )
+        # ref_url = (
+        #     result["post"].ref_urls[0] if len(result["post"].ref_urls) > 0 else None
+        # )
 
-        refLabelsTriplets = (
-            [
-                f"<_:1> <{getLabelUri(label)}> <{ref_url}>"
-                for label in result["answer"]["multi_tag"]
-            ]
-            if ref_url
-            else []
-        )
+        # refLabelsTriplets = (
+        #     [
+        #         f"<_:1> <{getLabelUri(label)}> <{ref_url}>"
+        #         for label in result["answer"]["multi_tag"]
+        #     ]
+        #     if ref_url
+        #     else []
+        # )
 
-        keywordUri = keyWordsOntology["URI"]
-        keywordsTriplets = [f"<_:1> <{keywordUri}> <{keyword}>" for keyword in keywords]
+        # keywordUri = keyWordsOntology["URI"]
+        # keywordsTriplets = [f"<_:1> <{keywordUri}> <{keyword}>" for keyword in keywords]
 
-        triplets = keywordsTriplets + refLabelsTriplets
+        # triplets = keywordsTriplets + refLabelsTriplets
 
-        paser_result: ParserResult = {
-            "semantics": {"triplets": triplets},
-            "support": {
-                "keywords": {"keyWordsOntology": keyWordsOntology},
-                "refLabels": {
-                    "labelsOntology": refLabelsOntoloty,
-                    "refsMeta": {
-                        ref_url: {
-                            "title": "Ref Title",
-                            "description": "Ref Description",
-                            "image": "https://www.notion.so/image/https%3A%2F%2Fprod-files-secure.s3.us-west-2.amazonaws.com%2Fbb2e95f3-ca12-4bb2-bcca-6f5ceea5d8ff%2F9faa5a96-a0a1-4686-a83b-3f6bdb3b7632%2Fsensenets.jpg?table=block&id=9945c551-0142-48d3-8591-dd9b5c3d2fe7&cache=v2",
-                        }
-                    },
-                },
-            },
-        }
+        # paser_result: ParserResult = {
+        #     "semantics": {"triplets": triplets},
+        #     "support": {
+        #         "keywords": {"keyWordsOntology": keyWordsOntology},
+        #         "refLabels": {
+        #             "labelsOntology": refLabelsOntoloty,
+        #             "refsMeta": {
+        #                 ref_url: {
+        #                     "title": "Ref Title",
+        #                     "description": "Ref Description",
+        #                     "image": "https://www.notion.so/image/https%3A%2F%2Fprod-files-secure.s3.us-west-2.amazonaws.com%2Fbb2e95f3-ca12-4bb2-bcca-6f5ceea5d8ff%2F9faa5a96-a0a1-4686-a83b-3f6bdb3b7632%2Fsensenets.jpg?table=block&id=9945c551-0142-48d3-8591-dd9b5c3d2fe7&cache=v2",
+        #                 }
+        #             },
+        #         },
+        #     },
+        # }
 
-        return paser_result
+        # return paser_result
 
     def process_text(
         self, text: str, author: str = "default_author", source: str = "default_source"
