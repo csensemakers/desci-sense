@@ -2,7 +2,7 @@ ontology = {
     "semantic_predicates": [
         {
             "name": "endorses",
-            "uri": None,
+            "uri": "https://sense-nets.xyz/endorses",
             "versions": ["v0"],
             "label": "endorses",
             "display_name": "➕ endorses",
@@ -32,7 +32,7 @@ ontology = {
         },
         {
             "name": "possibleMissingReference",
-            "uri": None,
+            "uri": "https://sense-nets.xyz/possibleMissingReference",
             "versions": ["v0"],
             "label": "missing-ref",
             "display_name": "⬛ possible-missing-reference",
@@ -41,8 +41,8 @@ ontology = {
             "valid_object_types": ["nan"],
         },
         {
-            "name": "dgObservation",
-            "uri": None,
+            "name": "observation",
+            "uri": "https://schema.org/Observation",
             "versions": ["v0"],
             "label": "dg-observation",
             "display_name": "🔭 discourse-graph/observation",
@@ -51,8 +51,8 @@ ontology = {
             "valid_object_types": ["nan"],
         },
         {
-            "name": "dgClaim",
-            "uri": None,
+            "name": "claim",
+            "uri": "https://schema.org/Claim",
             "versions": ["v0"],
             "label": "dg-claim",
             "display_name": "🫴 discourse-graph/claim",
@@ -61,8 +61,8 @@ ontology = {
             "valid_object_types": ["nan"],
         },
         {
-            "name": "dgQuestion",
-            "uri": None,
+            "name": "question",
+            "uri": "https://schema.org/Question",
             "versions": ["v0"],
             "label": "dg-question",
             "display_name": " ❓ discourse-graph/question",
@@ -72,7 +72,7 @@ ontology = {
         },
         {
             "name": "watchingStatus",
-            "uri": None,
+            "uri": "https://sense-nets.xyz/watchingStatus",
             "versions": ["v0"],
             "label": "watching",
             "display_name": "👀 watching-status",
@@ -82,7 +82,7 @@ ontology = {
         },
         {
             "name": "readingStatus",
-            "uri": None,
+            "uri": "https://sense-nets.xyz/readingStatus",
             "versions": ["v0"],
             "label": "reading",
             "display_name": "📑 reading-status",
@@ -92,7 +92,7 @@ ontology = {
         },
         {
             "name": "listeningStatus",
-            "uri": None,
+            "uri": "https://sense-nets.xyz/listeningStatus",
             "versions": ["v0"],
             "label": "listening",
             "display_name": "🎧 listening-status",
@@ -122,7 +122,7 @@ ontology = {
         },
         {
             "name": "recommends",
-            "uri": None,
+            "uri": "https://sense-nets.xyz/recommends",
             "versions": ["v0"],
             "label": "recommendation",
             "display_name": "👌 recommends",
@@ -132,7 +132,7 @@ ontology = {
         },
         {
             "name": "asksQuestionAbout",
-            "uri": None,
+            "uri": "https://sense-nets.xyz/asksQuestionAbout",
             "versions": ["v0"],
             "label": "question",
             "display_name": "❔ ask-question-about",
@@ -162,7 +162,7 @@ ontology = {
         },
         {
             "name": "announcesEvent",
-            "uri": None,
+            "uri": "https://sense-nets.xyz/announcesEvent",
             "versions": ["v0"],
             "label": "event",
             "display_name": "🗓️ announces-event",
@@ -172,7 +172,7 @@ ontology = {
         },
         {
             "name": "announcesJob",
-            "uri": None,
+            "uri": "https://sense-nets.xyz/announcesJob",
             "versions": ["v0"],
             "label": "job",
             "display_name": "📢 announces-job",
@@ -182,7 +182,7 @@ ontology = {
         },
         {
             "name": "announcesResource",
-            "uri": None,
+            "uri": "https://sense-nets.xyz/announcesResource",
             "versions": ["v0"],
             "label": "announce",
             "display_name": "📢 announces",

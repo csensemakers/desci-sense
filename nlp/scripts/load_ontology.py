@@ -22,8 +22,8 @@ from loguru import logger
 ROOT = Path(__file__).parents[1]
 sys.path.append(str(ROOT))
 
+from desci_sense.shared_functions.interface import NotionOntologyConfig
 from desci_sense.schema.notion_ontology_base import (
-    NotionOntologyConfig,
     load_notion_config_json,
     load_ontology_from_config,
 )
