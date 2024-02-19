@@ -20,7 +20,7 @@ import {
 import { useAccountContext } from './AccountContext';
 import { useAppSigner } from './signer/SignerContext';
 
-const DEBUG = true;
+const DEBUG = false;
 
 export type NanopubContextType = {
   profile?: NpProfile;
@@ -79,8 +79,8 @@ export const NanopubContext = (props: PropsWithChildren) => {
         .replace(/\n/g, '');
 
       if (DEBUG) console.log('checkProfile', { keyBody });
-      await (init as any)();
 
+      await (init as any)();
       const profile = new NpProfile(
         keyBody,
         `https://orcid.org/${connectedUser.orcid.orcid}`,

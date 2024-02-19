@@ -65,18 +65,22 @@ export const AppPostPage = (props: {}) => {
 
       let nanopubPublished: Nanopub | undefined = undefined;
       if (profile) {
-        const _semantis = semantics || parsed.semantics;
+        const _semantics = semantics || parsed.semantics;
 
         if (!connectedUser) throw new Error('User not connected');
         const nanopub = await constructNanopub(
           postText,
-          _semantis,
+          _semantics,
           connectedUser
         );
         if (DEBUG) console.log({ nanopub });
 
         nanopubPublished = await nanopub.publish(profile, NANOPUBS_SERVER);
-        if (DEBUG) console.log({ nanopubPublished });
+
+        if (DEBUG)
+          console.log({
+            nanopubPublished: nanopubPublished?.info(),
+          });
       }
 
       const postCreate: AppPostCreate = {
@@ -125,7 +129,8 @@ export const AppPostPage = (props: {}) => {
   }, [postTextDebounced]);
 
   const newPost = () => {
-    reset();
+    // reset(); see https://github.com/vemonet/nanopub-rs/issues/5
+    window.location.reload();
   };
 
   const content = (() => {

@@ -5,7 +5,7 @@ export const publishPostsValidationScheme = object({
   platforms: array().of(string()).required(),
   originalParsed: object().required(),
   signedNanopub: object().required(),
-  semantics: object().optional(),
+  semantics: string().optional(),
 }).noUnknown(true);
 
 export const getPostSemanticsValidationScheme = object({
