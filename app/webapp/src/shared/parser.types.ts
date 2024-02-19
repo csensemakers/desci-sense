@@ -33,6 +33,7 @@ export interface ParsedSupport {
 }
 
 export interface ParserResult {
+  post: string;
   semantics: AppPostSemantics;
   support: ParsedSupport;
 }

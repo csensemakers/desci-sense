@@ -17,7 +17,7 @@ export const KeywordsComponent = (props: PatternProps) => {
   const { constants } = useThemeContext();
 
   /** actual semantics */
-  const store = useSemanticsStore(props);
+  const { store } = useSemanticsStore(props);
 
   const KEYWORD_PREDICATE =
     props.originalParsed?.support.keywords.keyWordsOntology.URI;
@@ -85,6 +85,7 @@ export const KeywordsComponent = (props: PatternProps) => {
         }}
         direction="row">
         <AppLabelsEditor
+          hashtag
           labels={keywords}
           addLabel={(newLabel) => addKeyword(newLabel)}
           removeLabel={(newLabel) => removeKeyword(newLabel)}></AppLabelsEditor>

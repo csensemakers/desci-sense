@@ -7,11 +7,12 @@ const DEBUG = false;
 
 export const SemanticsEditor = (
   props: {
+    id: string;
     isLoading: boolean;
   } & PatternProps
 ) => {
   if (props.isLoading || !props.originalParsed) {
-    return <LoadingDiv></LoadingDiv>;
+    return <LoadingDiv fill></LoadingDiv>;
   }
 
   return (

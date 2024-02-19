@@ -10,15 +10,19 @@ import { RefLabel } from './RefLabel';
 import { RefsMap, processSemantics } from './process.semantics';
 
 export const RefLabelsComponent = (props: PatternProps) => {
-  const store = useSemanticsStore(props);
+  const { store, originalStore } = useSemanticsStore(props);
 
   /** processed ref labels with metadata */
   const refs = useMemo<RefsMap>(
     () =>
-      store && props.originalParsed
-        ? processSemantics(store, props.originalParsed.support.refLabels)
+      originalStore && store && props.originalParsed
+        ? processSemantics(
+            originalStore,
+            store,
+            props.originalParsed.support.refLabels
+          )
         : new Map(),
-    [props.originalParsed, store]
+    [originalStore, props.originalParsed, store]
   );
 
   const removeLabel = async (ref: string, labelUri: string) => {

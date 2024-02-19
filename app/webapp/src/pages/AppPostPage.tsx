@@ -1,10 +1,10 @@
 import { Nanopub } from '@nanopub/sign';
 import { Box, Text } from 'grommet';
-import { Send } from 'grommet-icons';
+import { Magic, Send } from 'grommet-icons';
 import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useDebounce } from 'use-debounce';
 
+// import { useDebounce } from 'use-debounce';
 import { useAccountContext } from '../app/AccountContext';
 import { useNanopubContext } from '../app/NanopubContext';
 import { TweetAnchor } from '../app/TwitterAnchor';
@@ -34,7 +34,7 @@ export const AppPostPage = (props: {}) => {
 
   /** postText is the text and is in sync with the PostEditor content */
   const [postText, setPostText] = useState<string>();
-  const [postTextDebounced] = useDebounce(postText, 2000);
+  // const [postTextDebounced] = useDebounce(postText, 10);
 
   /** parsed is the parsed semantics as computed by the service */
   const [parsed, setParsed] = useState<ParserResult>();
@@ -49,6 +49,8 @@ export const AppPostPage = (props: {}) => {
 
   /** the published post */
   const [post, setPost] = useState<AppPost>();
+
+  const canReRun = parsed && postText !== parsed.post;
 
   const reset = () => {
     setPost(undefined);
@@ -103,7 +105,8 @@ export const AppPostPage = (props: {}) => {
   }, [appAccessToken, connectedUser, parsed, postText, profile, semantics]);
 
   const getSemantics = () => {
-    if (postText && appAccessToken && !semantics) {
+    if (postText && appAccessToken) {
+      setSemantics(undefined);
       if (DEBUG) console.log('getPostMeta', { postText });
       setIsGettingSemantics(true);
       getPostSemantics(postText, appAccessToken).then((result) => {
@@ -120,13 +123,6 @@ export const AppPostPage = (props: {}) => {
       setSemantics(newSemantics);
     }
   };
-
-  useEffect(() => {
-    if (DEBUG) console.log({ postTextDebounced, postText });
-    if (postTextDebounced) {
-      getSemantics();
-    }
-  }, [postTextDebounced]);
 
   const newPost = () => {
     // reset(); see https://github.com/vemonet/nanopub-rs/issues/5
@@ -165,15 +161,44 @@ export const AppPostPage = (props: {}) => {
             setPostText(text);
           }}></PostEditor>
 
-        <Box direction="row" gap="medium" margin={{ bottom: 'medium' }}>
+        <Box
+          direction="row"
+          gap="medium"
+          margin={{ bottom: 'medium' }}
+          style={{ minHeight: '200px' }}>
           {isGettingSemantics !== undefined ? (
-            <SemanticsEditor
-              isLoading={isGettingSemantics}
-              semantics={semantics}
-              originalParsed={parsed}
-              semanticsUpdated={semanticsUpdated}></SemanticsEditor>
+            <Box fill>
+              {canReRun ? (
+                <AppButton
+                  onClick={() => getSemantics()}
+                  label={semantics ? t('reset') : t('refresh')}
+                  icon={
+                    <Magic color={constants.colors.primary}></Magic>
+                  }></AppButton>
+              ) : (
+                <></>
+              )}
+              <SemanticsEditor
+                id="aneditor"
+                isLoading={isGettingSemantics}
+                semantics={semantics}
+                originalParsed={parsed}
+                semanticsUpdated={semanticsUpdated}></SemanticsEditor>
+            </Box>
           ) : (
-            <></>
+            <BoxCentered
+              fill
+              style={{
+                backgroundColor: constants.colors.backgroundLight,
+                borderRadius: '8px',
+              }}>
+              <AppButton
+                onClick={() => getSemantics()}
+                label={t('process')}
+                icon={
+                  <Magic color={constants.colors.primary}></Magic>
+                }></AppButton>
+            </BoxCentered>
           )}
         </Box>
       </Box>

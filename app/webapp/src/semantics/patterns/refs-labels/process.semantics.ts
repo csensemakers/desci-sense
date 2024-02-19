@@ -10,20 +10,30 @@ export interface RefData {
 export type RefsMap = Map<string, RefData>;
 
 export const processSemantics = (
+  originalStore: Store,
   store: Store,
   support: ReflabelsSupport
 ): RefsMap => {
   const possiblePredicates = support.labelsOntology.map((item) => item.URI);
 
   /** get refLabels triplets */
-  const refLabelsTriplets = filterStore(store, (quad) =>
+  const orgRefLabels = filterStore(originalStore, (quad) =>
+    possiblePredicates.includes(quad.predicate.value)
+  );
+  const refLabels = filterStore(store, (quad) =>
     possiblePredicates.includes(quad.predicate.value)
   );
 
-  /** group refLabels by ref and include ref metadata from parser support */
   const refs: RefsMap = new Map();
 
-  forEachStore(refLabelsTriplets, (quad) => {
+  /** get the refs from the original store (even if their value is undefined) */
+  forEachStore(orgRefLabels, (quad) => {
+    const ref = quad.object.value;
+    refs.set(ref, { labelsUris: [] });
+  });
+
+  /** then get the labels from the actual semantics */
+  forEachStore(refLabels, (quad) => {
     const label = quad.predicate.value;
     const ref = quad.object.value;
     const current = refs.get(ref);
@@ -32,6 +42,7 @@ export const processSemantics = (
     refs.set(ref, { labelsUris: newLabels });
   });
 
+  /** then append the metadata for each ref */
   for (const [ref, value] of Array.from(refs.entries())) {
     const meta = support.refsMeta[ref];
     if (!meta) {
@@ -39,7 +50,7 @@ export const processSemantics = (
     }
 
     refs.set(ref, {
-      ...value,
+      labelsUris: value ? value.labelsUris : [],
       meta,
     });
   }

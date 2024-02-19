@@ -1,5 +1,5 @@
 import { Box, Keyboard, Text } from 'grommet';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { AppButton } from './AppButton';
@@ -15,7 +15,10 @@ export const AppLabelsEditor = (props: {
   options?: string[];
   addLabel?: (label: string) => void;
   removeLabel?: (label: string) => void;
+  hashtag?: boolean;
 }) => {
+  const hashtag = props.hashtag !== undefined ? props.hashtag : false;
+
   const { constants } = useThemeContext();
   const { t } = useTranslation();
 
@@ -24,12 +27,18 @@ export const AppLabelsEditor = (props: {
 
   const [height, setHeight] = useState<number>();
 
-  const [newLabel, setNewLabel] = useState<string>('');
+  const [input, setInput] = useState<string>('');
   const [adding, setAdding] = useState<boolean>(false);
 
-  const allOptions = props.options;
-
   const onlyOptions = props.options !== undefined;
+  const allOptions = useMemo(() => {
+    if (!onlyOptions) return undefined;
+    if (!input) return props.options;
+
+    return props.options
+      ? props.options.filter((e) => (e ? e.includes(input) : false))
+      : [];
+  }, [input, onlyOptions, props.options]);
 
   const addWidth = '120px';
 
@@ -52,7 +61,7 @@ export const AppLabelsEditor = (props: {
 
   const reset = () => {
     if (DEBUG) console.log('reset');
-    setNewLabel('');
+    setInput('');
     setAdding(false);
   };
 
@@ -69,22 +78,28 @@ export const AppLabelsEditor = (props: {
     }
   };
 
+  const enterPressed = () => {
+    if (!onlyOptions) {
+      addLabel();
+    }
+  };
+
   const addLabel = (_label?: string) => {
     if (props.addLabel) {
       if (DEBUG) console.log('addLabel', { _label });
-      const label = _label || newLabel;
+      const label = _label || input;
 
       props.addLabel(label);
       if (!onlyOptions) reset();
-      else setNewLabel('');
+      else setInput('');
     }
   };
 
   const inputChanged = (input: string) => {
-    setNewLabel(input);
+    setInput(input);
   };
 
-  const showCreator = !onlyOptions && newLabel;
+  const showCreator = !onlyOptions && input;
   const showOptions = onlyOptions && adding;
 
   const showSelector = showCreator || (onlyOptions && adding);
@@ -96,7 +111,7 @@ export const AppLabelsEditor = (props: {
           onClick={() => addLabel()}
           style={{ textTransform: 'none' }}>
           <Box direction="row" align="center">
-            <AppLabel margin={{ right: 'small' }}>{newLabel}</AppLabel>
+            <AppLabel margin={{ right: 'small' }}>{input}</AppLabel>
             <Text color={constants.colors.lightTextOnLight}>{t('create')}</Text>
           </Box>
         </AppButton>
@@ -154,14 +169,16 @@ export const AppLabelsEditor = (props: {
                 remove={() => removeLabel(label)}
                 key={ix}
                 margin={{ right: marginRight, bottom: 'xsmall' }}>
-                {label}
+                {`${hashtag ? '#' : ''}${label}`}
               </AppLabel>
             </Box>
           );
         })}
         <Box style={{ display: 'block', float: 'left', paddingTop: '5px' }}>
           {adding ? (
-            <Keyboard onEnter={() => addLabel()} onEsc={() => setAdding(false)}>
+            <Keyboard
+              onEnter={() => enterPressed()}
+              onEsc={() => setAdding(false)}>
               <Box>
                 <AppInput
                   style={{
@@ -171,7 +188,7 @@ export const AppLabelsEditor = (props: {
                   }}
                   plain
                   ref={keyInput}
-                  value={newLabel}
+                  value={input}
                   onChange={(event) =>
                     inputChanged(event.target.value)
                   }></AppInput>

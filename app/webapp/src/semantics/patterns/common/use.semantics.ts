@@ -6,17 +6,26 @@ import { PatternProps } from '../patterns';
 
 export const useSemanticsStore = (props: PatternProps) => {
   const [store, setStore] = useState<Store>();
+  const [originalStore, setOriginalStore] = useState<Store>();
 
   useEffect(() => {
-    if (!props.originalParsed && !props.semantics) {
-      setStore(undefined);
-    } else {
-      if (!props.originalParsed) throw new Error();
-      parseRDF(
-        props.semantics ? props.semantics : props.originalParsed.semantics
-      ).then((store) => setStore(store));
+    if (props.originalParsed) {
+      parseRDF(props.originalParsed.semantics).then((_store) => {
+        /** both stores are set to the same value if not semantics are provided */
+        setOriginalStore(_store);
+        if (!props.semantics) setStore(_store);
+      });
     }
   }, [props.originalParsed, props.semantics]);
 
-  return store;
+  useEffect(() => {
+    /** then the actual stored is set. If prop.semantics is provided */
+    if (!props.semantics) {
+      setStore(originalStore);
+    } else {
+      parseRDF(props.semantics).then((_store) => setStore(_store));
+    }
+  }, [originalStore, props.semantics]);
+
+  return { store, originalStore };
 };
