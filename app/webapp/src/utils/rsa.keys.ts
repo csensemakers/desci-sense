@@ -1,6 +1,11 @@
 import forge from 'node-forge';
 
-export const getRSAKeys = (seed: string) => {
+export interface RSAKeys {
+  privateKey: string;
+  publicKey: string;
+}
+
+export const getRSAKeys = (seed: string): RSAKeys => {
   // https://stackoverflow.com/a/72057346/1943661
   const prng = forge.random.createInstance();
   prng.seedFileSync = () => seed;
@@ -18,4 +23,12 @@ export const getRSAKeys = (seed: string) => {
     privateKey: privateKeyPem,
     publicKey: publicKeyPem,
   };
+};
+
+export const signMessage = (message: string, privateKey: string) => {
+  const md = forge.md.sha256.create();
+  md.update(message, 'utf8');
+  const privateKeyObj = forge.pki.privateKeyFromPem(privateKey);
+  const signature = privateKeyObj.sign(md);
+  return forge.util.encode64(signature);
 };

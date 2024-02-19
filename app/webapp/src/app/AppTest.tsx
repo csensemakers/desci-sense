@@ -4,10 +4,12 @@ import { useEffect } from 'react';
 import { constructNanopub } from '../nanopubs/construct.nanopub';
 import sample_result from '../sample.result.json';
 import { AppButton } from '../ui-components';
+import { useAccountContext } from './AccountContext';
 import { useNanopubContext } from './NanopubContext';
 import { NANOPUBS_SERVER } from './config';
 
 export const AppTest = (props: {}) => {
+  const { connectedUser } = useAccountContext();
   const { profile } = useNanopubContext();
   const start = async () => {
     // const semantics = `<http://example.org/subject2> <http://example.org/subject1> "cancer-research"@en .`;
@@ -32,7 +34,8 @@ export const AppTest = (props: {}) => {
 
     if (!semantics) throw new Error();
 
-    const nanopub = await constructNanopub('A text', semantics, 'orcid-1234');
+    if (!connectedUser) throw new Error('User not connected');
+    const nanopub = await constructNanopub('A text', semantics, connectedUser);
 
     console.log({ semantics, nanopub });
 

@@ -3,11 +3,12 @@ import { Nanopub } from '@nanopub/sign';
 import { THIS_POST_NAME } from '../app/config';
 import { parseRDF, replaceNodes, writeRDF } from '../shared/n3.utils';
 import { AppPostSemantics } from '../shared/parser.types';
+import { AppUserRead } from '../shared/types';
 
 export const constructNanopub = async (
   content: string,
   semantics: AppPostSemantics,
-  orcid: string
+  user: AppUserRead
 ): Promise<Nanopub> => {
   const NANOPUB_PLACEHOLDER = 'http://purl.org/nanopub/temp/mynanopub#';
   const store = await parseRDF(semantics);
@@ -15,6 +16,24 @@ export const constructNanopub = async (
     [THIS_POST_NAME]: `${NANOPUB_PLACEHOLDER}assertion`,
   });
   const assertionsRdf = await writeRDF(assertionsStore);
+
+  const exampleTriplet =
+    process.env.NODE_ENV !== 'production'
+      ? `: <http://www.w3.org/1999/02/22-rdf-syntax-ns#isa> <http://purl.org/nanopub/x/ExampleNanopub>`
+      : '';
+
+  /** identity data */
+  const orcid = user.orcid?.orcid;
+
+  const hasEthSigner = user.eth !== undefined;
+  const address = user.eth?.ethAddress;
+  const rsaToEthSignature = user.eth?.rsaToEthSignature;
+  const rootToRsaSignature = user.eth?.rootToRsaSignature;
+
+  const ethSignerRdf = `
+      : rootSigner ${address}
+      : rsaToEthSignature ${rsaToEthSignature}
+      : rootToRsaSignature ${rootToRsaSignature}`;
 
   const rdfStr = `
     @prefix : <${NANOPUB_PLACEHOLDER}> .
@@ -37,16 +56,17 @@ export const constructNanopub = async (
     }
     
     :assertion {
-      :assertion dct:creator orcid:0009-0004-1787-0341 .
+      :assertion dct:creator orcid:${orcid} .
       ${assertionsRdf}
     }
     
     :provenance {
-      :assertion prov:wasAttributedTo orcid:0009-0004-1787-0341 .
+      :assertion prov:wasAttributedTo orcid:${orcid} .
     }
     
     :pubinfo {
-      
+      ${hasEthSigner ? ethSignerRdf : ''}      
+      ${exampleTriplet}
     }
   `;
 

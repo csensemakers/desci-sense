@@ -8,7 +8,7 @@ import {
 } from 'react';
 import { useSearchParams } from 'react-router-dom';
 
-import { getLoggedUser, postOrcidCode } from '../auth/auth.requests';
+import { getLoggedUser, postOrcidCode } from '../functionsCalls/auth.requests';
 import { AppUserRead } from '../shared/types';
 import { ORCID_API_URL, ORCID_CLIENT_ID, ORCID_REDIRECT_URL } from './config';
 

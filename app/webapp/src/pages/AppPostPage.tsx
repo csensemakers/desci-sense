@@ -10,9 +10,9 @@ import { useNanopubContext } from '../app/NanopubContext';
 import { TweetAnchor } from '../app/TwitterAnchor';
 import { ViewportPage } from '../app/Viewport';
 import { NANOPUBS_SERVER } from '../app/config';
+import { getPostSemantics, postMessage } from '../functionsCalls/post.requests';
 import { constructNanopub } from '../nanopubs/construct.nanopub';
 import { PostEditor } from '../post/PostEditor';
-import { getPostSemantics, postMessage } from '../post/post.utils';
 import { SemanticsEditor } from '../semantics/SemanticsEditor';
 import { PatternProps } from '../semantics/patterns/patterns';
 import { AppPostSemantics, ParserResult } from '../shared/parser.types';
@@ -66,10 +66,13 @@ export const AppPostPage = (props: {}) => {
       let nanopubPublished: Nanopub | undefined = undefined;
       if (profile) {
         const _semantis = semantics || parsed.semantics;
-        const orcid = connectedUser?.orcid?.orcid;
-        if (!orcid) throw new Error('Orcid mandatory');
 
-        const nanopub = await constructNanopub(postText, _semantis, orcid);
+        if (!connectedUser) throw new Error('User not connected');
+        const nanopub = await constructNanopub(
+          postText,
+          _semantis,
+          connectedUser
+        );
         if (DEBUG) console.log({ nanopub });
 
         nanopubPublished = await nanopub.publish(profile, NANOPUBS_SERVER);

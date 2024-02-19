@@ -20,6 +20,13 @@ export interface AppUser {
   };
 }
 
+export interface EthAccountDetails {
+  ethAddress: HexStr;
+  rsaPublickey: string;
+  rsaToEthSignature: string;
+  rootToRsaSignature: HexStr;
+}
+
 export interface AppUserRead {
   userId: string;
   orcid?: {
@@ -30,6 +37,7 @@ export interface AppUserRead {
     user_id: string;
     screen_name: string;
   };
+  eth?: EthAccountDetails;
 }
 
 export type DefinedIfTrue<V, R> = V extends true ? R : R | undefined;
