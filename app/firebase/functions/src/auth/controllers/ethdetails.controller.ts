@@ -29,7 +29,7 @@ export const potEthDetailsUserController: RequestHandler = async (
 
     await setUserEthDetails(userId, payload);
 
-    response.status(500).send({ success: true });
+    response.status(200).send({ success: true });
   } catch (error: any) {
     logger.error('error', error);
     response.status(500).send({ success: false, error: error.message });

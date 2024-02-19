@@ -20,7 +20,7 @@ import {
 import { useAccountContext } from './AccountContext';
 import { useAppSigner } from './signer/SignerContext';
 
-const DEBUG = false;
+const DEBUG = true;
 
 export type NanopubContextType = {
   profile?: NpProfile;
@@ -70,6 +70,7 @@ export const NanopubContext = (props: PropsWithChildren) => {
 
     if (keysStr) {
       const keys = JSON.parse(keysStr);
+      setRsaKeys(keys);
 
       const keyBody = keys.privateKey
         .replace(/-----BEGIN PRIVATE KEY-----\n?/, '')

@@ -18,6 +18,7 @@ export interface AppUser {
     user_id?: string;
     screen_name?: string;
   };
+  eth?: EthAccountDetails;
 }
 
 export interface EthAccountDetails {

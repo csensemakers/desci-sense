@@ -4,12 +4,7 @@ import { FUNCTIONS_BASE } from '../app/config';
 import { AppUserRead, EthAccountDetails } from '../shared/types';
 
 export const postOrcidCode = async (code: string) => {
-  const res = await axios.post(FUNCTIONS_BASE + '/auth/code', {
-    method: 'post',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ code }),
-  });
-
+  const res = await axios.post(FUNCTIONS_BASE + '/auth/code', { code }, {});
   return res.data.token;
 };
 

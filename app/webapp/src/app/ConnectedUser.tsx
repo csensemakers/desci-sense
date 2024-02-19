@@ -9,7 +9,6 @@ import { cap } from '../utils/general';
 import { useAccountContext } from './AccountContext';
 import { AppAddress } from './AppAddress';
 import { useDisconnectContext } from './DisconnectContext';
-import { useNanopubContext } from './NanopubContext';
 import { OrcidAnchor } from './OrcidAnchor';
 import { TwitterProfileAnchor } from './TwitterAnchor';
 
@@ -18,8 +17,6 @@ export const ConnectedUser = (props: {}) => {
   const { isConnected, connect, connectedUser } = useAccountContext();
 
   const { constants } = useThemeContext();
-
-  const { profileAddress } = useNanopubContext();
 
   const { disconnect } = useDisconnectContext();
 
@@ -77,10 +74,10 @@ export const ConnectedUser = (props: {}) => {
               <></>
             )}
 
-            {profileAddress ? (
+            {connectedUser?.eth ? (
               <Box margin={{ bottom: 'small' }}>
                 <Text>{cap(t('nanopub signer'))}</Text>
-                <AppAddress address={profileAddress}></AppAddress>
+                <AppAddress address={connectedUser.eth.ethAddress}></AppAddress>
               </Box>
             ) : (
               <></>
