@@ -3,9 +3,10 @@ import json
 from firebase_functions import https_fn
 from firebase_admin import initialize_app
 
-from shared_functions.main import SM_FUNCTION_post_parser_config, SM_FUNCTION_post_parser_imp
-from shared_functions.interface import ParserResult
-from shared_functions.schema.ontology import keyWordsOntology, refLabelsOntoloty
+from shared_functions.main import (
+    SM_FUNCTION_post_parser_config,
+    SM_FUNCTION_post_parser_imp,
+)
 from config import openai_api_key
 
 app = initialize_app()
@@ -29,9 +30,10 @@ def SM_FUNCTION_post_parser(request):
     }
 
     parser_result = SM_FUNCTION_post_parser_imp(content, parameters, config)
+    parser_json = parser_result.model_dump_json()
 
     return https_fn.Response(
-        json.dumps(parser_result),
+        parser_json,
         status=200,
         headers={"Content-Type": "application/json"},
     )

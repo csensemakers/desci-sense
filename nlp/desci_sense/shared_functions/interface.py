@@ -197,24 +197,16 @@ class RefMeta(TypedDict):
     image: str
 
 
-# TODO deprecate
 class ReflabelsSupport(TypedDict):
     labelsOntology: List[OntologyItem]
     refsMeta: Dict[str, RefMeta]
 
 
-# TODO deprecate - use ParserSupport
 class ParsedSupport(TypedDict):
     keywords: KeywordsSupport
     refLabels: ReflabelsSupport
 
 
-# TODO deprecated
-class AppPostSemantics(TypedDict):
-    triplets: List[str]
-
-
-# TODO deprecate - use ParserResult
-class ParserResultOld(TypedDict):
-    semantics: AppPostSemantics
+class ParserResultDto(TypedDict):
+    semantics: str
     support: ParsedSupport

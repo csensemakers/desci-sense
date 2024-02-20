@@ -17,14 +17,7 @@ Rules:
 Author: {{ author_name }}
 Content: {{ content }}
 
-{% if metadata_list|length > 0 %} 
-## Reference Metadata:
-{% for ref in metadata_list %}
-{{ ref.to_str() }}
-{% if not loop.last %}---------------
-{% endif %}
-{% endfor %}
-{% endif %}
+{{ references_metadata }}
 
 # Output:
 """

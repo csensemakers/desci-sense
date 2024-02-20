@@ -1,6 +1,7 @@
 {
   "functions": [
     {
+      "runtime": "python311", // or python311,
       "source": "functions",
       "codebase": "python",
       "ignore": [

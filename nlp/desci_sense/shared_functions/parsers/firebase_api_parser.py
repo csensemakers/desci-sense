@@ -232,7 +232,12 @@ class FirebaseAPIParser:
         metadata_list: List[RefMetadata],
     ) -> ParserSupport:
         ontology = self.ontology.ontology_interface
-        md_dict = {m.url: m for m in metadata_list}
+        md_dict = {}  # Initialize an empty dictionary
+
+        for m in metadata_list:
+            if hasattr(m, "url"):
+                md_dict[m.url] = m
+
         return ParserSupport(ontology=ontology, refs_meta=md_dict)
 
     def post_process_result(
@@ -266,6 +271,21 @@ class FirebaseAPIParser:
 
         return ParserResult(semantics=graph, support=parser_support)
 
+    def get_refs_metadata_portion(self, metadata_list: List[RefMetadata]):
+        """
+        Processes the metadata list to append to the prompt
+        """
+        if len(metadata_list) > 0:
+            result_lines = ["## Reference Metadata:"]
+            for i, ref in enumerate(metadata_list):
+                if hasattr(ref, "to_str"):
+                    result_lines.append(ref.to_str())
+                if i < len(metadata_list) - 1:  # Check if it's not the last element
+                    result_lines.append("---------------")
+            result_string = "\n".join(result_lines)
+            return result_string
+        return ""
+
     def create_kw_prompt(
         self,
         post: RefPost,
@@ -282,13 +302,15 @@ class FirebaseAPIParser:
         Returns:
             str: full instantiated prompt
         """
+
+        references_metadata = self.get_refs_metadata_portion(metadata_list)
         prompt_j2_template = self.kw_extraction["prompt_j2_template"]
 
         # instantiate prompt with ref post details
         full_prompt = prompt_j2_template.render(
             author_name=post.author,
             content=post.content,
-            metadata_list=metadata_list,
+            references_metadata=references_metadata,
             max_keywords=self.kw_extraction["max_keywords"],
         )
 
@@ -312,6 +334,7 @@ class FirebaseAPIParser:
         Returns:
             str: full instantiated prompt
         """
+        references_metadata = self.get_refs_metadata_portion(metadata_list)
         prompt_j2_template = self.prompt_case_dict[case]["prompt_j2_template"]
         type_templates = self.prompt_case_dict[case]["type_templates"]
 
@@ -320,7 +343,7 @@ class FirebaseAPIParser:
             type_templates=type_templates,
             author_name=post.author,
             content=post.content,
-            metadata_list=metadata_list,
+            references_metadata=references_metadata,
         )
 
         return full_prompt

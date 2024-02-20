@@ -23,23 +23,34 @@ def normalize_citoid_metadata(metadata_list: List[dict], max_summary_length):
     results = []
     for metadata in metadata_list:
         summary = metadata.get("abstractNote", "")
-        results.append(
-            RefMetadata(
-                **{
-                    "url": metadata.get("url", None),
-                    "item_type": metadata.get("itemType", None),
-                    "title": metadata.get("title", ""),
-                    "summary": get_trunc_str(summary, max_summary_length),
-                }
+
+        skip = False
+        if metadata["msg"].startswith("Error:"):
+            skip = True
+
+        if not skip:
+            results.append(
+                RefMetadata(
+                    **{
+                        "url": metadata.get("url", None),
+                        "item_type": metadata.get("itemType", None),
+                        "title": metadata.get("title", ""),
+                        "summary": get_trunc_str(summary, max_summary_length),
+                    }
+                )
             )
-        )
     return results
 
 
 def extract_citoid_metadata(target_url, max_summary_length):
+    """
+    TODO:
+    """
     citoid_metadata = [fetch_citation(target_url)]
+    # TODO: This check is still valid when there is an error fetching the URL
     assert len(citoid_metadata) == 1
-    return normalize_citoid_metadata(citoid_metadata, max_summary_length)[0]
+    normalized = normalize_citoid_metadata(citoid_metadata, max_summary_length)
+    return normalized[0] if len(normalized) > 0 else []
 
 
 def extract_metadata_by_type(

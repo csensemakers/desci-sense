@@ -10,7 +10,7 @@
       "env": {
         "NODE_ENV": "local",
         "IS_TEST": "true",
-        "MOCK_SEMANTICS": "true",
+        "MOCK_SEMANTICS": "false",
         "FIRESTORE_EMULATOR_HOST": "localhost:8080"
       },
       "runtimeExecutable": "${workspaceFolder}/node_modules/.bin/mocha",
