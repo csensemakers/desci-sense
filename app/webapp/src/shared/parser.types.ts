@@ -1,10 +1,10 @@
 export type AppPostSemantics = string;
 
 export interface OntologyItem {
-  URI: string;
+  uri: string;
   display_name: string;
+  label: string;
   Name?: string;
-  label?: string;
   prompt?: string;
   notes?: string;
   valid_subject_types?: string;
@@ -12,28 +12,26 @@ export interface OntologyItem {
   versions?: string;
 }
 
-export interface KeywordsSupport {
-  keyWordsOntology: OntologyItem;
-}
-
 export interface RefMeta {
+  url: string;
   title: string;
-  description: string;
+  summary: string;
+  item_type: string;
   image: string;
 }
 
-export interface ReflabelsSupport {
-  labelsOntology: OntologyItem[];
-  refsMeta: Record<string, RefMeta>;
+export interface ParserOntology {
+  keyword_predicate?: OntologyItem;
+  semantic_predicates?: OntologyItem[];
 }
 
 export interface ParsedSupport {
-  keywords: KeywordsSupport;
-  refLabels: ReflabelsSupport;
+  ontology?: ParserOntology;
+  refs_meta?: Record<string, RefMeta>;
 }
 
 export interface ParserResult {
   post: string;
   semantics: AppPostSemantics;
-  support: ParsedSupport;
+  support?: ParsedSupport;
 }

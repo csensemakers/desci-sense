@@ -38,25 +38,28 @@ export const getTwitterTags = async (
   _semantics?: AppPostSemantics
 ): Promise<string[] | undefined> => {
   const semantics = _semantics || originalParsed.semantics;
-  const keywordOntology = originalParsed.support.keywords.keyWordsOntology;
-  const refLabelsOntology = originalParsed.support.refLabels.labelsOntology;
+  const keywordOntology = originalParsed?.support?.ontology?.keyword_predicate;
+  const refLabelsOntology =
+    originalParsed?.support?.ontology?.semantic_predicates;
 
   const store = await parseRDF(semantics);
 
-  const keywords = mapStoreElements(store, (quad) => {
-    if (quad.predicate.value === keywordOntology.URI) {
-      return quad.object.value;
-    }
+  const keywords = keywordOntology
+    ? (mapStoreElements(store, (quad) => {
+        if (quad.predicate.value === keywordOntology.uri) {
+          return quad.object.value;
+        }
 
-    const item = refLabelsOntology.find(
-      (item) => item.URI === quad.predicate.value
-    );
-    if (item) {
-      return item.display_name;
-    }
+        const item = refLabelsOntology
+          ? refLabelsOntology.find((item) => item.uri === quad.predicate.value)
+          : undefined;
+        if (item) {
+          return item.label;
+        }
 
-    return undefined;
-  }).filter((e) => e !== undefined) as string[];
+        return undefined;
+      }).filter((e) => e !== undefined) as string[])
+    : [];
 
   return keywords.map((k) => forceTag(k as string));
 };

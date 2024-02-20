@@ -20,7 +20,7 @@ export const KeywordsComponent = (props: PatternProps) => {
   const { store } = useSemanticsStore(props);
 
   const KEYWORD_PREDICATE =
-    props.originalParsed?.support.keywords.keyWordsOntology.URI;
+    props.originalParsed?.support?.ontology?.keyword_predicate?.uri;
 
   const keywords = useMemo<string[]>(() => {
     if (!store || !KEYWORD_PREDICATE) return [];

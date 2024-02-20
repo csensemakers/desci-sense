@@ -1,7 +1,7 @@
 import { Box } from 'grommet';
 import { useMemo } from 'react';
 
-import { ReflabelsSupport } from '../../../shared/parser.types';
+import { ParsedSupport, RefMeta } from '../../../shared/parser.types';
 import { AppLabelsEditor } from '../../../ui-components/AppLabelsEditor';
 import { useThemeContext } from '../../../ui-components/ThemedApp';
 import { RefCard } from '../common/RefCard';
@@ -10,13 +10,13 @@ import { RefData } from './process.semantics';
 const DEBUG = true;
 
 /** renders the labels for one ref */
-export const RefLabel = (props: {
+export const RefLabels = (props: {
   refData: RefData;
-  support: ReflabelsSupport;
+  support?: ParsedSupport;
   addLabel: (labelUri: string) => void;
   removeLabel: (labelUri: string) => void;
 }) => {
-  const labelsOntology = props.support.labelsOntology;
+  const labelsOntology = props.support?.ontology?.semantic_predicates;
   const refData = props.refData;
 
   const { constants } = useThemeContext();
@@ -25,9 +25,9 @@ export const RefLabel = (props: {
   const labelsDisplayNames = useMemo(
     () =>
       refData.labelsUris.map((labelUri) => {
-        const label_ontology = labelsOntology.find(
-          (item) => item.URI === labelUri
-        );
+        const label_ontology = labelsOntology
+          ? labelsOntology.find((item) => item.uri === labelUri)
+          : undefined;
 
         if (!label_ontology)
           throw new Error(`Unexpected ontology not found for ${labelUri}`);
@@ -37,17 +37,21 @@ export const RefLabel = (props: {
     [labelsOntology, refData.labelsUris]
   );
 
-  /** list of possible labels from ontology (filtering thoase selected) */
+  /** list of possible labels from ontology (filtering those selected) */
   const optionDisplayNames = useMemo(
     () =>
       labelsOntology
-        .filter((l) => !refData.labelsUris.includes(l.URI))
-        .map((l) => l.display_name),
+        ? labelsOntology
+            .filter((l) => !refData.labelsUris.includes(l.uri))
+            .map((l) => l.display_name)
+        : undefined,
     [labelsOntology, refData.labelsUris]
   );
 
   const getLabelFromDisplayName = (displayName: string) => {
-    const item = labelsOntology.find((l) => l.display_name === displayName);
+    const item = labelsOntology
+      ? labelsOntology.find((l) => l.display_name === displayName)
+      : undefined;
     if (!item)
       throw new Error(
         `Unexpected label with display_name equal to ${displayName} not found`
@@ -57,12 +61,12 @@ export const RefLabel = (props: {
 
   /** converts display name into label uri and calls its removal */
   const removeLabel = (label: string) => {
-    props.removeLabel(getLabelFromDisplayName(label).URI);
+    props.removeLabel(getLabelFromDisplayName(label).uri);
   };
 
   /** converts display name into label uri and calls its addition */
   const addLabel = (label: string) => {
-    props.addLabel(getLabelFromDisplayName(label).URI);
+    props.addLabel(getLabelFromDisplayName(label).uri);
   };
 
   return (
@@ -81,7 +85,7 @@ export const RefLabel = (props: {
       </Box>
       <RefCard
         title={refData.meta?.title}
-        description={refData.meta?.title}
+        description={refData.meta?.summary}
         image={refData.meta?.image}></RefCard>
     </Box>
   );

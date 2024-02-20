@@ -25,7 +25,7 @@ def normalize_citoid_metadata(metadata_list: List[dict], max_summary_length):
         summary = metadata.get("abstractNote", "")
 
         skip = False
-        if metadata["msg"].startswith("Error:"):
+        if "msg" in metadata and metadata["msg"].startswith("Error:"):
             skip = True
 
         if not skip:

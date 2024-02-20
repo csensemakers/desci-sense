@@ -1,7 +1,7 @@
 import { Store } from 'n3';
 
 import { filterStore, forEachStore } from '../../../shared/n3.utils';
-import { RefMeta, ReflabelsSupport } from '../../../shared/parser.types';
+import { ParsedSupport, RefMeta } from '../../../shared/parser.types';
 
 export interface RefData {
   labelsUris: string[];
@@ -12,39 +12,48 @@ export type RefsMap = Map<string, RefData>;
 export const processSemantics = (
   originalStore: Store,
   store: Store,
-  support: ReflabelsSupport
+  support?: ParsedSupport
 ): RefsMap => {
-  const possiblePredicates = support.labelsOntology.map((item) => item.URI);
+  const possiblePredicates = support?.ontology?.semantic_predicates?.map(
+    (item) => item.uri
+  );
 
   /** get refLabels triplets */
-  const orgRefLabels = filterStore(originalStore, (quad) =>
-    possiblePredicates.includes(quad.predicate.value)
-  );
-  const refLabels = filterStore(store, (quad) =>
-    possiblePredicates.includes(quad.predicate.value)
-  );
+  const orgRefLabels = possiblePredicates
+    ? filterStore(originalStore, (quad) =>
+        possiblePredicates.includes(quad.predicate.value)
+      )
+    : undefined;
+
+  const refLabels = possiblePredicates
+    ? filterStore(store, (quad) =>
+        possiblePredicates.includes(quad.predicate.value)
+      )
+    : undefined;
 
   const refs: RefsMap = new Map();
 
   /** get the refs from the original store (even if their value is undefined) */
-  forEachStore(orgRefLabels, (quad) => {
-    const ref = quad.object.value;
-    refs.set(ref, { labelsUris: [] });
-  });
+  if (orgRefLabels && refLabels) {
+    forEachStore(orgRefLabels, (quad) => {
+      const ref = quad.object.value;
+      refs.set(ref, { labelsUris: [] });
+    });
 
-  /** then get the labels from the actual semantics */
-  forEachStore(refLabels, (quad) => {
-    const label = quad.predicate.value;
-    const ref = quad.object.value;
-    const current = refs.get(ref);
-    const newLabels = current ? current.labelsUris.concat(label) : [label];
+    /** then get the labels from the actual semantics */
+    forEachStore(refLabels, (quad) => {
+      const label = quad.predicate.value;
+      const ref = quad.object.value;
+      const current = refs.get(ref);
+      const newLabels = current ? current.labelsUris.concat(label) : [label];
 
-    refs.set(ref, { labelsUris: newLabels });
-  });
+      refs.set(ref, { labelsUris: newLabels });
+    });
+  }
 
   /** then append the metadata for each ref */
   for (const [ref, value] of Array.from(refs.entries())) {
-    const meta = support.refsMeta[ref];
+    const meta = support?.refs_meta ? support.refs_meta[ref] : undefined;
     if (!meta) {
       throw new Error('Unsupported from now undefined meta for ref');
     }

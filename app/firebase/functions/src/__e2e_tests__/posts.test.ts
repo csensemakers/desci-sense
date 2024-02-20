@@ -11,7 +11,8 @@ describe('posts', () => {
   before(async () => {});
 
   it('create', async () => {
-    const content = 'This is a recommendation of a book https://abook.com';
+    const content =
+      'This is a recommendation of a book https://www.kirkusreviews.com/book-reviews/mordicai-gerstein/a-book/';
     const parsed = await getSemantics(content, http);
     console.log({ parsed });
 

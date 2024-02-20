@@ -6,7 +6,7 @@ import { THIS_POST_NAME } from '../../../app/config';
 import { filterStore, writeRDF } from '../../../shared/n3.utils';
 import { useSemanticsStore } from '../common/use.semantics';
 import { PatternProps } from '../patterns';
-import { RefLabel } from './RefLabel';
+import { RefLabels } from './RefLabel';
 import { RefsMap, processSemantics } from './process.semantics';
 
 export const RefLabelsComponent = (props: PatternProps) => {
@@ -16,11 +16,7 @@ export const RefLabelsComponent = (props: PatternProps) => {
   const refs = useMemo<RefsMap>(
     () =>
       originalStore && store && props.originalParsed
-        ? processSemantics(
-            originalStore,
-            store,
-            props.originalParsed.support.refLabels
-          )
+        ? processSemantics(originalStore, store, props.originalParsed?.support)
         : new Map(),
     [originalStore, props.originalParsed, store]
   );
@@ -81,14 +77,14 @@ export const RefLabelsComponent = (props: PatternProps) => {
                 throw new Error('Undexpected undefined');
 
               return (
-                <RefLabel
+                <RefLabels
                   key={ixref}
                   refData={refData}
-                  support={props.originalParsed.support.refLabels}
+                  support={props.originalParsed?.support}
                   removeLabel={(labelUri: string) => removeLabel(ref, labelUri)}
                   addLabel={(labelUri: string) =>
                     addLabel(ref, labelUri)
-                  }></RefLabel>
+                  }></RefLabels>
               );
             })}
           </Box>
