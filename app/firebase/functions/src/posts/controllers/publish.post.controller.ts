@@ -2,21 +2,21 @@ import { RequestHandler } from 'express';
 import { logger } from 'firebase-functions/v1';
 
 import { AppPostCreate } from '../../@shared/types';
-import { postPost } from '../posts.service';
-import { postsValidationScheme } from './posts.schemas';
+import { publishPost } from '../posts.service';
+import { publishPostsValidationScheme } from './posts.schemas';
 
-export const postController: RequestHandler = async (request, response) => {
+export const publishPostController: RequestHandler = async (request, response) => {
   try {
     const userId = (request as any).userId;
     if (!userId) {
       response.status(403).send({});
       return;
     }
-    const payload = (await postsValidationScheme.validate(
+    const payload = (await publishPostsValidationScheme.validate(
       request.body
     )) as AppPostCreate;
 
-    const post = await postPost(userId, payload);
+    const post = await publishPost(userId, payload);
 
     response.status(200).send({ success: true, post });
   } catch (error: any) {

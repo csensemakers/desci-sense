@@ -4,7 +4,8 @@ from shared_functions.main import (
 )
 from configs import environ
 
-content = "Test post"
+# content = "I would like to recommend this book: https://www.abook.com"
+content = "I would like to recommend a book"
 parameters = {}
 
 config: SM_FUNCTION_post_parser_config = {
@@ -15,6 +16,6 @@ config: SM_FUNCTION_post_parser_config = {
     "openai_api_referer": "https://127.0.0.1:3000/",
 }
 
-semantics = SM_FUNCTION_post_parser_imp(content, parameters, config)
+result = SM_FUNCTION_post_parser_imp(content, parameters, config)
 
-print("semantics {}", semantics)
+print("result {}", result)

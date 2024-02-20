@@ -8,3 +8,5 @@ notebooks/artifacts/*
 artifacts/*
 **.pyc
 .env
+
+*.log

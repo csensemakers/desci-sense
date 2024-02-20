@@ -1,5 +1,12 @@
 import * as jwt from 'jsonwebtoken';
+import * as forge from 'node-forge';
+import { verifyMessage } from 'viem';
 
+import {
+  getEthToRSAMessage,
+  getRsaToEthMessage,
+} from '../../@shared/sig.utils';
+import { EthAccountDetails } from '../../@shared/types';
 import { env } from '../../config/env';
 
 export interface TokenData {
@@ -16,3 +23,35 @@ export function verifyAccessToken(token: string): string {
   }) as unknown as jwt.JwtPayload & TokenData;
   return verified.payload.userId;
 }
+
+export const validateEthDetails = async (details: EthAccountDetails) => {
+  const validRsa = verifyRSA(
+    getRsaToEthMessage(details.ethAddress),
+    details.rsaPublickey,
+    details.rsaToEthSignature
+  );
+
+  if (!validRsa) {
+    throw new Error(`Invalid RSA signature`);
+  }
+
+  const validEth = await verifyMessage({
+    address: details.ethAddress,
+    message: getEthToRSAMessage(details.rsaPublickey),
+    signature: details.rootToRsaSignature,
+  });
+
+  if (!validEth) {
+    throw new Error(`Invalid eth signature`);
+  }
+
+  return true;
+};
+
+export const verifyRSA = (message: string, publicKey: string, sig: string) => {
+  const md = forge.md.sha256.create();
+  md.update(message, 'utf8');
+  const signatureBytes = forge.util.decode64(sig);
+  const publicKeyObj = forge.pki.publicKeyFromPem(publicKey);
+  return publicKeyObj.verify(md.digest().bytes(), signatureBytes);
+};

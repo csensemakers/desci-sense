@@ -8,3 +8,10 @@ export const verifierCodeScheme = object({
   oauth_token: string().required(),
   oauth_verifier: string().required(),
 }).noUnknown(true);
+
+export const ethDetailsScheme = object({
+  ethAddress: string().required(),
+  rsaPublickey: string().required(),
+  rsaToEthSignature: string().required(),
+  rootToRsaSignature: string().required(),
+}).noUnknown(true);

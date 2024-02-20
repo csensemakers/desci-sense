@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 
 import { useAccountContext } from '../app/AccountContext';
 import { AppConnectWidget } from '../app/AppConnectButton';
+import { AppPlatformManager } from '../app/AppPlaformManager';
 import { useTwitterContext } from '../app/TwitterContext';
 import { ViewportPage } from '../app/Viewport';
 import { AbsoluteRoutes } from '../route.names';
@@ -13,37 +14,24 @@ import { Loading } from '../ui-components/LoadingDiv';
 export const AppHome = (props: {}) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { isConnected, isConnecting, isInitializing } = useAccountContext();
-  const { needAuthorize, connect: connectTwitter, isConnecting: isConnectingTwitter } = useTwitterContext();
+  const { isConnected, isConnecting } = useAccountContext();
+  const { needAuthorize: needAuthorizeTwitter } = useTwitterContext();
 
   const content = (() => {
-    if (isInitializing) {
-      return <Loading></Loading>
-    }
-
     if (isConnecting) {
-      return <Loading></Loading>
-    }
-
-    if (isConnected && needAuthorize) {
-      if (isConnectingTwitter) {
-        return <Loading></Loading>
-      }
-
-      return (
-        <AppButton
-          primary
-          onClick={() => connectTwitter()}
-          label={t('Connect Twitter/X')}></AppButton>
-      );
+      return <Loading></Loading>;
     }
 
     if (!isConnected) return <AppConnectWidget></AppConnectWidget>;
 
+    const canPost = !needAuthorizeTwitter;
+
     return (
       <>
+        <AppPlatformManager></AppPlatformManager>
         <AppButton
           primary
+          disabled={!canPost}
           label={t('post')}
           onClick={() => navigate(AbsoluteRoutes.Post)}
           style={{ minWidth: '180px' }}></AppButton>

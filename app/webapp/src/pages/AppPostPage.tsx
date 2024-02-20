@@ -1,39 +1,51 @@
+import { Nanopub } from '@nanopub/sign';
 import { Box, Text } from 'grommet';
-import { Send } from 'grommet-icons';
-import { useEffect, useState } from 'react';
+import { Magic, Send } from 'grommet-icons';
+import { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useDebounce } from 'use-debounce';
 
+// import { useDebounce } from 'use-debounce';
 import { useAccountContext } from '../app/AccountContext';
+import { useNanopubContext } from '../app/NanopubContext';
 import { TweetAnchor } from '../app/TwitterAnchor';
 import { ViewportPage } from '../app/Viewport';
+import { NANOPUBS_SERVER } from '../app/config';
+import { getPostSemantics, postMessage } from '../functionsCalls/post.requests';
+import { constructNanopub } from '../nanopubs/construct.nanopub';
 import { PostEditor } from '../post/PostEditor';
-import { getPostSemantics, postMessage } from '../post/post.utils';
 import { SemanticsEditor } from '../semantics/SemanticsEditor';
-import {
-  AppPost,
-  AppPostCreate,
-  AppPostSemantics,
-  PLATFORM,
-} from '../shared/types';
+import { PatternProps } from '../semantics/patterns/patterns';
+import { AppPostSemantics, ParserResult } from '../shared/parser.types';
+import { AppPost, AppPostCreate, PLATFORM } from '../shared/types';
 import { AppButton, AppCard, AppHeading } from '../ui-components';
 import { BoxCentered } from '../ui-components/BoxCentered';
 import { Loading } from '../ui-components/LoadingDiv';
 import { useThemeContext } from '../ui-components/ThemedApp';
 
-const DEBUG = true;
+const DEBUG = false;
 
 export const AppPostPage = (props: {}) => {
   const { t } = useTranslation();
   const { constants } = useThemeContext();
-  const { appAccessToken, isConnecting, isConnected } = useAccountContext();
+  const {
+    appAccessToken,
+    isConnecting,
+    isConnected,
+    connectedUser,
+    isInitializing,
+  } = useAccountContext();
+
+  const { profile } = useNanopubContext();
 
   /** postText is the text and is in sync with the PostEditor content */
   const [postText, setPostText] = useState<string>();
-  const [postTextDebounced] = useDebounce(postText, 2000);
+  // const [postTextDebounced] = useDebounce(postText, 10);
 
-  /** meta is the metadata of the post */
-  const [semantics, setPostSemantics] = useState<AppPostSemantics>();
+  /** parsed is the parsed semantics as computed by the service */
+  const [parsed, setParsed] = useState<ParserResult>();
+
+  /** parsedModified is the semantics after the user edited them */
+  const [semantics, setSemantics] = useState<AppPostSemantics>();
 
   const [isSending, setIsSending] = useState<boolean>();
   const [isGettingSemantics, setIsGettingSemantics] = useState<boolean>();
@@ -43,18 +55,51 @@ export const AppPostPage = (props: {}) => {
   /** the published post */
   const [post, setPost] = useState<AppPost>();
 
-  const send = () => {
-    if (postText && appAccessToken) {
+  const canReRun = parsed && postText !== parsed.post;
+
+  // const reset = () => {
+  //   setPost(undefined);
+  //   setPostText(undefined);
+  //   setParsed(undefined);
+  //   setSemantics(undefined);
+  //   setIsSending(false);
+  //   setIsGettingSemantics(undefined);
+  // };
+
+  const send = useCallback(async () => {
+    if (postText && appAccessToken && parsed) {
       setIsSending(true);
+
+      let nanopubPublished: Nanopub | undefined = undefined;
+      if (profile) {
+        const _semantics = semantics || parsed.semantics;
+
+        if (!connectedUser) throw new Error('User not connected');
+        const nanopub = await constructNanopub(
+          postText,
+          _semantics,
+          connectedUser
+        );
+        if (DEBUG) console.log({ nanopub });
+
+        nanopubPublished = await nanopub.publish(profile, NANOPUBS_SERVER);
+
+        if (DEBUG)
+          console.log({
+            nanopubPublished: nanopubPublished?.info(),
+          });
+      }
+
       const postCreate: AppPostCreate = {
         content: postText,
+        originalParsed: parsed,
         semantics: semantics,
+        signedNanopub: nanopubPublished?.info(),
         platforms: [PLATFORM.X],
       };
       if (DEBUG) console.log('postMessage', { postCreate });
       postMessage(postCreate, appAccessToken).then((post) => {
         if (post) {
-          setPostText(undefined);
           setPost(post);
           setIsSending(false);
         } else {
@@ -62,34 +107,40 @@ export const AppPostPage = (props: {}) => {
         }
       });
     }
-  };
+  }, [appAccessToken, connectedUser, parsed, postText, profile, semantics]);
 
+  const canGetSemantics = postText && appAccessToken;
   const getSemantics = () => {
-    if (postText && appAccessToken) {
+    if (canGetSemantics) {
+      setSemantics(undefined);
       if (DEBUG) console.log('getPostMeta', { postText });
       setIsGettingSemantics(true);
-      getPostSemantics(postText, appAccessToken).then((semantics) => {
-        if (DEBUG) console.log({ semantics });
-        setPostSemantics(semantics);
+      getPostSemantics(postText, appAccessToken).then((result) => {
+        if (DEBUG) console.log({ result });
+        setParsed(result);
         setIsGettingSemantics(false);
       });
     }
   };
 
-  useEffect(() => {
-    if (DEBUG) console.log({ postTextDebounced, postText });
-    if (postTextDebounced) {
-      getSemantics();
+  const semanticsUpdated: PatternProps['semanticsUpdated'] = (newSemantics) => {
+    if (parsed) {
+      if (DEBUG) console.log('semanticsUpdated', { newSemantics });
+      setSemantics(newSemantics);
     }
-  }, [postTextDebounced]);
+  };
 
   const newPost = () => {
-    setPost(undefined);
-    setPostSemantics(undefined);
+    // reset(); see https://github.com/vemonet/nanopub-rs/issues/5
+    window.location.reload();
   };
 
   const content = (() => {
     if (isSending || isConnecting) {
+      return <Loading></Loading>;
+    }
+
+    if (isInitializing || isConnecting) {
       return <Loading></Loading>;
     }
 
@@ -120,22 +171,47 @@ export const AppPostPage = (props: {}) => {
             setPostText(text);
           }}></PostEditor>
 
-        <Box direction="row" gap="medium" margin={{ bottom: 'medium' }}>
+        <Box
+          direction="row"
+          gap="medium"
+          margin={{ bottom: 'medium' }}
+          style={{ minHeight: '200px' }}>
           {isGettingSemantics !== undefined ? (
-            <SemanticsEditor
-              isLoading={isGettingSemantics}
-              semantics={semantics}></SemanticsEditor>
+            <Box fill>
+              {canReRun ? (
+                <AppButton
+                  onClick={() => getSemantics()}
+                  label={semantics ? t('reset') : t('refresh')}
+                  icon={
+                    <Magic color={constants.colors.primary}></Magic>
+                  }></AppButton>
+              ) : (
+                <></>
+              )}
+              <SemanticsEditor
+                id="aneditor"
+                isLoading={isGettingSemantics}
+                semantics={semantics}
+                originalParsed={parsed}
+                semanticsUpdated={semanticsUpdated}></SemanticsEditor>
+            </Box>
           ) : (
-            <></>
+            <BoxCentered
+              fill
+              style={{
+                backgroundColor: constants.colors.backgroundLight,
+                borderRadius: '8px',
+              }}>
+              <AppButton
+                disabled={!canGetSemantics}
+                onClick={() => getSemantics()}
+                label={t('process')}
+                icon={
+                  <Magic color={constants.colors.primary}></Magic>
+                }></AppButton>
+            </BoxCentered>
           )}
         </Box>
-
-        <AppButton
-          margin={{ vertical: 'small' }}
-          reverse
-          icon={<Send color={constants.colors.primary}></Send>}
-          label={t('post')}
-          onClick={() => send()}></AppButton>
       </Box>
     );
   })();
@@ -143,6 +219,15 @@ export const AppPostPage = (props: {}) => {
   return (
     <ViewportPage
       content={<BoxCentered>{content}</BoxCentered>}
-      nav={<></>}></ViewportPage>
+      nav={
+        <>
+          <AppButton
+            margin={{ vertical: 'small' }}
+            reverse
+            icon={<Send color={constants.colors.primary}></Send>}
+            label={t('post')}
+            onClick={() => send()}></AppButton>
+        </>
+      }></ViewportPage>
   );
 };

@@ -11,7 +11,7 @@ import { useSearchParams } from 'react-router-dom';
 import {
   getTwitterAuthLink,
   postTwitterVerifierToken,
-} from '../auth/auth.requests';
+} from '../functionsCalls/auth.requests';
 import { TwitterUser } from '../shared/types';
 import { useAccountContext } from './AccountContext';
 
@@ -41,7 +41,7 @@ export const TwitterContext = (props: PropsWithChildren) => {
   const oauth_token_param = searchParams.get('oauth_token');
   const oauth_verifier_param = searchParams.get('oauth_verifier');
 
-  const [isConnecting, setIsConnecting] = useState<boolean>(false)
+  const [isConnecting, setIsConnecting] = useState<boolean>(false);
 
   /**
    * only ask authorization if twitter user not found locally nor
@@ -51,7 +51,7 @@ export const TwitterContext = (props: PropsWithChildren) => {
 
   const connect = () => {
     if (appAccessToken) {
-      setIsConnecting(true)
+      setIsConnecting(true);
       getTwitterAuthLink(appAccessToken).then((authLink) => {
         tokenHandled.current = true;
         window.location.href = authLink;
@@ -75,7 +75,7 @@ export const TwitterContext = (props: PropsWithChildren) => {
     ) {
       verifierHandled.current = true;
 
-      setIsConnecting(true)
+      setIsConnecting(true);
       postTwitterVerifierToken(appAccessToken, {
         oauth_verifier: oauth_verifier_param,
         oauth_token: oauth_token_param,
@@ -85,7 +85,7 @@ export const TwitterContext = (props: PropsWithChildren) => {
         searchParams.delete('oauth_token');
         searchParams.delete('oauth_verifier');
         setSearchParams(searchParams);
-        setIsConnecting(false)
+        setIsConnecting(false);
         refreshConnectedUser();
       });
     }

@@ -1,4 +1,4 @@
-import { AppUser, DefinedIfTrue } from '../@shared/types';
+import { AppUser, DefinedIfTrue, EthAccountDetails } from '../@shared/types';
 import { collections } from '../db/db';
 
 export const getUser = async <T extends boolean>(
@@ -24,4 +24,18 @@ export const setUser = async (user: AppUser): Promise<string> => {
   const docRef = collections.users.doc(id);
   await docRef.set(user, { merge: true });
   return docRef.id;
+};
+
+export const setUserEthDetails = async (
+  userId: string,
+  details: EthAccountDetails
+) => {
+  const docRef = collections.users.doc(userId);
+  const doc = await docRef.get();
+
+  if (!doc.exists) {
+    throw new Error(`User ${userId} not found`);
+  }
+
+  await docRef.set({ eth: details }, { merge: true });
 };

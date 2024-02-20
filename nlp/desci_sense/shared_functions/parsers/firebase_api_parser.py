@@ -6,6 +6,7 @@ from typing import List
 from langchain.chat_models import ChatOpenAI
 from langchain.prompts import PromptTemplate
 
+from ..interface import ParserResult
 from ..init import MAX_SUMMARY_LENGTH
 from ..schema.ontology_base import OntologyBase
 from ..schema.post import RefPost
@@ -24,6 +25,8 @@ from ..prompting.jinja.zero_ref_template import zero_ref_template
 from ..prompting.jinja.single_ref_template import single_ref_template
 from ..prompting.jinja.keywords_extraction_template import keywords_extraction_template
 from ..prompting.jinja.multi_ref_template import multi_ref_template
+
+from ..schema.ontology import refLabelsOntoloty, keyWordsOntology
 
 
 class PromptCase(EnumDictKey):
@@ -319,7 +322,10 @@ class FirebaseAPIParser:
 
         return result
 
-    def process_ref_post(self, post: RefPost):
+    def process_ref_post(self, post: RefPost) -> ParserResult:
+        """
+        TODO
+        """
         md_list = []
 
         # check how many external references post mentions
@@ -347,11 +353,62 @@ class FirebaseAPIParser:
         # process post
         result = self.process_by_case(post, case, md_list)
 
-        return result
+        # PostProc PLACEHOLDER
+
+        # I couldn't find the keywords on the result
+        # (are we sure we dont want to use the LLM to extract keywords too?)
+        keywords = ["cancer-research", "science"]
+
+        def getLabelUri(label):
+            def condition(item):
+                return item["label"] == label
+
+            matches = [item for item in refLabelsOntoloty if condition(item)]
+            return matches[0]["URI"]
+
+        ref_url = (
+            result["post"].ref_urls[0] if len(result["post"].ref_urls) > 0 else None
+        )
+
+        refLabelsTriplets = (
+            [
+                f"<_:1> <{getLabelUri(label)}> <{ref_url}>"
+                for label in result["answer"]["multi_tag"]
+            ]
+            if ref_url
+            else []
+        )
+
+        keywordUri = keyWordsOntology["URI"]
+        keywordsTriplets = [f"<_:1> <{keywordUri}> <{keyword}>" for keyword in keywords]
+
+        triplets = keywordsTriplets + refLabelsTriplets
+
+        paser_result: ParserResult = {
+            "semantics": {"triplets": triplets},
+            "support": {
+                "keywords": {"keyWordsOntology": keyWordsOntology},
+                "refLabels": {
+                    "labelsOntology": refLabelsOntoloty,
+                    "refsMeta": {
+                        ref_url: {
+                            "title": "Ref Title",
+                            "description": "Ref Description",
+                            "image": "https://www.notion.so/image/https%3A%2F%2Fprod-files-secure.s3.us-west-2.amazonaws.com%2Fbb2e95f3-ca12-4bb2-bcca-6f5ceea5d8ff%2F9faa5a96-a0a1-4686-a83b-3f6bdb3b7632%2Fsensenets.jpg?table=block&id=9945c551-0142-48d3-8591-dd9b5c3d2fe7&cache=v2",
+                        }
+                    },
+                },
+            },
+        }
+
+        return paser_result
 
     def process_text(
         self, text: str, author: str = "default_author", source: str = "default_source"
-    ):
+    ) -> ParserResult:
+        """
+        Process text
+        """
         # TODO fix results
 
         # convert text to RefPost

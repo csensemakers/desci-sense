@@ -4,6 +4,8 @@ from firebase_functions import https_fn
 from firebase_admin import initialize_app
 
 from shared_functions.main import SM_FUNCTION_post_parser_config, SM_FUNCTION_post_parser_imp
+from shared_functions.interface import ParserResult
+from shared_functions.schema.ontology import keyWordsOntology, refLabelsOntoloty
 from config import openai_api_key
 
 app = initialize_app()
@@ -26,17 +28,10 @@ def SM_FUNCTION_post_parser(request):
         "openai_api_referer": "https://127.0.0.1:3000/",
     }
 
-    # semantics = SM_FUNCTION_post_parser_imp(content, parameters, config)
-    semantics = {
-        "triplets": [
-            "<_:1> <has-keyword> <happy>",
-            "<_:1> <disagrees> <https://www.alink.com/>",
-            "<_:1> <announce> <https://www.anotherlink.com/>",
-        ]
-    }
+    parser_result = SM_FUNCTION_post_parser_imp(content, parameters, config)
 
     return https_fn.Response(
-        json.dumps({"semantics": semantics }),
+        json.dumps(parser_result),
         status=200,
-        headers={"Content-Type": "application/json"}
+        headers={"Content-Type": "application/json"},
     )
