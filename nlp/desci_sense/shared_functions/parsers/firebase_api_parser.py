@@ -1,16 +1,22 @@
 from confection import Config
 
 from loguru import logger
-from typing import List
+from typing import List, Dict
 
 from langchain.chat_models import ChatOpenAI
 from langchain.prompts import PromptTemplate
+from langchain_core.runnables import RunnableParallel
 
-from ..interface import ParserResult
+from ..interface import ParserResult, ParserSupport
 from ..init import MAX_SUMMARY_LENGTH
 from ..schema.ontology_base import OntologyBase
 from ..schema.post import RefPost
 from ..schema.helpers import convert_text_to_ref_post
+from ..postprocessing import (
+    convert_predicted_relations_to_rdf_triplets,
+    convert_triplets_to_graph,
+    convert_keywords_to_triplets,
+)
 from ..postprocessing.output_parsers import TagTypeParser, KeywordParser
 from ..dataloaders import scrape_post
 from ..enum_dict import EnumDict, EnumDictKey
@@ -25,8 +31,6 @@ from ..prompting.jinja.zero_ref_template import zero_ref_template
 from ..prompting.jinja.single_ref_template import single_ref_template
 from ..prompting.jinja.keywords_extraction_template import keywords_extraction_template
 from ..prompting.jinja.multi_ref_template import multi_ref_template
-
-from ..schema.ontology import refLabelsOntoloty, keyWordsOntology
 
 
 class PromptCase(EnumDictKey):
@@ -57,7 +61,7 @@ def create_model(
         temperature=temperature,
         openai_api_key=api_key,
         openai_api_base=api_base,
-        headers={"HTTP-Referer": openapi_referer},
+        # headers={"HTTP-Referer": openapi_referer},
     )
     return model
 
@@ -87,17 +91,20 @@ class FirebaseAPIParser:
         # init model
         model_name = (
             "mistralai/mistral-7b-instruct"
-            if not "model_name" in config["model"]
+            if "model_name" not in config["model"]
             else config["model"]["model_name"]
         )
         logger.info(f"Loading parser model (type={model_name})...")
-        logger.info("self.config {}", self.config)
+
+        # TODO replace this with new config serialize to not print api key
+        # logger.info("self.config {}", self.config)
+
         self.parser_model = ChatOpenAI(
             model=model_name,
             temperature=self.config["model"]["temperature"],
             openai_api_key=self.config["openai_api"]["openai_api_key"],
             openai_api_base=self.config["openai_api"]["openai_api_base"],
-            headers={"HTTP-Referer": self.config["openai_api"]["openai_api_referer"]},
+            # headers={"HTTP-Referer": self.config["openai_api"]["openai_api_referer"]},
         )
 
         # init kw extraction chain
@@ -215,16 +222,98 @@ class FirebaseAPIParser:
 
     @property
     def max_summary_length(self):
-        return self.config["general"].get("max_summary_length", MAX_SUMMARY_LENGTH)
+        return self.config["general"].get(
+            "max_summary_length",
+            MAX_SUMMARY_LENGTH,
+        )
 
-    def process_by_case(
-        self, post: RefPost, case: PromptCase, metadata_list: List[RefMetadata] = None
-    ) -> dict:
+    def get_support_data(
+        self,
+        metadata_list: List[RefMetadata],
+    ) -> ParserSupport:
+        ontology = self.ontology.ontology_interface
+        md_dict = {m.url: m for m in metadata_list}
+        return ParserSupport(ontology=ontology, refs_meta=md_dict)
+
+    def post_process_result(
+        self,
+        semantics: Dict,
+        keywords: Dict = None,
+    ) -> ParserResult:
+        """convert parser output result into format
+        required by app interface."""
+
+        # get metadata
+        metadata_list: List[RefMetadata] = semantics.get("md_list", list())
+
+        # convert model outputs to triplets
+        triplets = convert_predicted_relations_to_rdf_triplets(
+            semantics,
+            self.ontology,
+        )
+
+        # convert triplets to graph
+        graph = convert_triplets_to_graph(triplets)
+
+        # add keywords to graph
+        if keywords:
+            kw_triplets = convert_keywords_to_triplets(keywords)
+            for t in kw_triplets:
+                graph.add(t.to_tuple())
+
+        # gather support info
+        parser_support: ParserSupport = self.get_support_data(metadata_list)
+
+        return ParserResult(semantics=graph, support=parser_support)
+
+    def create_kw_prompt(
+        self,
+        post: RefPost,
+        metadata_list: List[RefMetadata] = None,
+    ) -> str:
+        """
+        Return full prompt for keyword chain
+
+        Args:
+            post (RefPost): input post
+            metadata_list (List[RefMetadata], optional): List of extracted
+            references metadata. Defaults to None.
+
+        Returns:
+            str: full instantiated prompt
+        """
+        prompt_j2_template = self.kw_extraction["prompt_j2_template"]
+
+        # instantiate prompt with ref post details
+        full_prompt = prompt_j2_template.render(
+            author_name=post.author,
+            content=post.content,
+            metadata_list=metadata_list,
+            max_keywords=self.kw_extraction["max_keywords"],
+        )
+
+        return full_prompt
+
+    def create_semantics_prompt_by_case(
+        self,
+        post: RefPost,
+        case: PromptCase,
+        metadata_list: List[RefMetadata] = None,
+    ) -> str:
+        """
+        Return full prompt for semantics chain, depending on input PromptCase
+
+        Args:
+            post (RefPost): input post
+            case (PromptCase): input PromptCase
+            metadata_list (List[RefMetadata], optional): List of extracted
+            references metadata. Defaults to None.
+
+        Returns:
+            str: full instantiated prompt
+        """
         prompt_j2_template = self.prompt_case_dict[case]["prompt_j2_template"]
         type_templates = self.prompt_case_dict[case]["type_templates"]
-
-        # load corresponding chain
-        chain = self.prompt_case_dict[case]["chain"]
 
         # instantiate prompt with ref post details
         full_prompt = prompt_j2_template.render(
@@ -233,6 +322,24 @@ class FirebaseAPIParser:
             content=post.content,
             metadata_list=metadata_list,
         )
+
+        return full_prompt
+
+    def process_by_case(
+        self,
+        post: RefPost,
+        case: PromptCase,
+        metadata_list: List[RefMetadata] = None,
+    ) -> dict:
+        # get full prompt
+        full_prompt = self.create_semantics_prompt_by_case(
+            post,
+            case,
+            metadata_list,
+        )
+
+        # load corresponding chain
+        chain = self.prompt_case_dict[case]["chain"]
 
         # run chain on full prompt
         answer = chain.invoke({"input": full_prompt})
@@ -243,6 +350,7 @@ class FirebaseAPIParser:
             "full_prompt": full_prompt,
             "answer": answer,
             "possible_labels": self.prompt_case_dict[case]["labels"],
+            "md_list": metadata_list,
         }
 
         return result
@@ -261,6 +369,9 @@ class FirebaseAPIParser:
                 "ref_metadata_method", MetadataExtractionType.NONE.value
             )
         )
+
+        # setup prompt template
+        self.kw_prompt_template = PromptTemplate.from_template("{kw_input}")
 
         # load template
         kw_template = keywords_extraction_template
@@ -281,7 +392,7 @@ class FirebaseAPIParser:
 
         self.kw_extraction = {
             "prompt_j2_template": kw_template,
-            "chain": self.prompt_template
+            "chain": self.kw_prompt_template
             | self.kw_model
             | KeywordParser(max_keywords=max_keywords),
             "max_keywords": max_keywords,
@@ -292,26 +403,111 @@ class FirebaseAPIParser:
     def extract_post_topics(
         self, post: RefPost, metadata_list: List[RefMetadata] = None
     ) -> dict:
-        prompt_j2_template = self.kw_extraction["prompt_j2_template"]
+        # instantiate prompt with ref post details
+        full_prompt = self.create_kw_prompt(
+            post,
+            metadata_list,
+        )
 
         # load corresponding chain
         chain = self.kw_extraction["chain"]
 
-        # instantiate prompt with ref post details
-        full_prompt = prompt_j2_template.render(
-            author_name=post.author,
-            content=post.content,
-            metadata_list=metadata_list,
-            max_keywords=self.kw_extraction["max_keywords"],
-        )
-
         # run chain on full prompt
-        answer = chain.invoke({"input": full_prompt})
+        answer = chain.invoke({"kw_input": full_prompt})
 
         # TODO make structured output type
         result = {"post": post, "full_prompt": full_prompt, "answer": answer}
 
         return result
+
+    def process_text_parallel(
+        self,
+        text: str,
+        author: str = "default_author",
+        source: str = "default_source",
+    ) -> ParserResult:
+        """
+        Process input text and return results in format required by the
+        API interface.
+
+        Runs keyword extraction in parallel chain if enabled in config
+        """
+        # convert text to RefPost
+        post: RefPost = convert_text_to_ref_post(text, author, source)
+
+        combined_result = self.process_ref_post_parallel(post)
+
+        final_result = self.post_process_result(**combined_result)
+
+        return final_result
+
+    def process_ref_post_parallel(self, post: RefPost):
+        assert self.kw_mode_enabled
+        md_list = []
+
+        # check how many external references post mentions
+        if len(post.ref_urls) == 0:
+            case = PromptCase.ZERO_REF
+
+        else:
+            # at least one external reference
+            if len(post.ref_urls) == 1:
+                case = PromptCase.SINGLE_REF
+                # if metadata flag is active, retreive metadata
+                md_list = extract_metadata_by_type(
+                    post.ref_urls[0],
+                    self.md_extract_method,
+                    self.config["general"]["max_summary_length"],
+                )
+
+            else:
+                case = PromptCase.MULTI_REF
+                # TODO finish
+                # md_list = extract_metadata_by_type(post.ref_urls[0], self.md_extract_method)
+
+        # run filters if specified TODO
+
+        # create prompts
+        full_semantics_prompt = self.create_semantics_prompt_by_case(
+            post,
+            case,
+            md_list,
+        )
+
+        full_kw_prompt = self.create_kw_prompt(post, md_list)
+
+        # create parallel chain
+        kw_chain = self.kw_extraction.get("chain")
+        semantics_chain = self.prompt_case_dict[case]["chain"]
+
+        map_chain = RunnableParallel(semantics=semantics_chain, keywords=kw_chain)
+
+        combined_result = map_chain.invoke(
+            {
+                "kw_input": full_kw_prompt,
+                "input": full_semantics_prompt,
+            }
+        )
+
+        # TODO hacky, find a cleaner way to pass this info
+        semantics_answer = combined_result.get("semantics")
+        kw_answer = combined_result.get("keywords")
+
+        combined_result["keywords"] = {
+            "post": post,
+            "full_prompt": full_kw_prompt,
+            "answer": kw_answer,
+        }
+
+        combined_result["semantics"] = {
+            "post": post,
+            "full_prompt": full_semantics_prompt,
+            "answer": semantics_answer,
+            "possible_labels": self.prompt_case_dict[case]["labels"],
+            "md_list": md_list,
+        }
+
+        return combined_result
 
     def extract_post_topics_w_metadata(self, post: RefPost) -> List[str]:
         md_list = extract_all_metadata_by_type(
@@ -323,6 +519,22 @@ class FirebaseAPIParser:
         return result
 
     def process_ref_post(self, post: RefPost) -> ParserResult:
+        """
+        Process input post and return results in the format required by
+        the API interface.
+        """
+        result: Dict = self.process_ref_post_st(post)
+
+        # post processing
+        full_result: ParserResult = self.post_process_result(
+            result,
+        )
+
+        # TODO keywords. maybe async call?
+
+        return full_result
+
+    def process_ref_post_st(self, post: RefPost) -> dict:
         """
         TODO
         """
@@ -353,68 +565,40 @@ class FirebaseAPIParser:
         # process post
         result = self.process_by_case(post, case, md_list)
 
-        # PostProc PLACEHOLDER
-
-        # I couldn't find the keywords on the result
-        # (are we sure we dont want to use the LLM to extract keywords too?)
-        keywords = ["cancer-research", "science"]
-
-        def getLabelUri(label):
-            def condition(item):
-                return item["label"] == label
-
-            matches = [item for item in refLabelsOntoloty if condition(item)]
-            return matches[0]["URI"]
-
-        ref_url = (
-            result["post"].ref_urls[0] if len(result["post"].ref_urls) > 0 else None
-        )
-
-        refLabelsTriplets = (
-            [
-                f"<_:1> <{getLabelUri(label)}> <{ref_url}>"
-                for label in result["answer"]["multi_tag"]
-            ]
-            if ref_url
-            else []
-        )
-
-        keywordUri = keyWordsOntology["URI"]
-        keywordsTriplets = [f"<_:1> <{keywordUri}> <{keyword}>" for keyword in keywords]
-
-        triplets = keywordsTriplets + refLabelsTriplets
-
-        paser_result: ParserResult = {
-            "semantics": {"triplets": triplets},
-            "support": {
-                "keywords": {"keyWordsOntology": keyWordsOntology},
-                "refLabels": {
-                    "labelsOntology": refLabelsOntoloty,
-                    "refsMeta": {
-                        ref_url: {
-                            "title": "Ref Title",
-                            "description": "Ref Description",
-                            "image": "https://www.notion.so/image/https%3A%2F%2Fprod-files-secure.s3.us-west-2.amazonaws.com%2Fbb2e95f3-ca12-4bb2-bcca-6f5ceea5d8ff%2F9faa5a96-a0a1-4686-a83b-3f6bdb3b7632%2Fsensenets.jpg?table=block&id=9945c551-0142-48d3-8591-dd9b5c3d2fe7&cache=v2",
-                        }
-                    },
-                },
-            },
-        }
-
-        return paser_result
+        return result
 
     def process_text(
-        self, text: str, author: str = "default_author", source: str = "default_source"
+        self,
+        text: str,
+        author: str = "default_author",
+        source: str = "default_source",
     ) -> ParserResult:
         """
-        Process text
+        Process input text and return results in format required by the
+        API interface.
+        """
+        # convert text to RefPost
+        post: RefPost = convert_text_to_ref_post(text, author, source)
+
+        result = self.process_ref_post(post)
+
+        return result
+
+    def process_text_st(
+        self,
+        text: str,
+        author: str = "default_author",
+        source: str = "default_source",
+    ) -> ParserResult:
+        """
+        Process text for format required by streamlit demo
         """
         # TODO fix results
 
         # convert text to RefPost
         post: RefPost = convert_text_to_ref_post(text, author, source)
 
-        result = self.process_ref_post(post)
+        result = self.process_ref_post_st(post)
 
         return result
 
@@ -426,6 +610,6 @@ class FirebaseAPIParser:
                 f"Could not detect social media type of input URL: {post_url}"
             )
 
-        result = self.process_ref_post(post)
+        result = self.process_ref_post_st(post)
 
         return result

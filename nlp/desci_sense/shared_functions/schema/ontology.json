@@ -2,7 +2,7 @@
     "semantic_predicates": [
         {
             "name": "endorses",
-            "uri": null,
+            "uri": "https://sense-nets.xyz/endorses",
             "versions": [
                 "v0"
             ],
@@ -53,7 +53,7 @@
         },
         {
             "name": "possibleMissingReference",
-            "uri": null,
+            "uri": "https://sense-nets.xyz/possibleMissingReference",
             "versions": [
                 "v0"
             ],
@@ -68,8 +68,8 @@
             ]
         },
         {
-            "name": "dgObservation",
-            "uri": null,
+            "name": "observation",
+            "uri": "https://schema.org/Observation",
             "versions": [
                 "v0"
             ],
@@ -84,8 +84,8 @@
             ]
         },
         {
-            "name": "dgClaim",
-            "uri": null,
+            "name": "claim",
+            "uri": "https://schema.org/Claim",
             "versions": [
                 "v0"
             ],
@@ -100,8 +100,8 @@
             ]
         },
         {
-            "name": "dgQuestion",
-            "uri": null,
+            "name": "question",
+            "uri": "https://schema.org/Question",
             "versions": [
                 "v0"
             ],
@@ -117,7 +117,7 @@
         },
         {
             "name": "watchingStatus",
-            "uri": null,
+            "uri": "https://sense-nets.xyz/watchingStatus",
             "versions": [
                 "v0"
             ],
@@ -133,7 +133,7 @@
         },
         {
             "name": "readingStatus",
-            "uri": null,
+            "uri": "https://sense-nets.xyz/readingStatus",
             "versions": [
                 "v0"
             ],
@@ -149,7 +149,7 @@
         },
         {
             "name": "listeningStatus",
-            "uri": null,
+            "uri": "https://sense-nets.xyz/listeningStatus",
             "versions": [
                 "v0"
             ],
@@ -198,7 +198,7 @@
         },
         {
             "name": "recommends",
-            "uri": null,
+            "uri": "https://sense-nets.xyz/recommends",
             "versions": [
                 "v0"
             ],
@@ -215,7 +215,7 @@
         },
         {
             "name": "asksQuestionAbout",
-            "uri": null,
+            "uri": "https://sense-nets.xyz/asksQuestionAbout",
             "versions": [
                 "v0"
             ],
@@ -266,7 +266,7 @@
         },
         {
             "name": "announcesEvent",
-            "uri": null,
+            "uri": "https://sense-nets.xyz/announcesEvent",
             "versions": [
                 "v0"
             ],
@@ -282,7 +282,7 @@
         },
         {
             "name": "announcesJob",
-            "uri": null,
+            "uri": "https://sense-nets.xyz/announcesJob",
             "versions": [
                 "v0"
             ],
@@ -298,7 +298,7 @@
         },
         {
             "name": "announcesResource",
-            "uri": null,
+            "uri": "https://sense-nets.xyz/announcesResource",
             "versions": [
                 "v0"
             ],

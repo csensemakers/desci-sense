@@ -60,7 +60,7 @@ def init_multi_stage_parser_config(
 
     config = {**defaults, **config, **optional}
 
-    logger.info(f"config {{}}", config)
+    # logger.info(f"config {{}}", config)
 
     parser_config = Config(
         {

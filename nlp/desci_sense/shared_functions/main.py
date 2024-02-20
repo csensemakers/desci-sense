@@ -20,8 +20,11 @@ def SM_FUNCTION_post_parser_imp(content, parameters, config) -> ParserResult:
 
     parser = FirebaseAPIParser(paserConfig)
 
+    # set extraction method to citoid
+    parser.set_md_extract_method("citoid")
+
     logger.info(f"Running parser on {content}...")
 
-    result = parser.process_text(content)
+    result = parser.process_text_parallel(content)
 
     return result
