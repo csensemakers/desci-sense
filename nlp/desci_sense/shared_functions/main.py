@@ -23,8 +23,10 @@ def SM_FUNCTION_post_parser_imp(content, parameters, config) -> ParserResult:
     # set extraction method to citoid
     parser.set_md_extract_method("citoid")
 
-    logger.info(f"Running parser on {content}...")
+    logger.info(f"Running parser on content: {content}...")
 
     result = parser.process_text_parallel(content)
+    
+    logger.info(f"Parser run ended result: {result}...")
 
     return result

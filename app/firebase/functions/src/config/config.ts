@@ -20,7 +20,7 @@ export const MOCK_SEMANTICS = process.env.MOCK_SEMANTICS === 'true';
 export const APP_URL =
   process.env.NODE_ENV !== 'production'
     ? 'http://127.0.0.1:3000/'
-    : 'https://split--sensemakers.netlify.app/';
+    : 'https://sensemakers.netlify.app/';
 
 export const TWITTER_CALLBACK_URL = APP_URL;
 

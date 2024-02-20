@@ -12,7 +12,7 @@ from config import openai_api_key
 app = initialize_app()
 
 
-@https_fn.on_request(min_instances=1)
+@https_fn.on_request(min_instances=1, memory=512)
 def SM_FUNCTION_post_parser(request):
     """
     Wrapper on SM_FUNCTION_post_parser_imp

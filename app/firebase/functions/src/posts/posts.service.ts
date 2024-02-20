@@ -41,9 +41,12 @@ export const getPostSemantics = async (content: string) => {
     body: JSON.stringify({ content, parameters }),
   });
 
-  const body = await response.json();
-
-  logger.debug('getPostSemantics', body);
-
-  return body;
+  try {
+    const body = await response.json();
+    logger.debug('getPostSemantics', body);
+    return body;
+  } catch (e) {
+    logger.error(`error: ${JSON.stringify(e)}`)
+    logger.error(`Error calling SM_FUNCTION_post_parser ${JSON.stringify(response)}`);
+  }
 };
