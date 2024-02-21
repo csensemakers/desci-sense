@@ -18,7 +18,9 @@ const forceTag = (input: string) => {
 };
 
 export const constructTweet = async (post: AppPostCreate) => {
-  const tags = await getTwitterTags(post.originalParsed, post.semantics);
+  const tags = post.originalParsed
+    ? await getTwitterTags(post.originalParsed, post.semantics)
+    : undefined;
 
   const appendTags =
     tags !== undefined

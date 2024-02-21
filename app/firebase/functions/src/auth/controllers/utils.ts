@@ -2,10 +2,7 @@ import * as jwt from 'jsonwebtoken';
 import * as forge from 'node-forge';
 import { verifyMessage } from 'viem';
 
-import {
-  getEthToRSAMessage,
-  getRsaToEthMessage,
-} from '../../@shared/sig.utils';
+import { getEthToRSAMessage } from '../../@shared/sig.utils';
 import { EthAccountDetails } from '../../@shared/types';
 import { env } from '../../config/env';
 
@@ -25,20 +22,10 @@ export function verifyAccessToken(token: string): string {
 }
 
 export const validateEthDetails = async (details: EthAccountDetails) => {
-  const validRsa = verifyRSA(
-    getRsaToEthMessage(details.ethAddress),
-    details.rsaPublickey,
-    details.rsaToEthSignature
-  );
-
-  if (!validRsa) {
-    throw new Error(`Invalid RSA signature`);
-  }
-
   const validEth = await verifyMessage({
     address: details.ethAddress,
     message: getEthToRSAMessage(details.rsaPublickey),
-    signature: details.rootToRsaSignature,
+    signature: details.ethSignature,
   });
 
   if (!validEth) {

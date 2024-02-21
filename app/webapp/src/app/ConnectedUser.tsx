@@ -1,6 +1,6 @@
-import { Box, DropButton, Text } from 'grommet';
+import { Anchor, Box, DropButton, Text } from 'grommet';
 import { UserExpert } from 'grommet-icons';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { AppButton } from '../ui-components';
@@ -22,12 +22,12 @@ export const ConnectedUser = (props: {}) => {
 
   const [showDrop, setShowDrop] = useState<boolean>(false);
 
-  const parts = connectedUser?.orcid?.name.split(' ');
-  const name = (() => {
+  const name = useMemo(() => {
+    const parts = connectedUser?.orcid?.name.split(' ');
     if (!parts) return '';
     if (parts.length > 2) return `${parts[0]} ${parts[2]}`;
     return `${parts[0]} ${parts[1]}`;
-  })();
+  }, [connectedUser?.orcid?.name]);
 
   const content = (() => {
     if (!isConnected) {
@@ -78,6 +78,13 @@ export const ConnectedUser = (props: {}) => {
               <Box margin={{ bottom: 'small' }}>
                 <Text>{cap(t('nanopub signer'))}</Text>
                 <AppAddress address={connectedUser.eth.ethAddress}></AppAddress>
+                <Anchor
+                  style={{}}
+                  target="_blank"
+                  href={`${connectedUser.eth.introNanopub}`}
+                  size="small">
+                  {t('introPub')}
+                </Anchor>
               </Box>
             ) : (
               <></>

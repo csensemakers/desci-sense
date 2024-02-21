@@ -3,7 +3,7 @@ import { array, object, string } from 'yup';
 export const publishPostsValidationScheme = object({
   content: string().required(),
   platforms: array().of(string()).required(),
-  originalParsed: object().required(),
+  originalParsed: object().optional(),
   signedNanopub: object().optional(),
   semantics: string().optional(),
 }).noUnknown(true);

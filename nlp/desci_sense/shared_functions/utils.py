@@ -108,7 +108,10 @@ def extract_urls(text):
     """takes a string text as input and uses the regular expression pattern to find all
     occurrences of URLs in the text. returns a list of all non-overlapping matches of the regular expression pattern in the string.
     """
-    url_regex = r"((http|ftp|https):\/\/([\w_-]+(?:(?:\.[\w_-]+)+))([\w.,@?^=%&:\/~+#-]*[\w@?^=%&\/~+#-]))"
+    # url_regex = r"((http|ftp|https):\/\/([\w_-]+(?:(?:\.[\w_-]+)+))([\w.,@?^=%&:\/~+#-]*[\w@?^=%&\/~+#-]))"
+    # Loose match urls
+    url_regex = r"\b(?:https?://)?(?:www\.)?([a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,6})(:[0-9]{1,5})?(/[\w\-./?%&=]*)?"
+
     res = re.findall(url_regex, text)
     final_res = [r[0] for r in res]
     return final_res

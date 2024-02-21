@@ -24,8 +24,8 @@ export interface AppUser {
 export interface EthAccountDetails {
   ethAddress: HexStr;
   rsaPublickey: string;
-  rsaToEthSignature: string;
-  rootToRsaSignature: HexStr;
+  ethSignature: HexStr;
+  introNanopub?: string;
 }
 
 export interface AppUserRead {
@@ -55,7 +55,7 @@ export enum PLATFORM {
 
 export interface AppPostCreate {
   content: string;
-  originalParsed: ParserResult;
+  originalParsed?: ParserResult;
   semantics?: AppPostSemantics;
   signedNanopub?: { uri: string };
   platforms: PLATFORM[];

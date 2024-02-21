@@ -1,39 +1,65 @@
 import init, { Nanopub } from '@nanopub/sign';
+import { DataFactory, Store } from 'n3';
 
 import { THIS_POST_NAME } from '../app/config';
 import { parseRDF, replaceNodes, writeRDF } from '../shared/n3.utils';
 import { AppPostSemantics } from '../shared/parser.types';
 import { AppUserRead } from '../shared/types';
+import {
+  ASSERTION_URI,
+  HAS_COMMENT_URI,
+  NANOPUB_PLACEHOLDER,
+} from './semantics.helper';
 
-export const constructNanopub = async (
+export const constructPostNanopub = async (
   content: string,
-  semantics: AppPostSemantics,
-  user: AppUserRead
+  user: AppUserRead,
+  semantics?: AppPostSemantics
 ): Promise<Nanopub> => {
   await (init as any)();
-  const NANOPUB_PLACEHOLDER = 'http://purl.org/nanopub/temp/mynanopub#';
-  const store = await parseRDF(semantics);
-  const assertionsStore = replaceNodes(store, {
-    [THIS_POST_NAME]: `${NANOPUB_PLACEHOLDER}assertion`,
-  });
+
+  /** Then get the RDF as triplets */
+  const assertionsStore = await (async () => {
+    if (!semantics) return new Store();
+
+    const store = await parseRDF(semantics);
+
+    /** Manipulate assertion semantics on the N3 store */
+
+    /** replace THIS_POST_NAME node with the nanopub:assertion node */
+    const assertionsStore = replaceNodes(store, {
+      [THIS_POST_NAME]: ASSERTION_URI,
+    });
+
+    return assertionsStore;
+  })();
+
+  /** Add the post context as a comment of the assertion */
+  assertionsStore.addQuad(
+    DataFactory.namedNode(ASSERTION_URI),
+    DataFactory.namedNode(HAS_COMMENT_URI),
+    DataFactory.literal(content),
+    DataFactory.defaultGraph()
+  );
+
+  /** Then get the RDF as triplets */
   const assertionsRdf = await writeRDF(assertionsStore);
 
+  /** append the npx:ExampleNanopub (manually for now) */
   const exampleTriplet =
     process.env.NODE_ENV !== 'production' ? `: a npx:ExampleNanopub .` : '';
 
-  /** identity data */
+  /** append the data related to the author (including) identity */
   const orcid = user.orcid?.orcid;
 
   const hasEthSigner = user.eth !== undefined;
   const address = user.eth?.ethAddress;
-  const rsaToEthSignature = user.eth?.rsaToEthSignature;
-  const rootToRsaSignature = user.eth?.rootToRsaSignature;
+  const ethSignature = user.eth?.ethSignature;
 
   const ethSignerRdf = hasEthSigner
     ? `
       : <http://sense-nets.xyz/rootSigner> "${address}" .
-      : <http://sense-nets.xyz/rsaToEthSignature> "${rsaToEthSignature}" .
-      : <http://sense-nets.xyz/rootToRsaSignature> "${rootToRsaSignature}" .
+      : <http://sense-nets.xyz/rootToRsaSignature> "${ethSignature}" .
   `
     : '';
 

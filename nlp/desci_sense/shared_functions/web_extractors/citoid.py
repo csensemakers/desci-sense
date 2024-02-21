@@ -70,6 +70,10 @@ def fetch_citation(target_url):
     if response.status_code == 200:
         # return JSON response
         response = response.json()[0]
+
+        # remember the target url as the original_url
+        response["original_url"] = target_url
+
         return response
     else:
         formatted_err_msg = {

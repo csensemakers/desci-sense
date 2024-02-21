@@ -1,17 +1,18 @@
 import { Nanopub } from '@nanopub/sign';
 import { Box, Text } from 'grommet';
 import { Magic, Send } from 'grommet-icons';
-import { useCallback, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 // import { useDebounce } from 'use-debounce';
 import { useAccountContext } from '../app/AccountContext';
 import { useNanopubContext } from '../app/NanopubContext';
-import { TweetAnchor } from '../app/TwitterAnchor';
+import { NanopubAnchor, TweetAnchor } from '../app/TwitterAnchor';
 import { ViewportPage } from '../app/Viewport';
 import { NANOPUBS_SERVER } from '../app/config';
 import { getPostSemantics, postMessage } from '../functionsCalls/post.requests';
-import { constructNanopub } from '../nanopubs/construct.nanopub';
+import { constructPostNanopub } from '../nanopubs/construct.post.nanopub';
+import { PlatformSelector } from '../post/PlatformSelector';
 import { PostEditor } from '../post/PostEditor';
 import { SemanticsEditor } from '../semantics/SemanticsEditor';
 import { PatternProps } from '../semantics/patterns/patterns';
@@ -41,6 +42,8 @@ export const AppPostPage = (props: {}) => {
   const [postText, setPostText] = useState<string>();
   // const [postTextDebounced] = useDebounce(postText, 10);
 
+  const [platforms, setPlatforms] = useState<PLATFORM[]>();
+
   /** parsed is the parsed semantics as computed by the service */
   const [parsed, setParsed] = useState<ParserResult>();
 
@@ -56,6 +59,7 @@ export const AppPostPage = (props: {}) => {
   const [post, setPost] = useState<AppPost>();
 
   const canReRun = parsed && postText !== parsed.post;
+  const canPost = platforms && platforms.length && !isGettingSemantics;
 
   // const reset = () => {
   //   setPost(undefined);
@@ -67,18 +71,19 @@ export const AppPostPage = (props: {}) => {
   // };
 
   const send = useCallback(async () => {
-    if (postText && appAccessToken && parsed) {
+    if (postText && appAccessToken && platforms) {
       setIsSending(true);
 
       let nanopubPublished: Nanopub | undefined = undefined;
-      if (profile) {
-        const _semantics = semantics || parsed.semantics;
+
+      if (platforms.includes(PLATFORM.Nanopubs) && profile) {
+        const _semantics = semantics || parsed?.semantics;
 
         if (!connectedUser) throw new Error('User not connected');
-        const nanopub = await constructNanopub(
+        const nanopub = await constructPostNanopub(
           postText,
-          _semantics,
-          connectedUser
+          connectedUser,
+          _semantics
         );
         if (DEBUG) console.log({ nanopub });
 
@@ -95,8 +100,9 @@ export const AppPostPage = (props: {}) => {
         originalParsed: parsed,
         semantics: semantics,
         signedNanopub: nanopubPublished?.info(),
-        platforms: [PLATFORM.X],
+        platforms,
       };
+
       if (DEBUG) console.log('postMessage', { postCreate });
       postMessage(postCreate, appAccessToken).then((post) => {
         if (post) {
@@ -107,7 +113,15 @@ export const AppPostPage = (props: {}) => {
         }
       });
     }
-  }, [appAccessToken, connectedUser, parsed, postText, profile, semantics]);
+  }, [
+    appAccessToken,
+    connectedUser,
+    parsed,
+    platforms,
+    postText,
+    profile,
+    semantics,
+  ]);
 
   const canGetSemantics = postText && appAccessToken;
   const getSemantics = () => {
@@ -156,7 +170,13 @@ export const AppPostPage = (props: {}) => {
       return (
         <Box gap="medium" align="center">
           <AppHeading level="3">{t('postSent')}</AppHeading>
-          <TweetAnchor id={post.tweet?.id}></TweetAnchor>
+          {post.tweet ? (
+            <TweetAnchor id={post.tweet?.id}></TweetAnchor>
+          ) : post.signedNanopub ? (
+            <NanopubAnchor href={post.signedNanopub.uri}></NanopubAnchor>
+          ) : (
+            <></>
+          )}
           <AppButton label={t('postNew')} onClick={() => newPost()}></AppButton>
         </Box>
       );
@@ -164,6 +184,12 @@ export const AppPostPage = (props: {}) => {
 
     return (
       <Box width="100%" pad="medium">
+        <Box>
+          <AppHeading level="3">{t('Publishto')}:</AppHeading>
+          <PlatformSelector
+            margin={{ vertical: 'medium' }}
+            onChanged={setPlatforms}></PlatformSelector>
+        </Box>
         <PostEditor
           editable
           placeholder={t('writeYourPost')}
@@ -180,6 +206,7 @@ export const AppPostPage = (props: {}) => {
             <Box fill>
               {canReRun ? (
                 <AppButton
+                  margin={{ vertical: 'small' }}
                   onClick={() => getSemantics()}
                   label={semantics ? t('reset') : t('refresh')}
                   icon={
@@ -222,6 +249,7 @@ export const AppPostPage = (props: {}) => {
       nav={
         <>
           <AppButton
+            disabled={!canPost}
             margin={{ vertical: 'small' }}
             reverse
             icon={<Send color={constants.colors.primary}></Send>}

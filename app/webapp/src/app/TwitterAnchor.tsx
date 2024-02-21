@@ -1,4 +1,4 @@
-import { Anchor } from 'grommet';
+import { Anchor, AnchorExtendedProps } from 'grommet';
 import { useTranslation } from 'react-i18next';
 
 import { LoadingDiv } from '../ui-components/LoadingDiv';
@@ -31,6 +31,15 @@ export const TweetAnchor = (props: { id?: string; label?: string }) => {
       href={`https://twitter.com/x/status/${props.id}`}
       size="medium">
       {label}
+    </Anchor>
+  );
+};
+
+export const NanopubAnchor = (props: AnchorExtendedProps) => {
+  const { t } = useTranslation();
+  return (
+    <Anchor target="_blank" size="small" {...props}>
+      {t('nanopub')}
     </Anchor>
   );
 };

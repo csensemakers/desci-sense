@@ -12,6 +12,6 @@ export const verifierCodeScheme = object({
 export const ethDetailsScheme = object({
   ethAddress: string().required(),
   rsaPublickey: string().required(),
-  rsaToEthSignature: string().required(),
-  rootToRsaSignature: string().required(),
+  ethSignature: string().required(),
+  introNanopub: string().optional(),
 }).noUnknown(true);
