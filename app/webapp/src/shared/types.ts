@@ -24,8 +24,7 @@ export interface AppUser {
 export interface EthAccountDetails {
   ethAddress: HexStr;
   rsaPublickey: string;
-  rsaToEthSignature: string;
-  rootToRsaSignature: HexStr;
+  ethSignature: HexStr;
 }
 
 export interface AppUserRead {

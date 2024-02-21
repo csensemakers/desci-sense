@@ -20,7 +20,7 @@ import {
 import { useAccountContext } from './AccountContext';
 import { useAppSigner } from './signer/SignerContext';
 
-const DEBUG = false;
+const DEBUG = true;
 
 export type NanopubContextType = {
   profile?: NpProfile;
@@ -55,24 +55,39 @@ export const NanopubContext = (props: PropsWithChildren) => {
   const [profileAddress, setProfileAddress] = useState<HexStr>();
   const [rsaKeys, setRsaKeys] = useState<RSAKeys>();
 
-  const [rsaToEthSignature, setRsaToEthSignature] = useState<string>();
-  const [rootToRsaSignature, setRootToRsaSignature] = useState<HexStr>();
+  const [ethSignature, setEthSignature] = useState<HexStr>();
+
+  const disconnect = () => {
+    localStorage.removeItem(KEYS_KEY);
+    readKeys();
+  };
 
   /**
    * check for the rsa keys on localStorage, if they exist
    * prepares the Nanopub profile
    */
-  const checkProfile = useCallback(async () => {
+  const readKeys = useCallback(async () => {
     const keysStr = localStorage.getItem(KEYS_KEY);
     if (DEBUG) console.log('checkProfile', { keysStr });
 
     if (!connectedUser || !connectedUser.orcid) return;
-
     if (keysStr) {
       const keys = JSON.parse(keysStr);
       setRsaKeys(keys);
+    } else {
+      setRsaKeys(undefined);
+    }
+  }, [connectedUser]);
 
-      const keyBody = keys.privateKey
+  /** check profile once */
+  useEffect(() => {
+    readKeys();
+  }, [readKeys]);
+
+  /** set profile */
+  const buildProfile = async () => {
+    if (rsaKeys && connectedUser && connectedUser.eth && connectedUser.orcid) {
+      const keyBody = rsaKeys.privateKey
         .replace(/-----BEGIN PRIVATE KEY-----\n?/, '')
         .replace(/\n?-----END PRIVATE KEY-----/, '')
         .replace(/\r/g, '')
@@ -91,12 +106,19 @@ export const NanopubContext = (props: PropsWithChildren) => {
       if (DEBUG) console.log('profile', { profile });
 
       setProfile(profile);
-      setProfileAddress(keys.address);
+      setProfileAddress(rsaKeys.address);
       setIsConnecting(false);
     } else {
       reset();
     }
-  }, [connectedUser]);
+  };
+
+  /** set Nanopub profile (considered the end of the connecting flow) */
+  useEffect(() => {
+    if (rsaKeys && connectedUser && connectedUser.eth) {
+      buildProfile();
+    }
+  }, [connectedUser, rsaKeys]);
 
   /** keep the rsaPublicKey up to date with the profile */
   const publicKey = useMemo(() => {
@@ -107,37 +129,22 @@ export const NanopubContext = (props: PropsWithChildren) => {
   /** keep user details aligned with profile and keep track of all the
    * eth<>rsa signatures (if not already done) */
   useEffect(() => {
-    if (connectedUser && !connectedUser.eth) {
-      if (
-        rsaKeys &&
-        address &&
-        rsaToEthSignature &&
-        rootToRsaSignature &&
-        appAccessToken
-      ) {
+    if (connectedUser && !connectedUser.eth && connectIntention) {
+      if (rsaKeys && address && ethSignature && appAccessToken) {
         const details: EthAccountDetails = {
           rsaPublickey: rsaKeys.publicKey,
           ethAddress: address,
-          rsaToEthSignature,
-          rootToRsaSignature,
+          ethSignature,
         };
         if (DEBUG) console.log('posting user details', { details });
         postUserEthDetails(details, appAccessToken).then(() => {
           refreshConnectedUser();
         });
-      } else if (!rsaToEthSignature && rsaKeys && address) {
-        if (DEBUG)
-          console.log('generating RSA signature of eth account', { rsaKeys });
-        const rsaToEthSignature = signMessageRSA(
-          getRsaToEthMessage(address),
-          rsaKeys.privateKey
-        );
-        setRsaToEthSignature(rsaToEthSignature);
-      } else if (!rootToRsaSignature && signMessage && rsaKeys) {
+      } else if (!ethSignature && signMessage && rsaKeys) {
         if (DEBUG)
           console.log('generating ETH signature of RSA account', { address });
         signMessage(getEthToRSAMessage(rsaKeys.publicKey)).then((sig) => {
-          setRootToRsaSignature(sig);
+          setEthSignature(sig);
         });
       }
     }
@@ -146,17 +153,11 @@ export const NanopubContext = (props: PropsWithChildren) => {
     address,
     connectedUser,
     rsaKeys,
-    rsaToEthSignature,
-    rootToRsaSignature,
+    ethSignature,
     appAccessToken,
     signMessage,
     refreshConnectedUser,
   ]);
-
-  /** check profile once */
-  useEffect(() => {
-    checkProfile();
-  }, [checkProfile]);
 
   /** create rsa keys from a secret (camed from a secret signature with the eth wallet) */
   const deriveKeys = useCallback(
@@ -166,9 +167,9 @@ export const NanopubContext = (props: PropsWithChildren) => {
       if (DEBUG) console.log('deriveKeys done', { keys });
       localStorage.setItem(KEYS_KEY, JSON.stringify({ ...keys, address }));
 
-      checkProfile();
+      readKeys();
     },
-    [checkProfile]
+    [readKeys]
   );
 
   /** as long as connect intention is true, go through the connection steps */
@@ -226,10 +227,8 @@ export const NanopubContext = (props: PropsWithChildren) => {
     setProfile(undefined);
   };
 
-  const disconnect = () => {
-    localStorage.removeItem(KEYS_KEY);
-    checkProfile();
-  };
+  const needAuthorize =
+    profile === undefined || (connectedUser && connectedUser.eth === undefined);
 
   return (
     <NanopubContextValue.Provider
@@ -238,7 +237,7 @@ export const NanopubContext = (props: PropsWithChildren) => {
         disconnect,
         profile,
         isConnecting,
-        needAuthorize: profile === undefined,
+        needAuthorize,
         profileAddress,
       }}>
       {props.children}

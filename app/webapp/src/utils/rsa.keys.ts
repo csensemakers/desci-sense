@@ -1,8 +1,11 @@
 import forge from 'node-forge';
 
+import { HexStr } from '../shared/types';
+
 export interface RSAKeys {
   privateKey: string;
   publicKey: string;
+  address?: HexStr;
 }
 
 export const getRSAKeys = (seed: string): RSAKeys => {

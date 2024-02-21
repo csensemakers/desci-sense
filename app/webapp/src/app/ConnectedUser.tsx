@@ -1,6 +1,6 @@
 import { Box, DropButton, Text } from 'grommet';
 import { UserExpert } from 'grommet-icons';
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { AppButton } from '../ui-components';
@@ -22,12 +22,12 @@ export const ConnectedUser = (props: {}) => {
 
   const [showDrop, setShowDrop] = useState<boolean>(false);
 
-  const parts = connectedUser?.orcid?.name.split(' ');
-  const name = (() => {
+  const name = useMemo(() => {
+    const parts = connectedUser?.orcid?.name.split(' ');
     if (!parts) return '';
     if (parts.length > 2) return `${parts[0]} ${parts[2]}`;
     return `${parts[0]} ${parts[1]}`;
-  })();
+  }, [connectedUser?.orcid?.name]);
 
   const content = (() => {
     if (!isConnected) {

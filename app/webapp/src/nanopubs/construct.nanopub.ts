@@ -26,14 +26,12 @@ export const constructNanopub = async (
 
   const hasEthSigner = user.eth !== undefined;
   const address = user.eth?.ethAddress;
-  const rsaToEthSignature = user.eth?.rsaToEthSignature;
-  const rootToRsaSignature = user.eth?.rootToRsaSignature;
+  const ethSignature = user.eth?.ethSignature;
 
   const ethSignerRdf = hasEthSigner
     ? `
       : <http://sense-nets.xyz/rootSigner> "${address}" .
-      : <http://sense-nets.xyz/rsaToEthSignature> "${rsaToEthSignature}" .
-      : <http://sense-nets.xyz/rootToRsaSignature> "${rootToRsaSignature}" .
+      : <http://sense-nets.xyz/rootToRsaSignature> "${ethSignature}" .
   `
     : '';
 
