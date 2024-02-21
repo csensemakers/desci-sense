@@ -1,8 +1,10 @@
 import {
+  Box,
   Button,
   ButtonExtendedProps,
   DropButton,
   DropButtonExtendedProps,
+  Text,
 } from 'grommet';
 import { useState } from 'react';
 
@@ -104,5 +106,21 @@ export const AppModalButtonResponsive = (props: {
         <></>
       )}
     </>
+  );
+};
+
+export const AppButtonTwoLinesLabel = (props: {
+  tag?: JSX.Element | string;
+  label?: JSX.Element | string;
+}) => {
+  return (
+    <Box align="start">
+      <Box>
+        <Text size="xsmall">{props.tag}</Text>
+      </Box>
+      <Box>
+        <Text>{props.label}</Text>
+      </Box>
+    </Box>
   );
 };

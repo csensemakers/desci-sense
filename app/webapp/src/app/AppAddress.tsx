@@ -1,12 +1,16 @@
-import { Anchor } from 'grommet';
+import { Anchor, Text } from 'grommet';
 import { getAddress } from 'viem';
 import { useEnsName } from 'wagmi';
 
 import { HexStr } from '../shared/types';
 import { LoadingDiv } from '../ui-components/LoadingDiv';
 
-export const AppAddress = (props: { address?: HexStr; digits?: number }) => {
-  const digits = props.digits || 5;
+export const AppAddress = (props: {
+  address?: HexStr;
+  digits?: number;
+  asText?: boolean;
+}) => {
+  const digits = props.digits || 4;
 
   const { data: ens } = useEnsName({ address: props.address });
 
@@ -20,6 +24,9 @@ export const AppAddress = (props: { address?: HexStr; digits?: number }) => {
     ? `0x${address.slice(2, 2 + digits)}...${address.slice(address.length - digits, address.length)}`
     : '';
 
+  if (props.asText) {
+    return <Text>{ens ? ens : addressTxt}</Text>;
+  }
   return (
     <Anchor
       style={{}}

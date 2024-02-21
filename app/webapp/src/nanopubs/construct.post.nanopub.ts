@@ -1,5 +1,5 @@
 import init, { Nanopub } from '@nanopub/sign';
-import { DataFactory } from 'n3';
+import { DataFactory, Store } from 'n3';
 
 import { THIS_POST_NAME } from '../app/config';
 import { parseRDF, replaceNodes, writeRDF } from '../shared/n3.utils';
@@ -13,19 +13,26 @@ import {
 
 export const constructPostNanopub = async (
   content: string,
-  semantics: AppPostSemantics,
-  user: AppUserRead
+  user: AppUserRead,
+  semantics?: AppPostSemantics
 ): Promise<Nanopub> => {
   await (init as any)();
 
-  const store = await parseRDF(semantics);
+  /** Then get the RDF as triplets */
+  const assertionsStore = await (async () => {
+    if (!semantics) return new Store();
 
-  /** Manipulate assertion semantics on the N3 store */
+    const store = await parseRDF(semantics);
 
-  /** replace THIS_POST_NAME node with the nanopub:assertion node */
-  const assertionsStore = replaceNodes(store, {
-    [THIS_POST_NAME]: ASSERTION_URI,
-  });
+    /** Manipulate assertion semantics on the N3 store */
+
+    /** replace THIS_POST_NAME node with the nanopub:assertion node */
+    const assertionsStore = replaceNodes(store, {
+      [THIS_POST_NAME]: ASSERTION_URI,
+    });
+
+    return assertionsStore;
+  })();
 
   /** Add the post context as a comment of the assertion */
   assertionsStore.addQuad(

@@ -55,7 +55,7 @@ export enum PLATFORM {
 
 export interface AppPostCreate {
   content: string;
-  originalParsed: ParserResult;
+  originalParsed?: ParserResult;
   semantics?: AppPostSemantics;
   signedNanopub?: { uri: string };
   platforms: PLATFORM[];

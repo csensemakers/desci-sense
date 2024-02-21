@@ -37,8 +37,8 @@ export const AppTest = (props: {}) => {
     if (!connectedUser) throw new Error('User not connected');
     const nanopub = await constructPostNanopub(
       'A text',
-      semantics,
-      connectedUser
+      connectedUser,
+      semantics
     );
 
     console.log({ semantics, nanopub });

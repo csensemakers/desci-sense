@@ -23,8 +23,11 @@ export const publishPost = async (userId: string, post: AppPostCreate) => {
   const createdPost = await createPost({
     ...post,
     author: userId,
-    tweet,
   });
+
+  if (tweet) {
+    createdPost.tweet = tweet;
+  }
 
   return createdPost;
 };
@@ -46,7 +49,9 @@ export const getPostSemantics = async (content: string) => {
     logger.debug('getPostSemantics', body);
     return body;
   } catch (e) {
-    logger.error(`error: ${JSON.stringify(e)}`)
-    logger.error(`Error calling SM_FUNCTION_post_parser ${JSON.stringify(response)}`);
+    logger.error(`error: ${JSON.stringify(e)}`);
+    logger.error(
+      `Error calling SM_FUNCTION_post_parser ${JSON.stringify(response)}`
+    );
   }
 };
