@@ -5,16 +5,18 @@ import { THIS_POST_NAME } from '../app/config';
 import { parseRDF, replaceNodes, writeRDF } from '../shared/n3.utils';
 import { AppPostSemantics } from '../shared/parser.types';
 import { AppUserRead } from '../shared/types';
+import {
+  ASSERTION_URI,
+  HAS_COMMENT_URI,
+  NANOPUB_PLACEHOLDER,
+} from './semantics.helper';
 
-export const constructNanopub = async (
+export const constructPostNanopub = async (
   content: string,
   semantics: AppPostSemantics,
   user: AppUserRead
 ): Promise<Nanopub> => {
   await (init as any)();
-  const NANOPUB_PLACEHOLDER = 'http://purl.org/nanopub/temp/mynanopub#';
-  const ASSERTION_URI = `${NANOPUB_PLACEHOLDER}assertion`;
-  const HAS_COMMENT_URI = 'https://www.w3.org/2000/01/rdf-schema#comment';
 
   const store = await parseRDF(semantics);
 

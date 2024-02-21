@@ -10,6 +10,8 @@ import {
 } from 'react';
 
 import { postUserEthDetails } from '../functionsCalls/auth.requests';
+import { constructIntroNanopub } from '../nanopubs/construct.intro.nanopub';
+import { getProfile } from '../nanopubs/semantics.helper';
 import { getEthToRSAMessage, getRsaToEthMessage } from '../shared/sig.utils';
 import { EthAccountDetails, HexStr } from '../shared/types';
 import {
@@ -18,6 +20,7 @@ import {
   signMessage as signMessageRSA,
 } from '../utils/rsa.keys';
 import { useAccountContext } from './AccountContext';
+import { NANOPUBS_SERVER } from './config';
 import { useAppSigner } from './signer/SignerContext';
 
 const DEBUG = true;
@@ -87,22 +90,9 @@ export const NanopubContext = (props: PropsWithChildren) => {
   /** set profile */
   const buildProfile = async () => {
     if (rsaKeys && connectedUser && connectedUser.eth && connectedUser.orcid) {
-      const keyBody = rsaKeys.privateKey
-        .replace(/-----BEGIN PRIVATE KEY-----\n?/, '')
-        .replace(/\n?-----END PRIVATE KEY-----/, '')
-        .replace(/\r/g, '')
-        .replace(/\n/g, '');
-
-      if (DEBUG) console.log('checkProfile', { keyBody });
-
       await (init as any)();
-      const profile = new NpProfile(
-        keyBody,
-        `https://orcid.org/${connectedUser.orcid.orcid}`,
-        `${connectedUser.orcid.name}`,
-        ''
-      );
 
+      const profile = getProfile(rsaKeys, connectedUser);
       if (DEBUG) console.log('profile', { profile });
 
       setProfile(profile);
@@ -126,8 +116,37 @@ export const NanopubContext = (props: PropsWithChildren) => {
     return profile.toJs().public_key;
   }, [profile]);
 
-  /** keep user details aligned with profile and keep track of all the
-   * eth<>rsa signatures (if not already done) */
+  /** keep user details aligned with profile and keep track of the
+   * eth<>rsa signature (if not already done) */
+  const postEthDetails = useCallback(
+    async (details: EthAccountDetails) => {
+      if (rsaKeys && appAccessToken && connectedUser) {
+        const introNanopub = await constructIntroNanopub(
+          details,
+          connectedUser
+        );
+        if (DEBUG) console.log({ introNanopub });
+
+        const _profile = getProfile(rsaKeys, connectedUser);
+        if (!_profile) throw new Error('Unexpected');
+
+        const introPublished = await introNanopub.publish(
+          _profile,
+          NANOPUBS_SERVER
+        );
+        const introUrl = introPublished.info().uri;
+        details.introNanopub = introUrl;
+
+        if (DEBUG) console.log({ details });
+
+        postUserEthDetails(details, appAccessToken).then(() => {
+          refreshConnectedUser();
+        });
+      }
+    },
+    [appAccessToken, connectedUser, refreshConnectedUser, rsaKeys]
+  );
+
   useEffect(() => {
     if (connectedUser && !connectedUser.eth && connectIntention) {
       if (rsaKeys && address && ethSignature && appAccessToken) {
@@ -137,9 +156,7 @@ export const NanopubContext = (props: PropsWithChildren) => {
           ethSignature,
         };
         if (DEBUG) console.log('posting user details', { details });
-        postUserEthDetails(details, appAccessToken).then(() => {
-          refreshConnectedUser();
-        });
+        postEthDetails(details);
       } else if (!ethSignature && signMessage && rsaKeys) {
         if (DEBUG)
           console.log('generating ETH signature of RSA account', { address });
@@ -157,6 +174,8 @@ export const NanopubContext = (props: PropsWithChildren) => {
     appAccessToken,
     signMessage,
     refreshConnectedUser,
+    connectIntention,
+    postEthDetails,
   ]);
 
   /** create rsa keys from a secret (camed from a secret signature with the eth wallet) */

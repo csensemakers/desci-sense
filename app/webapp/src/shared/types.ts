@@ -25,6 +25,7 @@ export interface EthAccountDetails {
   ethAddress: HexStr;
   rsaPublickey: string;
   ethSignature: HexStr;
+  introNanopub?: string;
 }
 
 export interface AppUserRead {

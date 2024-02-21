@@ -11,7 +11,7 @@ import { TweetAnchor } from '../app/TwitterAnchor';
 import { ViewportPage } from '../app/Viewport';
 import { NANOPUBS_SERVER } from '../app/config';
 import { getPostSemantics, postMessage } from '../functionsCalls/post.requests';
-import { constructNanopub } from '../nanopubs/construct.nanopub';
+import { constructPostNanopub } from '../nanopubs/construct.post.nanopub';
 import { PostEditor } from '../post/PostEditor';
 import { SemanticsEditor } from '../semantics/SemanticsEditor';
 import { PatternProps } from '../semantics/patterns/patterns';
@@ -75,7 +75,7 @@ export const AppPostPage = (props: {}) => {
         const _semantics = semantics || parsed.semantics;
 
         if (!connectedUser) throw new Error('User not connected');
-        const nanopub = await constructNanopub(
+        const nanopub = await constructPostNanopub(
           postText,
           _semantics,
           connectedUser

@@ -1,7 +1,7 @@
 import { Box } from 'grommet';
 import { useEffect } from 'react';
 
-import { constructNanopub } from '../nanopubs/construct.nanopub';
+import { constructPostNanopub } from '../nanopubs/construct.post.nanopub';
 import sample_result from '../sample.result.json';
 import { AppButton } from '../ui-components';
 import { useAccountContext } from './AccountContext';
@@ -35,7 +35,11 @@ export const AppTest = (props: {}) => {
     if (!semantics) throw new Error();
 
     if (!connectedUser) throw new Error('User not connected');
-    const nanopub = await constructNanopub('A text', semantics, connectedUser);
+    const nanopub = await constructPostNanopub(
+      'A text',
+      semantics,
+      connectedUser
+    );
 
     console.log({ semantics, nanopub });
 

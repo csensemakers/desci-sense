@@ -1,6 +1,6 @@
-import { Box, DropButton, Text } from 'grommet';
+import { Anchor, Box, DropButton, Text } from 'grommet';
 import { UserExpert } from 'grommet-icons';
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { AppButton } from '../ui-components';
@@ -78,6 +78,13 @@ export const ConnectedUser = (props: {}) => {
               <Box margin={{ bottom: 'small' }}>
                 <Text>{cap(t('nanopub signer'))}</Text>
                 <AppAddress address={connectedUser.eth.ethAddress}></AppAddress>
+                <Anchor
+                  style={{}}
+                  target="_blank"
+                  href={`${connectedUser.eth.introNanopub}`}
+                  size="small">
+                  {t('introPub')}
+                </Anchor>
               </Box>
             ) : (
               <></>
