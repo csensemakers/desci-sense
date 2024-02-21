@@ -32,7 +32,8 @@ def normalize_citoid_metadata(metadata_list: List[dict], max_summary_length):
             results.append(
                 RefMetadata(
                     **{
-                        "url": metadata.get("url", None),
+                        "citoid_url": metadata.get("url", None),
+                        "url": metadata.get("original_url", None),
                         "item_type": metadata.get("itemType", None),
                         "title": metadata.get("title", ""),
                         "summary": get_trunc_str(summary, max_summary_length),
