@@ -26,6 +26,7 @@ export const getLoggedUserController: RequestHandler = async (
               screen_name: user.twitter.screen_name,
             }
           : undefined,
+        eth: user.eth,
       },
     });
   } catch (error: any) {

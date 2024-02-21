@@ -5,6 +5,7 @@ import { Route, Routes } from 'react-router-dom';
 import { AppHome } from '../pages/AppHome';
 import { AppPostPage } from '../pages/AppPostPage';
 import { RouteNames } from '../route.names';
+import { AppTest } from './AppTest';
 import { GlobalNav } from './GlobalNav';
 import { MAX_WIDTH_APP, ViewportContainer } from './Viewport';
 
@@ -41,6 +42,7 @@ export const AppContainer = (props: React.PropsWithChildren) => {
             <Route
               path={RouteNames.Post}
               element={<AppPostPage></AppPostPage>}></Route>
+            <Route path={RouteNames.Test} element={<AppTest></AppTest>}></Route>
           </Routes>
         </Box>
       </ViewportContainer>

@@ -7,6 +7,7 @@ import {
 import { useState } from 'react';
 
 import { AppModal, IAppModal } from './AppModal';
+import { Loading } from './LoadingDiv';
 import { useResponsive } from './ResponsiveApp';
 import { useThemeContext } from './ThemedApp';
 
@@ -21,11 +22,18 @@ const circleButtonStyle: React.CSSProperties = {
   textAlign: 'center',
 };
 
-export const AppButton = (props: IButton) => {
+export const AppButton = (props: IButton & { loading?: boolean }) => {
+  const { constants } = useThemeContext();
+  const newProps = { ...props };
+  if (newProps.loading) {
+    newProps.disabled = true;
+    newProps.label = <Loading color={constants.colors.textOnPrimary}></Loading>;
+  }
+
   return (
     <>
       <Button
-        {...props}
+        {...newProps}
         style={{ textTransform: 'uppercase', ...props.style }}
       />
     </>

@@ -27,7 +27,7 @@ export const getAuthenticatedOrcidId = async (code: string) => {
 
   if (!response.ok) {
     const body = await response.json();
-    logger.error('Error getting Orcid token', { body });
+    logger.error(`Error getting Orcid token ${JSON.stringify(body)}`);
     throw new Error(`Error getting Orcid token: ${response.status}`);
   }
 

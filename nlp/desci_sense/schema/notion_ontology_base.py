@@ -6,8 +6,8 @@ from pydantic import Field
 
 
 from ..configs import environ
+from ..shared_functions.interface import NotionOntologyConfig
 from ..shared_functions.schema.ontology_base import (
-    NotionOntologyConfig,
     OntologyInterface,
     get_llm_predicate_defs_from_df,
 )
@@ -47,7 +47,9 @@ def create_df_from_notion_db(raw_notion_db) -> pd.DataFrame:
             ]
             if row["properties"]["display_name"]["rich_text"]
             else None,
-            "uri": row["properties"]["URI"]["url"],
+            "uri": row["properties"]["URI"]["formula"]["string"]
+            if row["properties"]["URI"].get("formula")
+            else None,
             "label": row["properties"]["label"]["rich_text"][0]["plain_text"]
             if row["properties"]["label"]["rich_text"]
             else None,

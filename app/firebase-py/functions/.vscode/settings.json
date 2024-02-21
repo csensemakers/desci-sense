@@ -45,7 +45,9 @@
     "yarn-error.log": true,
     "**/yarn-error.log": true,
     "**/.yalc": true,
-    "**/.yarn": true
+    "**/.yarn": true,
+    "venv": true,
+    "venv/*/**": true,
   },
   "python.linting.enabled": true,
   "python.linting.pylintEnabled": true,

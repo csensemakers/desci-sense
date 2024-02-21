@@ -1,4 +1,7 @@
+import { Nanopub } from '@nanopub/sign';
 import { TweetV2PostTweetResult } from 'twitter-api-v2';
+
+import { AppPostSemantics, ParserResult } from './parser.types';
 
 export interface AppUser {
   userId: string;
@@ -15,6 +18,14 @@ export interface AppUser {
     user_id?: string;
     screen_name?: string;
   };
+  eth?: EthAccountDetails;
+}
+
+export interface EthAccountDetails {
+  ethAddress: HexStr;
+  rsaPublickey: string;
+  rsaToEthSignature: string;
+  rootToRsaSignature: HexStr;
 }
 
 export interface AppUserRead {
@@ -27,6 +38,7 @@ export interface AppUserRead {
     user_id: string;
     screen_name: string;
   };
+  eth?: EthAccountDetails;
 }
 
 export type DefinedIfTrue<V, R> = V extends true ? R : R | undefined;
@@ -43,17 +55,24 @@ export enum PLATFORM {
 
 export interface AppPostCreate {
   content: string;
-  semantics: any;
-  platforms: [PLATFORM];
+  originalParsed: ParserResult;
+  semantics?: AppPostSemantics;
+  signedNanopub?: { uri: string };
+  platforms: PLATFORM[];
 }
 
 export interface AppPostGetSemantics {
   content: string;
 }
 
+export interface AppPostConstructNanopub {
+  content: string;
+}
+
 export type AppPostStore = AppPostCreate & {
   author: string;
   tweet?: TweetRead;
+  nanopub?: Nanopub;
 };
 
 export type TweetRead = TweetV2PostTweetResult['data'];
@@ -62,6 +81,4 @@ export type AppPost = AppPostStore & {
   id: string;
 };
 
-export interface AppPostSemantics {
-  triplets: string[];
-}
+export type HexStr = `0x${string}`;

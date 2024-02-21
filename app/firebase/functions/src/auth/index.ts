@@ -5,6 +5,7 @@ import { RUNTIME_OPTIONS } from '../config/RUNTIME_OPTIONS';
 import { REGION } from '../config/config';
 import { app } from '../instances/app';
 import { authCodeController } from './controllers/code.controller';
+import { potEthDetailsUserController } from './controllers/ethdetails.controller';
 import {
   getTwitterCodeController,
   postTwitterVerifierController,
@@ -17,6 +18,7 @@ authRouter.post('/code', authCodeController);
 authRouter.post('/twitter-code', getTwitterCodeController);
 authRouter.post('/twitter-verifier', postTwitterVerifierController);
 authRouter.post('/me', getLoggedUserController);
+authRouter.post('/eth', potEthDetailsUserController);
 
 export const authApp = functions
   .region(REGION)

@@ -1,24 +1,30 @@
 import { logger } from 'firebase-functions/v1';
 
 import { AppPostCreate, PLATFORM, TweetRead } from '../@shared/types';
-import { FUNCTIONS_PY_URL } from '../config/config';
+import { FUNCTIONS_PY_URL, IS_TEST } from '../config/config';
 import { createPost } from '../db/posts.repo';
+import { constructTweet } from '../twitter/construct.tweet';
 import { postMessageTwitter } from '../twitter/twitter.utils';
 import { TAG_OPTIONS } from './TAG_OPTIONS';
 
-export const postPost = async (userId: string, post: AppPostCreate) => {
+export const publishPost = async (userId: string, post: AppPostCreate) => {
   let tweet: TweetRead | undefined = undefined;
 
   if (post.platforms.includes(PLATFORM.X)) {
-    const append = post.semantics?.tags
-      ? '\n\n' + post.semantics.tags.map((tag: string) => `#${tag}`).join(' ')
-      : '';
-    const newContent = post.content + append;
-
-    tweet = await postMessageTwitter(userId, newContent);
+    const tweetContent = await constructTweet(post);
+    if (IS_TEST) {
+      tweet = { id: 'dummyurl', text: tweetContent };
+      logger.debug('skipping publish', { tweet });
+    } else {
+      tweet = await postMessageTwitter(userId, tweetContent);
+    }
   }
 
-  const createdPost = await createPost({ ...post, author: userId, tweet });
+  const createdPost = await createPost({
+    ...post,
+    author: userId,
+    tweet,
+  });
 
   return createdPost;
 };
@@ -35,10 +41,12 @@ export const getPostSemantics = async (content: string) => {
     body: JSON.stringify({ content, parameters }),
   });
 
-  const body = await response.json();
-
-  const semantics = body.semantics;
-  logger.debug('getPostSemantics', semantics);
-
-  return semantics;
+  try {
+    const body = await response.json();
+    logger.debug('getPostSemantics', body);
+    return body;
+  } catch (e) {
+    logger.error(`error: ${JSON.stringify(e)}`)
+    logger.error(`Error calling SM_FUNCTION_post_parser ${JSON.stringify(response)}`);
+  }
 };
